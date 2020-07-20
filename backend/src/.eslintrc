@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "airbnb/base",
+    "plugin:prettier/recommended",
+    "plugin:mocha/recommended"
+  ],
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "import/prefer-default-export": "off"
+  }
+}
