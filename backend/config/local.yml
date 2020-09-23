@@ -1,2 +1,10 @@
 server:
   port: 5913
+
+db:
+  url: localhost
+  port: 27017
+  dbName: blog
+  connectionOptions:
+    useNewUrlParser: true
+    useUnifiedTopology: true
