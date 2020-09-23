@@ -1,2 +1,10 @@
 server:
   port: 443
+
+db:
+  url: TBD
+  port: 27017
+  dbName: blog
+  connectionOptions:
+    useNewUrlParser: true
+    useUnifiedTopology: true
