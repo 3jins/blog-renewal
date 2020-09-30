@@ -12,14 +12,14 @@ export interface CommentDoc extends Document {
 }
 
 export const commentSchema = new Schema({
-  post: { type: Schema.Types.ObjectId, ref: 'Post', required: true },
+  post: { type: Schema.Types.ObjectId, ref: 'post', required: true },
   member: { type: Schema.Types.ObjectId, ref: 'Member', required: true },
-  refComment: { type: Schema.Types.ObjectId, ref: 'Comment', default: null },
-  lastVersionComment: { type: Schema.Types.ObjectId, ref: 'Comment', default: null },
+  refComment: { type: Schema.Types.ObjectId, ref: 'comment', default: null },
+  lastVersionComment: { type: Schema.Types.ObjectId, ref: 'comment', default: null },
   isPostAuthor: { type: Boolean, required: true },
   content: { type: String, required: true },
   createdDate: { type: Date, required: true, default: Date.now },
   isLatestVersion: { type: Boolean, required: true, default: true },
 });
 
-export default model<CommentDoc>('Comment', commentSchema, 'comments');
+export default model<CommentDoc>('comment', commentSchema, 'comments');

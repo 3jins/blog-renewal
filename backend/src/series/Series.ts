@@ -1,5 +1,5 @@
 import { Document, model, Schema } from 'mongoose';
-import Image from './Image';
+import Image from '../image/Image';
 
 export interface SeriesDoc extends Document {
   name: string;
@@ -13,4 +13,4 @@ export const seriesSchema = new Schema({
   thumbnailImage: { type: Schema.Types.ObjectId, ref: 'Image' },
 });
 
-export default model<SeriesDoc>('Series', seriesSchema, 'series');
+export default model<SeriesDoc>('series', seriesSchema, 'series');

@@ -1,6 +1,6 @@
 import { ClientSession } from 'mongoose';
 import { common as commonTestData } from '../data/testData';
-import { Category } from '../../src/model';
+import Category from '../../src/category/Category';
 import { MongoError } from 'mongodb';
 
 export default (session: ClientSession) => ({

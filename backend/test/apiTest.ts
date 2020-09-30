@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { should } from 'chai';
-import homeRouter from '../../src/api/home';
+import homeRouter from '../src/home/home';
 import Koa = require('koa');
 import Router = require('@koa/router');
 

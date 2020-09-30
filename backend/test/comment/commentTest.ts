@@ -1,7 +1,8 @@
 import { ClientSession, Schema } from 'mongoose';
 import { common as commonTestData } from '../data/testData';
-import { Comment, Member, Post } from '../../src/model';
-import { CommentDoc } from '../../src/model/Comment';
+import Comment, { CommentDoc } from '../../src/comment/Comment';
+import Member from '../../src/member/Member';
+import Post from '../../src/post/Post';
 
 const _createComments = async (postId: Schema.Types.ObjectId, session: ClientSession): Promise<Array<CommentDoc>> => {
   const [masterMember, guestMember1, guestMember2] = await Member.create(

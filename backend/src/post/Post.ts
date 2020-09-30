@@ -22,16 +22,16 @@ export interface PostDoc extends Document {
 
 export const postSchema = new Schema({
   postNo: { type: Number, required: true },
-  category: { type: Schema.Types.ObjectId, ref: 'Category', default: null },
-  tagList: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
-  series: { type: Schema.Types.ObjectId, ref: 'Series', default: null },
-  lastVersionPost: { type: Schema.Types.ObjectId, ref: 'Post', default: null },
+  category: { type: Schema.Types.ObjectId, ref: 'category', default: null },
+  tagList: [{ type: Schema.Types.ObjectId, ref: 'tag' }],
+  series: { type: Schema.Types.ObjectId, ref: 'series', default: null },
+  lastVersionPost: { type: Schema.Types.ObjectId, ref: 'post', default: null },
   title: { type: String, required: true },
   rawContent: { type: String, required: true },
   renderedContent: { type: String, required: true },
   language: { type: String, required: true, default: Language.KO },
   thumbnailContent: { type: String, required: true },
-  thumbnailImage: { type: Schema.Types.ObjectId, ref: 'Image' },
+  thumbnailImage: { type: Schema.Types.ObjectId, ref: 'image' },
   createdDate: { type: Date, required: true, default: Date.now },
   isLatestVersion: { type: Boolean, required: true, default: true },
   isDeleted: { type: Boolean, required: true, default: false },
@@ -39,4 +39,4 @@ export const postSchema = new Schema({
   isPrivate: { type: Boolean, required: true, default: false },
 });
 
-export default model<PostDoc>('Post', postSchema, 'posts');
+export default model<PostDoc>('post', postSchema, 'posts');

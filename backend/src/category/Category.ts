@@ -1,5 +1,4 @@
 import { Document, model, Schema } from 'mongoose';
-import { Category } from './index';
 
 export interface CategoryDoc extends Document {
   categoryNo: number;
@@ -10,9 +9,9 @@ export interface CategoryDoc extends Document {
 
 export const categorySchema = new Schema({
   categoryNo: { type: Number, required: true, unique: true },
-  parentCategory: { type: Schema.Types.ObjectId, ref: 'Category', default: null },
+  parentCategory: { type: Schema.Types.ObjectId, ref: 'category', default: null },
   name: { type: String, required: true },
   level: { type: Number, required: true, default: 0 },
 });
 
-export default model<CategoryDoc>('Category', categorySchema, 'categories');
+export default model<CategoryDoc>('category', categorySchema, 'categories');

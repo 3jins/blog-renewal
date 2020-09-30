@@ -1,11 +1,10 @@
 import { ClientSession } from 'mongoose';
 import { common as commonTestData } from '../data/testData';
-import { Category, Image, Post, Series, Tag } from '../../src/model';
-import { PostDoc } from '../../src/model/Post';
-import { TagDoc } from '../../src/model/Tag';
-import { CategoryDoc } from '../../src/model/Category';
-import { SeriesDoc } from '../../src/model/Series';
-import { ImageDoc } from '../../src/model/Image';
+import Category, { CategoryDoc } from '../../src/category/Category';
+import Image, { ImageDoc } from '../../src/image/Image';
+import Post, { PostDoc } from '../../src/post/Post';
+import Series, { SeriesDoc } from '../../src/series/Series';
+import Tag, { TagDoc } from '../../src/tag/Tag';
 
 interface CreatedData {
   newPosts: Array<PostDoc>;

@@ -1,4 +1,4 @@
-import { MemberDoc } from '../model/Member';
+import { MemberDoc } from '../Member';
 
 interface MemberRepository {
   create(name: string): MemberDoc;
