@@ -2,7 +2,7 @@
 import Koa from 'koa';
 import Router from '@koa/router';
 import config from 'config';
-import getConnection from './db/getConnection';
+import getConnection from './util/getDbConnection';
 import home from './api/home';
 import { Connection } from 'mongoose';
 

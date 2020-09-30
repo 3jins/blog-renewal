@@ -10,4 +10,4 @@ export const imageSchema = new mongoose.Schema({
   format: { type: String, required: true },
 });
 
-export default mongoose.model<ImageDoc>('Image', imageSchema, 'images');
+export default mongoose.model<ImageDoc>('image', imageSchema, 'images');

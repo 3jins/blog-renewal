@@ -7,7 +7,7 @@ export interface TagDoc extends Document {
 
 export const tagSchema = new Schema({
   name: { type: String, required: true, unique: true },
-  postList: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
+  postList: [{ type: Schema.Types.ObjectId, ref: 'post' }],
 });
 
-export default model<TagDoc & Document>('Tag', tagSchema, 'tags');
+export default model<TagDoc & Document>('tag', tagSchema, 'tags');

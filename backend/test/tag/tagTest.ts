@@ -1,6 +1,7 @@
 import { ClientSession } from 'mongoose';
 import { common as commonTestData } from '../data/testData';
-import { Post, Tag } from '../../src/model';
+import Post from '../../src/post/Post';
+import Tag from '../../src/tag/Tag';
 
 export default (session: ClientSession) => ({
   updateTest: async () => {

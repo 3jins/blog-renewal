@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
+import { Schema } from 'mongoose';
 import RoleLevel from '../constant/RoleLevel';
-import { Schema } from "mongoose";
 
 export interface MemberDoc extends mongoose.Document {
   memberNo: number;
@@ -23,9 +23,9 @@ export const memberSchema = new mongoose.Schema({
   mailAddressList: [{ type: String, required: false }],
   mentionNoti: { type: Boolean, required: true, default: true },
   subscriptionNoti: { type: Boolean, required: true, default: false },
-  categoryNoti: [{ type: Schema.Types.ObjectId, ref: 'Category' }],
-  tagNoti: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
-  seriesNoti: [{ type: Schema.Types.ObjectId, ref: 'Series' }],
+  categoryNoti: [{ type: Schema.Types.ObjectId, ref: 'category' }],
+  tagNoti: [{ type: Schema.Types.ObjectId, ref: 'tag' }],
+  seriesNoti: [{ type: Schema.Types.ObjectId, ref: 'series' }],
   roleLevel: { type: Number, required: true, default: RoleLevel.ORDINARY },
   isBlocked: { type: Boolean, required: true, default: false },
 });
