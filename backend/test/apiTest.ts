@@ -1,24 +1,27 @@
-import request from 'supertest';
+import supertest from 'supertest';
 import { should } from 'chai';
-import homeRouter from '../src/home/home';
+import * as URL from '../src/common/constant/URL';
+import { makeApp, makeRouter } from '../src';
 import Koa = require('koa');
 import Router = require('@koa/router');
 
 describe('api test', () => {
   let app: Koa;
   let router: Router;
+  let request: supertest.SuperTest<supertest.Test>;
+  let server;
 
   before(() => {
-    app = new Koa();
-    router = new Router();
     should();
+    router = makeRouter();
+    app = makeApp(router);
+    request = supertest(app.callback());
   });
 
   it('/', async () => {
-    router.use('/', homeRouter.routes());
-    app.use(router.routes());
-    const response = await request(app.callback()).get('/');
-    response.status.should.equal(200);
+    const response = await request
+      .get('/')
+      .expect(200);
     response.text.should.equal('Hello, world!');
   });
 });

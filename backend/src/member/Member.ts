@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 import { Schema } from 'mongoose';
-import RoleLevel from '../constant/RoleLevel';
+import RoleLevel from '../common/constant/RoleLevel';
 
 export interface MemberDoc extends mongoose.Document {
   memberNo: number;

@@ -3,7 +3,7 @@ import Koa from 'koa';
 import Router from '@koa/router';
 import config from 'config';
 import getConnection from './util/getDbConnection';
-import home from './api/home';
+import HomeRouter from './home/HomeRouter';
 import { Connection } from 'mongoose';
 
 const connectToDb = () => {
@@ -18,12 +18,16 @@ const connectToDb = () => {
   });
 };
 
-const startServer = () => {
-  const { port } = config.get('server');
-  const app = new Koa();
+const makeRouter = (): Router => {
   const router = new Router();
+  router
+    .use(HomeRouter.routes());
 
-  router.use('/', home.routes());
+  return router;
+};
+
+const makeApp = (router: Router): Koa => {
+  const app = new Koa();
   app
     .use(async (ctx, next) => {
       await next();
@@ -31,9 +35,22 @@ const startServer = () => {
       const rt = ctx.response.get('X-Response-Time');
       console.info(`${ctx.method} ${ctx.url} - ${rt} from ${ip}`);
     })
-    .use(router.routes())
-    .listen(port, () => console.info(`Server started to listening from port ${port}.`));
+    .use(router.routes());
+
+  return app;
+};
+
+const startApp = () => {
+  const { port } = config.get('server');
+  const router = makeRouter();
+  const app = makeApp(router);
+  app.listen(port, () => console.info(`Server started to listening from port ${port}.`));
 };
 
 connectToDb();
-startServer();
+startApp();
+
+export {
+  makeRouter,
+  makeApp,
+};
