@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "start": "nodemon --exec 'ts-node' src/index.ts",
-    "test": "mocha --require ts-node/register test/*.ts"
+    "test": "mocha --require ts-node/register 'test/**/*.ts'"
   },
   "author": "",
   "license": "ISC",

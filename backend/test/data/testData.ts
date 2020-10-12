@@ -1,4 +1,4 @@
-import Language from '../../src/constant/Language';
+import Language from '../../src/common/constant/Language';
 
 export const common = {
   masterMember: {
