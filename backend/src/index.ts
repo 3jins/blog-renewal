@@ -5,6 +5,9 @@ import config from 'config';
 import getConnection from './util/getDbConnection';
 import HomeRouter from './home/HomeRouter';
 import { Connection } from 'mongoose';
+import BlogErrorHandler from './common/error/BlogErrorHandler';
+import { Container } from 'typedi';
+
 
 const connectToDb = () => {
   const conn: Connection = getConnection();
@@ -28,12 +31,17 @@ const makeRouter = (): Router => {
 
 const makeApp = (router: Router): Koa => {
   const app = new Koa();
+  const blogErrorHandler: BlogErrorHandler = Container.get(BlogErrorHandler);
   app
     .use(async (ctx, next) => {
-      await next();
-      const { ip } = ctx.request;
-      const rt = ctx.response.get('X-Response-Time');
-      console.info(`${ctx.method} ${ctx.url} - ${rt} from ${ip}`);
+      try {
+        await next();
+        const { ip } = ctx.request;
+        const rt = ctx.response.get('X-Response-Time');
+        console.info(`${ctx.method} ${ctx.url} - ${rt} from ${ip}`);
+      } catch (err) {
+        blogErrorHandler.handleError(ctx, err);
+      }
     })
     .use(router.routes());
 
