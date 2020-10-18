@@ -45,6 +45,7 @@
     "nodemon": "^2.0.4",
     "prettier": "^2.1.2",
     "simon": "^0.2.3",
+    "sinon": "^9.2.0",
     "supertest": "^4.0.2",
     "ts-mockito": "^2.6.1",
     "ts-node": "^8.10.2",
