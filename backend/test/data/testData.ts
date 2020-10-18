@@ -91,4 +91,6 @@ export const common = {
     isCommentAuthor: false,
     content: '나한테 이래라 저래라 하지 마세요. 난 노랑통닭이 좋아요.',
   },
+
+  simpleText: 'Just quit, 채워진 바둑판처럼 그만 둬',
 };
