@@ -9,17 +9,19 @@ describe('logging test', () => {
   describe('Logger test', () => {
     let logger: Logger;
     let sandbox;
+    let loggerTest;
     before(() => {
       logger = new Logger();
       sandbox = sinon.createSandbox();
+      loggerTest = LoggerTest(logger, sandbox);
     });
-    beforeEach(() => sandbox.restore())
-    it('call Logger.leaveLog with MUTE option', () => LoggerTest.leaveMuteLogTest(logger, sandbox));
-    it('call Logger.leaveLog with DEBUG option', () => LoggerTest.leaveDebugLogTest(logger, sandbox));
-    it('call Logger.leaveLog with INFO option', () => LoggerTest.leaveInfoLogTest(logger, sandbox));
-    it('call Logger.leaveLog with WARN option', () => LoggerTest.leaveWarnLogTest(logger, sandbox));
-    it('call Logger.leaveLog with ERROR option', () => LoggerTest.leaveErrorLogTest(logger, sandbox));
-    it('call Logger.leaveLog with DEFAULT option', () => LoggerTest.leaveDefaultLogTest(logger, sandbox));
+    beforeEach(() => sandbox.restore());
+    it('call Logger.leaveLog with MUTE option', () => loggerTest.leaveMuteLogTest());
+    it('call Logger.leaveLog with DEBUG option', () => loggerTest.leaveDebugLogTest());
+    it('call Logger.leaveLog with INFO option', () => loggerTest.leaveInfoLogTest());
+    it('call Logger.leaveLog with WARN option', () => loggerTest.leaveWarnLogTest());
+    it('call Logger.leaveLog with ERROR option', () => loggerTest.leaveErrorLogTest());
+    it('call Logger.leaveLog with DEFAULT option', () => loggerTest.leaveDefaultLogTest());
   });
 
 });
