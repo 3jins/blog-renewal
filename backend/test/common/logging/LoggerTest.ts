@@ -2,10 +2,9 @@ import Logger from '../../../src/common/logging/Logger';
 import LogLevel from '../../../src/common/logging/LogLevel';
 import { common as commonTestData } from '../../data/testData';
 import _ from 'lodash';
-import { spy } from 'ts-mockito';
 
-export default ({
-  leaveMuteLogTest: (logger: Logger, sandbox) => {
+export default (logger: Logger, sandbox) => ({
+  leaveMuteLogTest: () => {
     const consoleStub = sandbox.stub(console);
     logger.leaveLog(LogLevel.MUTE, commonTestData.simpleText);
     const spyFunctions = _.keys(consoleStub);
@@ -13,27 +12,27 @@ export default ({
       consoleStub[spyFunction].notCalled.should.be.true;
     });
   },
-  leaveDebugLogTest: (logger: Logger, sandbox) => {
+  leaveDebugLogTest: () => {
     const consoleDebugStub = sandbox.stub(console, 'debug');
     logger.leaveLog(LogLevel.DEBUG, commonTestData.simpleText);
     consoleDebugStub.calledOnce.should.be.true;
   },
-  leaveInfoLogTest: (logger: Logger, sandbox) => {
+  leaveInfoLogTest: () => {
     const consoleInfoStub = sandbox.stub(console, 'info');
     logger.leaveLog(LogLevel.INFO, commonTestData.simpleText);
     consoleInfoStub.calledOnce.should.be.true;
   },
-  leaveWarnLogTest: (logger: Logger, sandbox) => {
+  leaveWarnLogTest: () => {
     const consoleWarnStub = sandbox.stub(console, 'warn');
     logger.leaveLog(LogLevel.WARN, commonTestData.simpleText);
     consoleWarnStub.calledOnce.should.be.true;
   },
-  leaveErrorLogTest: (logger: Logger, sandbox) => {
+  leaveErrorLogTest: () => {
     const consoleErrorStub = sandbox.stub(console, 'error');
     logger.leaveLog(LogLevel.ERROR, commonTestData.simpleText);
     consoleErrorStub.calledOnce.should.be.true;
   },
-  leaveDefaultLogTest: (logger: Logger, sandbox) => {
+  leaveDefaultLogTest: () => {
     const consoleStub = sandbox.stub(console);
     logger.leaveLog(1073741824, commonTestData.simpleText);
     const spyFunctions = _.keys(consoleStub);
