@@ -1,21 +1,16 @@
 import supertest from 'supertest';
 import { should } from 'chai';
-import * as URL from '../src/common/constant/URL';
-import { makeApp, makeRouter } from '../src';
-import Koa = require('koa');
-import Router = require('@koa/router');
+import { endApp, startApp } from '../src/app';
+import { Server } from 'http';
 
 describe('api test', () => {
-  let app: Koa;
-  let router: Router;
+  let server: Server;
   let request: supertest.SuperTest<supertest.Test>;
-  let server;
 
   before(() => {
     should();
-    router = makeRouter();
-    app = makeApp(router);
-    request = supertest(app.callback());
+    server = startApp();
+    request = supertest(server);
   });
 
   it('/', async () => {
@@ -23,5 +18,9 @@ describe('api test', () => {
       .get('/')
       .expect(200);
     response.text.should.equal('Hello, world!');
+  });
+
+  after(() => {
+    endApp(server);
   });
 });
