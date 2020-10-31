@@ -1,9 +1,11 @@
-import BlogErrorHandler from '../../../src/common/error/BlogErrorHandler';
+import {
+  anyString, instance, mock, verify,
+} from 'ts-mockito';
 import { Context } from 'koa';
-import { BlogError } from '../../../src/common/error/BlogError';
-import { anyString, instance, mock, verify } from 'ts-mockito';
-import Logger from '../../../src/common/logging/Logger';
-import LogLevel from '../../../src/common/logging/LogLevel';
+import BlogErrorHandler from '@src/common/error/BlogErrorHandler';
+import { BlogError } from '@src/common/error/BlogError';
+import Logger from '@src/common/logging/Logger';
+import LogLevel from '@src/common/logging/LogLevel';
 
 export default () => ({
   blogErrorHandlingTest: () => {

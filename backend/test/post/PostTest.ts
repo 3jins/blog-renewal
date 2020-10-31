@@ -1,10 +1,10 @@
 import { ClientSession } from 'mongoose';
-import { common as commonTestData } from '../data/testData';
-import Category, { CategoryDoc } from '../../src/category/Category';
-import Image, { ImageDoc } from '../../src/image/Image';
-import Post, { PostDoc } from '../../src/post/Post';
-import Series, { SeriesDoc } from '../../src/series/Series';
-import Tag, { TagDoc } from '../../src/tag/Tag';
+import { common as commonTestData } from '@test/data/testData';
+import Category, { CategoryDoc } from '@src/category/Category';
+import Image, { ImageDoc } from '@src/image/Image';
+import Post, { PostDoc } from '@src/post/Post';
+import Series, { SeriesDoc } from '@src/series/Series';
+import Tag, { TagDoc } from '@src/tag/Tag';
 
 interface CreatedData {
   newPosts: Array<PostDoc>;
@@ -14,7 +14,7 @@ interface CreatedData {
   newImage: ImageDoc;
 }
 
-const _createData = async (session: ClientSession): Promise<CreatedData> => {
+const createData = async (session: ClientSession): Promise<CreatedData> => {
   const ret: CreatedData = {
     newTags: await Tag.create([commonTestData.tag], { session }),
     newCategory: (await Category.create([commonTestData.childCategory], { session }))[0],
@@ -24,17 +24,17 @@ const _createData = async (session: ClientSession): Promise<CreatedData> => {
   };
   ret.newPosts = await Post.create([{
     ...commonTestData.post1,
-    tagList: ret.newTags.map(tag => tag._id),
+    tagList: ret.newTags.map((tag) => tag._id),
     category: ret.newCategory._id,
     thumbnailImage: ret.newImage._id,
   }, {
     ...commonTestData.post2,
-    tagList: ret.newTags.map(tag => tag._id),
+    tagList: ret.newTags.map((tag) => tag._id),
     category: ret.newCategory._id,
     series: ret.newSeries._id,
   }, {
     ...commonTestData.post2En,
-    tagList: ret.newTags.map(tag => tag._id),
+    tagList: ret.newTags.map((tag) => tag._id),
     category: ret.newCategory._id,
     series: ret.newSeries._id,
   }], { session });
@@ -45,7 +45,9 @@ const _createData = async (session: ClientSession): Promise<CreatedData> => {
 export default (session: ClientSession) => ({
   createTest: async () => {
     const littleBitAgo = Date.now();
-    const { newPosts, newTags, newCategory, newSeries, newImage }: CreatedData = await _createData(session);
+    const {
+      newPosts, newTags, newCategory, newSeries, newImage,
+    }: CreatedData = await createData(session);
 
     const post1 = await Post
       .findOne({ postNo: commonTestData.post1.postNo })

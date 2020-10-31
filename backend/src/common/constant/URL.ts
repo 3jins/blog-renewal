@@ -3,9 +3,7 @@ const PREFIX = {
 };
 
 const ENDPOINT = {
+  IMAGE: '/image',
 };
 
-export {
-  PREFIX,
-  ENDPOINT
-}
+export { PREFIX, ENDPOINT };

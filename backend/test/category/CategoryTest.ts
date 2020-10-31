@@ -1,11 +1,14 @@
 import { ClientSession } from 'mongoose';
-import { common as commonTestData } from '../data/testData';
-import Category from '../../src/category/Category';
 import { MongoError } from 'mongodb';
+import { common as commonTestData } from '@test/data/testData';
+import Category from '@src/category/Category';
 
 export default (session: ClientSession) => ({
   createTest: async () => {
-    const [{ _id: parentCategoryId }] = await Category.create([commonTestData.parentCategory], { session });
+    const [{ _id: parentCategoryId }] = await Category.create(
+      [commonTestData.parentCategory],
+      { session },
+    );
     await Category.create([{
       ...commonTestData.childCategory,
       parentCategory: parentCategoryId,
@@ -43,7 +46,7 @@ export default (session: ClientSession) => ({
   },
 
   deleteTest: async () => {
-    const [childCategory] = await Category.create([commonTestData.childCategory], { session });
+    await Category.create([commonTestData.childCategory], { session });
     await Category
       .deleteOne({ categoryNo: commonTestData.childCategory.categoryNo })
       .session(session);

@@ -1,5 +1,5 @@
 import { Document, model, Schema } from 'mongoose';
-import Language from '../common/constant/Language';
+import Language from '@src/common/constant/Language';
 
 export interface PostDoc extends Document {
   postNo: number;

@@ -1,14 +1,14 @@
-import Logger from '../../../src/common/logging/Logger';
-import LogLevel from '../../../src/common/logging/LogLevel';
-import { common as commonTestData } from '../../data/testData';
 import _ from 'lodash';
+import Logger from 'src/common/logging/Logger';
+import LogLevel from 'src/common/logging/LogLevel';
+import { common as commonTestData } from '../../data/testData';
 
 export default (logger: Logger, sandbox) => ({
   leaveMuteLogTest: () => {
     const consoleStub = sandbox.stub(console);
     logger.leaveLog(LogLevel.MUTE, commonTestData.simpleText);
     const spyFunctions = _.keys(consoleStub);
-    spyFunctions.forEach(spyFunction => {
+    spyFunctions.forEach((spyFunction) => {
       consoleStub[spyFunction].notCalled.should.be.true;
     });
   },
@@ -36,7 +36,7 @@ export default (logger: Logger, sandbox) => ({
     const consoleStub = sandbox.stub(console);
     logger.leaveLog(1073741824, commonTestData.simpleText);
     const spyFunctions = _.keys(consoleStub);
-    spyFunctions.forEach(spyFunction => {
+    spyFunctions.forEach((spyFunction) => {
       if (spyFunction === 'warn') {
         consoleStub[spyFunction].calledOnce.should.be.true;
         consoleStub[spyFunction].args.should.have.lengthOf(1);
