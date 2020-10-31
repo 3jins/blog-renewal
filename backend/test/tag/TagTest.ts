@@ -1,7 +1,7 @@
 import { ClientSession } from 'mongoose';
-import { common as commonTestData } from '../data/testData';
-import Post from '../../src/post/Post';
-import Tag from '../../src/tag/Tag';
+import { common as commonTestData } from '@test/data/testData';
+import Post from '@src/post/Post';
+import Tag from '@src/tag/Tag';
 
 export default (session: ClientSession) => ({
   updateTest: async () => {
@@ -13,7 +13,7 @@ export default (session: ClientSession) => ({
       ...commonTestData.post2,
       tagList: [newTag._id],
     }], { session });
-    await Tag.updateOne({ name: newTag.name }, { postList: newPosts.map(newPost => newPost._id) }, { session });
+    await Tag.updateOne({ name: newTag.name }, { postList: newPosts.map((newPost) => newPost._id) }, { session });
 
     const tag = await Tag
       .findOne({ name: commonTestData.tag.name })

@@ -1,5 +1,5 @@
 import { should } from 'chai';
-import getConnection from '../src/util/getDbConnection';
+import getConnection from '@src/util/getDbConnection';
 import { ClientSession, Connection } from 'mongoose';
 import MemberTest from './member/MemberTest';
 import CategoryTest from './category/CategoryTest';

@@ -1,7 +1,7 @@
 import { should } from 'chai';
-import LoggerTest from './LoggerTest';
-import Logger from '../../../src/common/logging/Logger';
+import Logger from '@src/common/logging/Logger';
 import sinon from 'sinon';
+import LoggerTest from './LoggerTest';
 
 describe('logging test', () => {
   before(() => should());
@@ -23,5 +23,4 @@ describe('logging test', () => {
     it('call Logger.leaveLog with ERROR option', () => loggerTest.leaveErrorLogTest());
     it('call Logger.leaveLog with DEFAULT option', () => loggerTest.leaveDefaultLogTest());
   });
-
 });

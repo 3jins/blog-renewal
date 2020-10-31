@@ -1,6 +1,6 @@
 import supertest from 'supertest';
 import { should } from 'chai';
-import { endApp, startApp } from '../src/app';
+import { endApp, startApp } from '@src/app';
 import { Server } from 'http';
 
 describe('api test', () => {

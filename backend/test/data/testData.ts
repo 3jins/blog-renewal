@@ -1,4 +1,10 @@
-import Language from '../../src/common/constant/Language';
+import Language from '@src/common/constant/Language';
+import * as path from 'path';
+
+export const appPath = {
+  root: process.env.PWD,
+  testRoot: path.resolve(process.env.PWD!, 'test'),
+};
 
 export const common = {
   masterMember: {

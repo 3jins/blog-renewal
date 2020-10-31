@@ -1,10 +1,10 @@
 import { ClientSession, Schema } from 'mongoose';
-import { common as commonTestData } from '../data/testData';
-import Comment, { CommentDoc } from '../../src/comment/Comment';
-import Member from '../../src/member/Member';
-import Post from '../../src/post/Post';
+import { common as commonTestData } from '@test/data/testData';
+import Comment, { CommentDoc } from '@src/comment/Comment';
+import Member from '@src/member/Member';
+import Post from '@src/post/Post';
 
-const _createComments = async (postId: Schema.Types.ObjectId, session: ClientSession): Promise<Array<CommentDoc>> => {
+const createComments = async (postId: Schema.Types.ObjectId, session: ClientSession): Promise<Array<CommentDoc>> => {
   const [masterMember, guestMember1, guestMember2] = await Member.create(
     [commonTestData.masterMember, commonTestData.guestMember1, commonTestData.guestMember2],
     { session },
@@ -38,12 +38,11 @@ const _createComments = async (postId: Schema.Types.ObjectId, session: ClientSes
   return [comment1, comment2, comment3, comment4];
 };
 
-
 export default (session: ClientSession) => ({
   createTest: async () => {
     const littleBitAgo = Date.now();
     const [{ _id: postId }] = await Post.create([commonTestData.post1], { session });
-    const newComments = await _createComments(postId, session);
+    await createComments(postId, session);
 
     const comments = await Comment
       .find({ post: postId })

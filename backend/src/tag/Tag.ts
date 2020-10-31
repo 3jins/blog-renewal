@@ -10,4 +10,4 @@ export const tagSchema = new Schema({
   postList: [{ type: Schema.Types.ObjectId, ref: 'post' }],
 });
 
-export default model<TagDoc & Document>('tag', tagSchema, 'tags');
+export default model<TagDoc>('tag', tagSchema, 'tags');

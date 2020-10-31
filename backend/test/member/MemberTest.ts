@@ -1,6 +1,6 @@
 import { ClientSession } from 'mongoose';
-import { common as commonTestData } from '../data/testData';
-import Member from '../../src/member/Member';
+import Member from '@src/member/Member';
+import { common as commonTestData } from '@test/data/testData';
 
 export default (session: ClientSession) => ({
   createTest: async () => {

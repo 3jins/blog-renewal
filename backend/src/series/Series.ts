@@ -1,5 +1,4 @@
 import { Document, model, Schema } from 'mongoose';
-import Image from '../image/Image';
 
 export interface SeriesDoc extends Document {
   name: string;

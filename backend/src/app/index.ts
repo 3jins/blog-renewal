@@ -1,15 +1,14 @@
 /* eslint-disable no-console */
+import 'reflect-metadata';
 import Koa from 'koa';
 import Router from '@koa/router';
 import config from 'config';
-import getConnection from '../util/getDbConnection';
-import HomeRouter from '../home/HomeRouter';
-import ImageRouter from '../image/ImageRouter';
 import { Connection } from 'mongoose';
-import BlogErrorHandler from '../common/error/BlogErrorHandler';
 import { Container } from 'typedi';
 import { Server } from 'http';
-
+import getConnection from '@src/util/getDbConnection';
+import HomeRouter from '@src/home/HomeRouter';
+import BlogErrorHandler from '@src/common/error/BlogErrorHandler';
 
 const connectToDb = () => {
   const conn: Connection = getConnection();
@@ -23,16 +22,15 @@ const connectToDb = () => {
   });
 };
 
-const _makeRouter = (): Router => {
+const makeRouter = (): Router => {
   const router = new Router();
   router
-    .use(HomeRouter.routes())
-    .use(ImageRouter.routes());
+    .use(HomeRouter.routes());
 
   return router;
 };
 
-const _makeApp = (router: Router): Koa => {
+const makeApp = (router: Router): Koa => {
   const app = new Koa();
   const blogErrorHandler: BlogErrorHandler = Container.get(BlogErrorHandler);
   app
@@ -53,15 +51,11 @@ const _makeApp = (router: Router): Koa => {
 
 const startApp = (): Server => {
   const { port } = config.get('server');
-  const router = _makeRouter();
-  const app = _makeApp(router);
+  const router = makeRouter();
+  const app = makeApp(router);
   return app.listen(port, () => console.info(`Server started to listening from port ${port}.`));
 };
 
 const endApp = (server: Server) => server.close();
 
-export {
-  connectToDb,
-  startApp,
-  endApp,
-};
+export { connectToDb, startApp, endApp };
