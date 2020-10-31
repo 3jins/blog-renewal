@@ -1,6 +1,7 @@
 {
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "test/**/*.ts"
   ],
   "exclude": [
     "node_modules"
@@ -20,7 +21,12 @@
     "outDir": "./dist",
     "strict": true,
     "baseUrl": "./",
+    "paths": {
+      "@src/*": ["src/*"],
+      "@test/*": ["test/*"],
+    },
     "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "noImplicitAny": false
   }
