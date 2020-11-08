@@ -18,11 +18,13 @@ describe('logging test', () => {
     });
 
     beforeEach(() => sandbox.restore());
-    it('call Logger.leaveLog with MUTE option', () => loggerTest.leaveMuteLogTest());
-    it('call Logger.leaveLog with DEBUG option', () => loggerTest.leaveDebugLogTest());
-    it('call Logger.leaveLog with INFO option', () => loggerTest.leaveInfoLogTest());
-    it('call Logger.leaveLog with WARN option', () => loggerTest.leaveWarnLogTest());
-    it('call Logger.leaveLog with ERROR option', () => loggerTest.leaveErrorLogTest());
-    it('call Logger.leaveLog with DEFAULT option', () => loggerTest.leaveDefaultLogTest());
+
+    it('call Logger.leaveBlogErrorLog with MUTE option', () => loggerTest.leaveMuteLogTest());
+    it('call Logger.leaveBlogErrorLog with DEBUG option', () => loggerTest.leaveDebugLogTest());
+    it('call Logger.leaveBlogErrorLog with INFO option', () => loggerTest.leaveInfoLogTest());
+    it('call Logger.leaveBlogErrorLog with WARN option', () => loggerTest.leaveWarnLogTest());
+    it('call Logger.leaveBlogErrorLog with ERROR option', () => loggerTest.leaveErrorLogTest());
+    it('call Logger.leaveBlogErrorLog with DEFAULT option', () => loggerTest.leaveDefaultLogTest());
+    it('call Logger.leaveBlogErrorLog with parameters', () => loggerTest.leaveLogForErrorWithParametersTest());
   });
 });

@@ -49,4 +49,15 @@ export default (logger: Logger, sandbox, dummyBlogErrorCode) => ({
       }
     });
   },
+  leaveLogForErrorWithParametersTest: () => {
+    const consoleErrorStub = sandbox.stub(console, 'error');
+    const params = ['Tablo', 'Mithra', 'Tukutz'];
+    logger.leaveBlogErrorLog(new BlogError(dummyBlogErrorCode.TEST_PARAMS, params));
+    consoleErrorStub.calledOnce.should.be.true;
+    consoleErrorStub.args.should.have.lengthOf(1);
+    consoleErrorStub.args[0].should.have.lengthOf(1);
+    consoleErrorStub.args[0][0].should.equal(
+      `- error code: ${dummyBlogErrorCode.TEST_PARAMS.code}\n- message: Parameters are given: ${params[0]}, ${params[1]}, and ${params[2]}.`,
+    );
+  },
 });
