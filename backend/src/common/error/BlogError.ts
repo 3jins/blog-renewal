@@ -1,14 +1,26 @@
-import http2 from 'http2';
-import LogLevel from '../logging/LogLevel';
+import _ from 'lodash';
+import { BlogErrorCode, BlogErrorCodeFormat } from '@src/common/error/BlogErrorCode';
 
-const BlogError = {
-  // 테스트 필요. key랑 code가 모두 일치하는지 확인.
-  FILE_NOT_UPLOADED: {
-    code: 'FILE_NOT_UPLOADED',
-    errorMessage: '파일이 업로드되지 않았습니다.',
-    httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
-    logLevel: LogLevel.ERROR,
-  },
-};
+export default class BlogError extends Error {
+  private readonly _blogErrorCode: BlogErrorCodeFormat;
+  private readonly _params: string[];
+  private readonly _stack?: string;
 
-export { BlogError };
+  public constructor(code: BlogErrorCodeFormat, params?: string[], message?: string) {
+    super(message);
+    this._blogErrorCode = _.isEmpty(code) ? BlogErrorCode.UNEXPECTED_ERROR : code as BlogErrorCodeFormat;
+    this._params = _.isEmpty(params) ? [] : params as string[];
+  }
+
+  public get blogErrorCode() {
+    return this._blogErrorCode;
+  }
+
+  get params(): string[] {
+    return this._params;
+  }
+
+  get stack(): string | undefined {
+    return this._stack;
+  }
+}
