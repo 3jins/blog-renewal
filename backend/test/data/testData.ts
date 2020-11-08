@@ -148,7 +148,7 @@ export const blogErrorCode = {
   TEST_PARAMS: {
     code: 'TEST_PARAMS_CODE',
     errorMessage: common.simpleText,
-    loggingMessage: 'Test message for given param({0}) and another param({1}).',
+    loggingMessage: 'Parameters are given: {0}, {1}, and {2}.',
     httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
     logLevel: LogLevel.ERROR,
   },

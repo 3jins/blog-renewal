@@ -7,47 +7,50 @@ import LogLevel from './LogLevel';
 @Service()
 export default class Logger {
   public leaveBlogErrorLog = (blogError: BlogError): void => {
-    const loggingMessage = this.buildMessage(blogError);
+    const fullMessage = this.buildMessage(blogError);
     const { blogErrorCode: { logLevel } } = blogError;
-    this.leaveLog(loggingMessage, logLevel);
+    this.leaveLog(fullMessage, logLevel);
   };
 
   private buildMessage = (blogError: BlogError): string => {
     const {
       blogErrorCode, params, stack, message: rawErrorMessage,
     } = blogError;
-    const { code, errorMessage } = blogErrorCode;
+    const { code, loggingMessage } = blogErrorCode;
 
-    params.forEach((param, idx) => errorMessage.replace(`{${idx}}`, param));
-    const loggingMessage = `- error code: ${code}\n- message: ${errorMessage}`;
+    let replacedLoggingMessage = loggingMessage;
+    params.forEach((param, idx) => {
+      replacedLoggingMessage = replacedLoggingMessage.replace(`{${idx}}`, param);
+    });
+    const fullMessage = `- error code: ${code}\n- message: ${replacedLoggingMessage}`;
     if (!_.isEmpty(rawErrorMessage)) {
-      loggingMessage.concat(`\n- raw error message: ${rawErrorMessage}`);
+      fullMessage.concat(`\n- raw error message: ${rawErrorMessage}`);
     }
     if (!_.isEmpty(stack)) {
-      loggingMessage.concat(`\n- stack: ${stack}`);
+      fullMessage.concat(`\n- stack: ${stack}`);
     }
 
-    return loggingMessage;
+    return fullMessage;
   };
 
-  private leaveLog = (loggingMessage: string, logLevel: LogLevel): void => {
+  private leaveLog = (message: string, logLevel: LogLevel): void => {
     switch (logLevel) {
       case LogLevel.MUTE:
         break;
       case LogLevel.DEBUG:
-        console.debug(loggingMessage);
+        console.debug(message);
         break;
       case LogLevel.INFO:
-        console.info(loggingMessage);
+        console.info(message);
         break;
       case LogLevel.WARN:
-        console.warn(loggingMessage);
+        console.warn(message);
         break;
       case LogLevel.ERROR:
-        console.error(loggingMessage);
+        console.error(message);
         break;
       default:
-        console.warn(`다음 메시지에 대한 log level이 지정되지 않았습니다:\n${loggingMessage}`);
+        console.warn(`다음 메시지에 대한 log level이 지정되지 않았습니다:\n${message}`);
     }
   };
 }
