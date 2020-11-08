@@ -1,5 +1,7 @@
 import Language from '@src/common/constant/Language';
 import * as path from 'path';
+import http2 from "http2";
+import LogLevel from '@src/common/logging/LogLevel';
 
 export const appPath = {
   root: process.env.PWD,
@@ -99,4 +101,55 @@ export const common = {
   },
 
   simpleText: 'Just quit, 채워진 바둑판처럼 그만 둬',
+};
+
+export const blogErrorCode = {
+  TEST_ERROR: {
+    code: 'TEST_ERROR_CODE',
+    errorMessage: common.simpleText,
+    loggingMessage: common.simpleText,
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.ERROR,
+  },
+  TEST_WARN: {
+    code: 'TEST_WARN_CODE',
+    errorMessage: common.simpleText,
+    loggingMessage: common.simpleText,
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.WARN,
+  },
+  TEST_INFO: {
+    code: 'TEST_INFO_CODE',
+    errorMessage: common.simpleText,
+    loggingMessage: common.simpleText,
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.INFO,
+  },
+  TEST_DEBUG: {
+    code: 'TEST_DEBUG_CODE',
+    errorMessage: common.simpleText,
+    loggingMessage: common.simpleText,
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.DEBUG,
+  },
+  TEST_MUTE: {
+    code: 'TEST_MUTE_CODE',
+    errorMessage: common.simpleText,
+    loggingMessage: common.simpleText,
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.MUTE,
+  },
+  TEST_DEFAULT: {
+    code: 'TEST_DEFAULT_CODE',
+    errorMessage: common.simpleText,
+    loggingMessage: common.simpleText,
+    httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
+  },
+  TEST_PARAMS: {
+    code: 'TEST_PARAMS_CODE',
+    errorMessage: common.simpleText,
+    loggingMessage: 'Test message for given param({0}) and another param({1}).',
+    httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
+    logLevel: LogLevel.ERROR,
+  },
 };

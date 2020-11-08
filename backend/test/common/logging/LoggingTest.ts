@@ -2,19 +2,21 @@ import { should } from 'chai';
 import Logger from '@src/common/logging/Logger';
 import sinon from 'sinon';
 import LoggerTest from './LoggerTest';
+import { blogErrorCode as dummyBlogErrorCode } from '@test/data/testData';
 
 describe('logging test', () => {
   before(() => should());
 
   describe('Logger test', () => {
-    let logger: Logger;
     let sandbox;
     let loggerTest;
+
     before(() => {
-      logger = new Logger();
+      const logger = new Logger();
       sandbox = sinon.createSandbox();
-      loggerTest = LoggerTest(logger, sandbox);
+      loggerTest = LoggerTest(logger, sandbox, dummyBlogErrorCode);
     });
+
     beforeEach(() => sandbox.restore());
     it('call Logger.leaveLog with MUTE option', () => loggerTest.leaveMuteLogTest());
     it('call Logger.leaveLog with DEBUG option', () => loggerTest.leaveDebugLogTest());

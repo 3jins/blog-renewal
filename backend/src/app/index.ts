@@ -35,6 +35,7 @@ const makeApp = (router: Router): Koa => {
   const blogErrorHandler: BlogErrorHandler = Container.get(BlogErrorHandler);
   app
     .use(async (ctx, next) => {
+      // TODO: middleware에 대해 좀 더 알아보고, 로깅과 에러처리를 각각의 미들웨어로 분리할 수 있는지 생각해볼 것.
       try {
         await next();
         const { ip } = ctx.request;
