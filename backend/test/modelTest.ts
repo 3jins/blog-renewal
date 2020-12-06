@@ -1,5 +1,5 @@
 import { should } from 'chai';
-import getConnection from '@src/util/getDbConnection';
+import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { ClientSession, Connection } from 'mongoose';
 import MemberTest from './member/MemberTest';
 import CategoryTest from './category/CategoryTest';
@@ -16,6 +16,7 @@ describe('model test', () => {
   let session: ClientSession;
 
   before(() => {
+    setConnection();
     conn = getConnection();
     should();
   });

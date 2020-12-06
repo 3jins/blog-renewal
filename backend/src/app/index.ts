@@ -6,12 +6,12 @@ import config from 'config';
 import { Connection } from 'mongoose';
 import { Container } from 'typedi';
 import { Server } from 'http';
-import getConnection from '@src/util/getDbConnection';
-import HomeRouter from '@src/home/HomeRouter';
+import * as DbConnection from '@src/common/mongodb/DbConnectionUtil';
 import BlogErrorHandler from '@src/common/error/BlogErrorHandler';
 
 const connectToDb = () => {
-  const conn: Connection = getConnection();
+  DbConnection.setConnection();
+  const conn: Connection = DbConnection.getConnection();
   conn.on('error', (err: Error) => console.error(err));
   conn.once('open', () => {
     const { name, host, port } = conn;
@@ -22,11 +22,9 @@ const connectToDb = () => {
   });
 };
 
-const makeRouter = (): Router => {
+const makeRouter = (apiRouterList: Router[]): Router => {
   const router = new Router();
-  router
-    .use(HomeRouter.routes());
-
+  apiRouterList.forEach((apiRouter) => router.use(apiRouter.routes()));
   return router;
 };
 
@@ -35,24 +33,21 @@ const makeApp = (router: Router): Koa => {
   const blogErrorHandler: BlogErrorHandler = Container.get(BlogErrorHandler);
   app
     .use(async (ctx, next) => {
-      // TODO: middleware에 대해 좀 더 알아보고, 로깅과 에러처리를 각각의 미들웨어로 분리할 수 있는지 생각해볼 것.
-      try {
-        await next();
-        const { ip } = ctx.request;
-        const rt = ctx.response.get('X-Response-Time');
-        console.info(`${ctx.method} ${ctx.url} - ${rt} from ${ip}`);
-      } catch (err) {
-        blogErrorHandler.handleError(ctx, err);
-      }
+      const { ip } = ctx.request;
+      const rt = ctx.response.get('X-Response-Time');
+      console.info(`${ctx.method} ${ctx.url} - ${rt} from ${ip}`);
+      await next();
     })
+    .use((ctx, next) => next()
+      .catch((err) => blogErrorHandler.handleError(ctx, err)))
     .use(router.routes());
 
   return app;
 };
 
-const startApp = (): Server => {
+const startApp = (routerList: Router[]): Server => {
   const { port } = config.get('server');
-  const router = makeRouter();
+  const router = makeRouter(routerList);
   const app = makeApp(router);
   return app.listen(port, () => console.info(`Server started to listening from port ${port}.`));
 };

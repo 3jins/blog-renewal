@@ -3,9 +3,11 @@ import * as path from 'path';
 import http2 from "http2";
 import LogLevel from '@src/common/logging/LogLevel';
 
+const root = process.env.PWD;
 export const appPath = {
-  root: process.env.PWD,
-  testRoot: path.resolve(process.env.PWD!, 'test'),
+  root,
+  testRoot: `${root}/test`,
+  testData: `${root}/test/data`,
 };
 
 export const common = {
@@ -41,9 +43,15 @@ export const common = {
     name: '심슨가족이다, 그지 깽깽이들아!',
     detail: '심슨가족 짤방들에 얽힌 이야기들',
   },
-  image: {
-    title: '아이유 박수',
-    format: 'gif',
+  gifImage: {
+    title: 'iu-clap.gif',
+    createdDate: new Date('1993-05-16 01:23:45.678'),
+    size: 1044310,
+  },
+  pngImage: {
+    title: 'roseblade.png',
+    createdDate: new Date('2020-11-28 13:00:31.131'),
+    size: 104431,
   },
   post1: {
     postNo: 1,

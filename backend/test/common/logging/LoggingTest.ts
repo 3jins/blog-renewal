@@ -1,8 +1,8 @@
 import { should } from 'chai';
 import Logger from '@src/common/logging/Logger';
 import sinon from 'sinon';
-import LoggerTest from './LoggerTest';
 import { blogErrorCode as dummyBlogErrorCode } from '@test/data/testData';
+import LoggerTest from './LoggerTest';
 
 describe('logging test', () => {
   before(() => should());
