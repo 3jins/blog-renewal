@@ -2,12 +2,14 @@ import * as mongoose from 'mongoose';
 
 export interface ImageDoc extends mongoose.Document {
   title: string;
-  format: string;
+  createdDate: Date;
+  size: number;
 }
 
 export const imageSchema = new mongoose.Schema({
   title: { type: String, required: true, unique: true },
-  format: { type: String, required: true },
+  createdDate: { type: Date, required: true },
+  size: { type: Number, required: true },
 });
 
 export default mongoose.model<ImageDoc>('image', imageSchema, 'images');

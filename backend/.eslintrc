@@ -16,12 +16,22 @@
     "import/resolver": {
       "typescript": {},
       "node": {
-        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".ts",
+          ".tsx"
+        ]
       }
     }
   },
   "rules": {
-    "max-len": ["error", {"code": 150}],
+    "max-len": [
+      "error",
+      {
+        "code": 150
+      }
+    ],
     "no-underscore-dangle": "off",
     "import/prefer-default-export": "off",
     "import/extensions": [
@@ -35,18 +45,37 @@
       }
     ],
     "mocha/no-mocha-arrows": "off",
-    "lines-between-class-members": "off"
+    "lines-between-class-members": "off",
+    "object-curly-newline": [
+      "error",
+      {
+        "ImportDeclaration": "never"
+      }
+    ]
   },
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx"],
+      "files": [
+        "*.ts",
+        "*.tsx"
+      ],
       "rules": {
-        "@typescript-eslint/no-unused-vars": ["error", {
-          "args": "none"
-        }],
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "args": "none"
+          }
+        ],
         "no-useless-constructor": "off",
         "no-undef": "off",
-        "no-empty-function": ["error", {"allow": ["constructors"]}],
+        "no-empty-function": [
+          "error",
+          {
+            "allow": [
+              "constructors"
+            ]
+          }
+        ],
         "no-unused-expressions": "off",
         "chai-friendly/no-unused-expressions": "error"
       }

@@ -20,7 +20,7 @@ const createData = async (session: ClientSession): Promise<CreatedData> => {
     newCategory: (await Category.create([commonTestData.childCategory], { session }))[0],
     newSeries: (await Series.create([commonTestData.series], { session }))[0],
     newPosts: [],
-    newImage: (await Image.create([commonTestData.image], { session }))[0],
+    newImage: (await Image.create([commonTestData.pngImage], { session }))[0],
   };
   ret.newPosts = await Post.create([{
     ...commonTestData.post1,

@@ -24,6 +24,20 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
     logLevel: LogLevel.ERROR,
   },
+  FILE_CANNOT_BE_MOVED: {
+    code: 'FILE_CANNOT_BE_MOVED',
+    errorMessage: '파일을 이동시키는데 실패했습니다.',
+    loggingMessage: '파일을 이동시키는데 실패했습니다. ({0} -> {1})',
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.ERROR,
+  },
+  TRANSACTION_FAILED: {
+    code: 'TRANSACTION_FAILED',
+    errorMessage: '트랜잭션 처리 중 예외가 발생하여 롤백했습니다.',
+    loggingMessage: '트랜잭션 처리 중 예외가 발생하여 롤백했습니다. (예외내용: {0})',
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.WARN,
+  },
 };
 
 export { BlogErrorCodeFormat, BlogErrorCode };

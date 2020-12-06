@@ -8,3 +8,6 @@ db:
   connectionOptions:
     useNewUrlParser: true
     useUnifiedTopology: true
+
+path:
+  appData: /home/blog
