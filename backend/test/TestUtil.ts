@@ -10,6 +10,9 @@ export const replaceUseTransactionForTest = async (sandbox, session: ClientSessi
     try {
       await callback(session);
     } catch (err) {
+      if (err instanceof (BlogError)) { // known error
+        throw err;
+      }
       throw new BlogError(BlogErrorCode.TRANSACTION_FAILED, [err.message]);
     }
   },
