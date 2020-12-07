@@ -38,6 +38,13 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
     logLevel: LogLevel.WARN,
   },
+  DUPLICATED_FILE_NAME: {
+    code: 'DUPLICATED_FILE_NAME',
+    errorMessage: '중복된 파일명이 있습니다.',
+    loggingMessage: '중복된 파일명이 있습니다. (중복된 파일 리스트: {0})',
+    httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
+    logLevel: LogLevel.ERROR,
+  },
 };
 
 export { BlogErrorCodeFormat, BlogErrorCode };
