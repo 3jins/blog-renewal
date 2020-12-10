@@ -4,10 +4,9 @@ import Koa from 'koa';
 import Router from '@koa/router';
 import config from 'config';
 import { Connection } from 'mongoose';
-import { Container } from 'typedi';
 import { Server } from 'http';
 import * as DbConnection from '@src/common/mongodb/DbConnectionUtil';
-import BlogErrorHandler from '@src/common/error/BlogErrorHandler';
+import { handleError } from '@src/common/error/BlogErrorHandlingUtil';
 
 const connectToDb = () => {
   DbConnection.setConnection();
@@ -30,7 +29,6 @@ const makeRouter = (apiRouterList: Router[]): Router => {
 
 const makeApp = (router: Router): Koa => {
   const app = new Koa();
-  const blogErrorHandler: BlogErrorHandler = Container.get(BlogErrorHandler);
   app
     .use(async (ctx, next) => {
       const { ip } = ctx.request;
@@ -39,7 +37,7 @@ const makeApp = (router: Router): Koa => {
       await next();
     })
     .use((ctx, next) => next()
-      .catch((err) => blogErrorHandler.handleError(ctx, err)))
+      .catch((err) => handleError(ctx, err)))
     .use(router.routes());
 
   return app;
