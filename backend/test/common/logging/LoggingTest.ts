@@ -1,30 +1,28 @@
 import { should } from 'chai';
-import Logger from '@src/common/logging/Logger';
 import sinon from 'sinon';
 import { blogErrorCode as dummyBlogErrorCode } from '@test/data/testData';
-import LoggerTest from './LoggerTest';
+import LoggingUtilTest from './LoggingUtilTest';
 
 describe('logging test', () => {
   before(() => should());
 
   describe('Logger test', () => {
     let sandbox;
-    let loggerTest;
+    let loggingUtilTest;
 
     before(() => {
-      const logger = new Logger();
       sandbox = sinon.createSandbox();
-      loggerTest = LoggerTest(logger, sandbox, dummyBlogErrorCode);
+      loggingUtilTest = LoggingUtilTest(sandbox, dummyBlogErrorCode);
     });
 
-    beforeEach(() => sandbox.restore());
+    afterEach(() => sandbox.restore());
 
-    it('call Logger.leaveBlogErrorLog with MUTE option', () => loggerTest.leaveMuteLogTest());
-    it('call Logger.leaveBlogErrorLog with DEBUG option', () => loggerTest.leaveDebugLogTest());
-    it('call Logger.leaveBlogErrorLog with INFO option', () => loggerTest.leaveInfoLogTest());
-    it('call Logger.leaveBlogErrorLog with WARN option', () => loggerTest.leaveWarnLogTest());
-    it('call Logger.leaveBlogErrorLog with ERROR option', () => loggerTest.leaveErrorLogTest());
-    it('call Logger.leaveBlogErrorLog with DEFAULT option', () => loggerTest.leaveDefaultLogTest());
-    it('call Logger.leaveBlogErrorLog with parameters', () => loggerTest.leaveLogForErrorWithParametersTest());
+    it('call Logger.leaveBlogErrorLog with MUTE option', () => loggingUtilTest.leaveMuteLogTest());
+    it('call Logger.leaveBlogErrorLog with DEBUG option', () => loggingUtilTest.leaveDebugLogTest());
+    it('call Logger.leaveBlogErrorLog with INFO option', () => loggingUtilTest.leaveInfoLogTest());
+    it('call Logger.leaveBlogErrorLog with WARN option', () => loggingUtilTest.leaveWarnLogTest());
+    it('call Logger.leaveBlogErrorLog with ERROR option', () => loggingUtilTest.leaveErrorLogTest());
+    it('call Logger.leaveBlogErrorLog with DEFAULT option', () => loggingUtilTest.leaveDefaultLogTest());
+    it('call Logger.leaveBlogErrorLog with parameters', () => loggingUtilTest.leaveLogForErrorWithParametersTest());
   });
 });
