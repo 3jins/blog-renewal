@@ -2,7 +2,7 @@ import { should } from 'chai';
 import sinon from 'sinon';
 import * as LoggingUtil from '@src/common/logging/LoggingUtil';
 import BlogErrorTest from './BlogErrorCodeTest';
-import BlogErrorHandlerTest from './BlogErrorHandlerTest';
+import BlogErrorHandlerTest from './BlogErrorHandlingUtilTest';
 
 describe('error test', () => {
   before(() => should());
