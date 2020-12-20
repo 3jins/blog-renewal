@@ -2,6 +2,8 @@ import { ClientSession, Connection } from 'mongoose';
 import { getConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
+import { leaveLog } from '@src/common/logging/LoggingUtil';
+import LogLevel from '@src/common/logging/LogLevel';
 
 export const useTransaction = async (callback: Function): Promise<void> => {
   const conn: Connection = getConnection();
@@ -11,8 +13,7 @@ export const useTransaction = async (callback: Function): Promise<void> => {
     await callback(session);
     await session.commitTransaction();
     session.endSession();
-    // eslint-disable-next-line no-console
-    console.info('Transaction committed well!');
+    leaveLog('Transaction committed well!', LogLevel.INFO);
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
