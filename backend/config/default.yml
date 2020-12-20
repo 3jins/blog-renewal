@@ -1,2 +1,7 @@
 path:
   image: /data/images
+
+logger:
+  pino:
+    option:
+      prettyPrint: true

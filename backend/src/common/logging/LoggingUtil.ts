@@ -1,7 +1,7 @@
-/* eslint-disable no-console */
 import _ from 'lodash';
 import BlogError from '@src/common/error/BlogError';
 import LogLevel from './LogLevel';
+import Logger from '@src/common/logging/Logger';
 
 const buildMessage = (blogError: BlogError): string => {
   const {
@@ -28,20 +28,26 @@ export const leaveLog = (message: string, logLevel: LogLevel): void => {
   switch (logLevel) {
     case LogLevel.MUTE:
       break;
+    case LogLevel.TRACE:
+      Logger.trace(message);
+      break;
     case LogLevel.DEBUG:
-      console.debug(message);
+      Logger.debug(message);
       break;
     case LogLevel.INFO:
-      console.info(message);
+      Logger.info(message);
       break;
     case LogLevel.WARN:
-      console.warn(message);
+      Logger.warn(message);
       break;
     case LogLevel.ERROR:
-      console.error(message);
+      Logger.error(message);
+      break;
+    case LogLevel.FATAL:
+      Logger.fatal(message);
       break;
     default:
-      console.warn(`다음 메시지에 대한 log level이 지정되지 않았습니다:\n${message}`);
+      Logger.warn(`다음 메시지에 대한 log level이 지정되지 않았습니다:\n${message}`);
   }
 };
 
