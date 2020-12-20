@@ -112,6 +112,13 @@ export const common = {
 };
 
 export const blogErrorCode = {
+  TEST_FATAL: {
+    code: 'TEST_FATAL_CODE',
+    errorMessage: common.simpleText,
+    loggingMessage: common.simpleText,
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.FATAL,
+  },
   TEST_ERROR: {
     code: 'TEST_ERROR_CODE',
     errorMessage: common.simpleText,
@@ -140,6 +147,13 @@ export const blogErrorCode = {
     httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
     logLevel: LogLevel.DEBUG,
   },
+  TEST_TRACE: {
+    code: 'TEST_TRACE_CODE',
+    errorMessage: common.simpleText,
+    loggingMessage: common.simpleText,
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.TRACE,
+  },
   TEST_MUTE: {
     code: 'TEST_MUTE_CODE',
     errorMessage: common.simpleText,
@@ -153,7 +167,7 @@ export const blogErrorCode = {
     loggingMessage: common.simpleText,
     httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
   },
-  TEST_PARAMS: {
+  TEST_ERROR_WITH_PARAMS: {
     code: 'TEST_PARAMS_CODE',
     errorMessage: common.simpleText,
     loggingMessage: 'Parameters are given: {0}, {1}, and {2}.',

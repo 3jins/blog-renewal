@@ -11,3 +11,5 @@ db:
 
 path:
   appData: /home/blog
+  image: /image
+  logging: /log

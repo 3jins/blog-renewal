@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@koa/router": "^9.4.0",
+    "@types/pino": "^6.3.4",
     "axios": "^0.19.2",
     "config": "^3.3.2",
     "file-type": "^15.0.1",
@@ -22,6 +23,8 @@
     "lodash": "^4.17.20",
     "mongodb": "^3.6.2",
     "mongoose": "^5.10.7",
+    "pino": "^6.7.0",
+    "pino-pretty": "^4.3.0",
     "reflect-metadata": "^0.1.13",
     "typedi": "^0.8.0"
   },
