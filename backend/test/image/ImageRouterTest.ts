@@ -11,7 +11,7 @@ import * as URL from '../../src/common/constant/URL';
 Container.set(ImageService, mock(ImageService));
 const ImageRouter = require('@src/image/ImageRouter');
 
-describe('Image integration test', () => {
+describe('Image router test', () => {
   let server: Server;
   let request: supertest.SuperTest<supertest.Test>;
 

@@ -1,7 +1,5 @@
 import { Files } from 'formidable';
 
-interface UploadImageParamDto {
+export interface UploadImageParamDto {
   files: Files;
 }
-
-export { UploadImageParamDto };

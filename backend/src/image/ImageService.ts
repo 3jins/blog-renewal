@@ -12,7 +12,7 @@ import { BlogErrorCode } from '../common/error/BlogErrorCode';
 
 @Service()
 export default class ImageService {
-  public constructor(private readonly _imageRepository: ImageRepository) {
+  public constructor(private readonly imageRepository: ImageRepository) {
   }
 
   public uploadImage = (paramDto: UploadImageParamDto) => {
@@ -39,6 +39,6 @@ export default class ImageService {
       const file = files[fileName];
       return ({ title: file.name, createdDate: new Date(), size: file.size });
     });
-    this._imageRepository.createImages(imageList);
+    this.imageRepository.createImages(imageList);
   };
 }

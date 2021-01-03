@@ -18,6 +18,7 @@ export interface PostDoc extends Document {
   isDeleted?: boolean;
   commentCount?: number;
   isPrivate?: boolean;
+  isDeprecated?: boolean;
 }
 
 export const postSchema = new Schema({
@@ -29,14 +30,15 @@ export const postSchema = new Schema({
   title: { type: String, required: true },
   rawContent: { type: String, required: true },
   renderedContent: { type: String, required: true },
-  language: { type: String, required: true, default: Language.KO },
+  language: { type: String, required: false, default: Language.KO },
   thumbnailContent: { type: String, required: true },
   thumbnailImage: { type: Schema.Types.ObjectId, ref: 'image' },
-  createdDate: { type: Date, required: true, default: Date.now },
-  isLatestVersion: { type: Boolean, required: true, default: true },
-  isDeleted: { type: Boolean, required: true, default: false },
-  commentCount: { type: Number, required: true, default: 0 },
-  isPrivate: { type: Boolean, required: true, default: false },
+  createdDate: { type: Date, required: false, default: Date.now },
+  isLatestVersion: { type: Boolean, required: false, default: true },
+  isDeleted: { type: Boolean, required: false, default: false },
+  commentCount: { type: Number, required: false, default: 0 },
+  isPrivate: { type: Boolean, required: false, default: false },
+  isDeprecated: { type: Boolean, required: false, default: false },
 });
 
 export default model<PostDoc>('post', postSchema, 'posts');
