@@ -8,7 +8,7 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
 @Service()
 export default class ImageRepository {
-  public createImages = (imageList: CreateQuery<ImageDoc>[]) => useTransaction(async (session) => {
+  public createImages = (imageList: CreateQuery<ImageDoc>[]) => useTransaction(async (session: ClientSession) => {
     await this.validateFileNameDuplication(imageList, session);
     await Image.create(imageList, { session });
   });
