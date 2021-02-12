@@ -10,7 +10,7 @@
 
 # production
 /backend/build
-/frontend/build
+/frontend/build/bundle.js
 
 # misc
 .DS_Store
