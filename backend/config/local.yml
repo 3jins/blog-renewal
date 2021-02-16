@@ -1,10 +1,6 @@
 server:
   port: 5913
 
-client:
-  url: http://localhost
-  port: 8080
-
 db:
   url: localhost
   port: 27017

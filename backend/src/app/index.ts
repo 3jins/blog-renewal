@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 import Koa from 'koa';
 import Router from '@koa/router';
-import cors from '@koa/cors';
 import config from 'config';
 import { Connection } from 'mongoose';
 import { Server } from 'http';
@@ -30,10 +29,8 @@ const makeRouter = (apiRouterList: Router[]): Router => {
 };
 
 const makeApp = (router: Router): Koa => {
-  const { url: clientUrl, port: clientPort } = config.get('client');
   const app = new Koa();
   app
-    .use(cors({ origin: `${clientUrl}:${clientPort}` }))
     .use(async (ctx, next) => {
       const { ip } = ctx.request;
       const rt = ctx.response.get('X-Response-Time');

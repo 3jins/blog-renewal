@@ -1,10 +1,6 @@
 server:
   port: 443
 
-client:
-  url: TBD
-  port: TBD
-
 db:
   url: TBD
   port: 27017
