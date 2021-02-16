@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { ClientSession, Connection } from 'mongoose';
 import { should } from 'chai';
 import sinon from 'sinon';
@@ -54,5 +55,17 @@ describe('PostRepository test', () => {
     const posts: PostDoc[] = await Post.find().session(session);
     posts.should.have.lengthOf(1);
     const post: PostDoc = posts[0];
+    post.should.not.be.empty;
+    post.should.contain(commonTestData.post1);
+    (post.lastVersionPost !== undefined).should.be.true;
+    (post.lastVersionPost === null).should.be.true;
+    (post.isLatestVersion !== undefined).should.be.true;
+    post.isLatestVersion!.should.be.true;
+    (post.isDeleted !== undefined).should.be.true;
+    post.isDeleted!.should.be.false;
+    (post.createdDate !== undefined).should.be.true;
+    post.createdDate!.getTime().should.closeTo(new Date().getTime(), 3000); // Expect difference to be less than 3 seconds
+    (post.commentCount !== undefined).should.be.true;
+    post.commentCount!.should.equal(0);
   });
 });
