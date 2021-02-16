@@ -1,15 +1,14 @@
 import Language from '@src/common/constant/Language';
+import { File } from 'formidable';
 
 export interface AddPostParamDto {
+  post: File;
   categoryId?: string;
   tagIdList?: Array<string>;
   seriesId?: string;
-  title: string;
-  rawContent: string;
   language: Language;
   thumbnailContent: string;
   thumbnailImageId?: string;
-  createdDate?: Date;
   isPrivate?: boolean;
 }
 
