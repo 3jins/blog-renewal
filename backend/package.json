@@ -18,7 +18,7 @@
   "dependencies": {
     "@koa/router": "^9.4.0",
     "@types/pino": "^6.3.4",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "config": "^3.3.2",
     "file-type": "^15.0.1",
     "formidable": "^1.2.2",
