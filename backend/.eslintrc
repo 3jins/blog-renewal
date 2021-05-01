@@ -46,12 +46,8 @@
     ],
     "mocha/no-mocha-arrows": "off",
     "lines-between-class-members": "off",
-    "object-curly-newline": [
-      "error",
-      {
-        "ImportDeclaration": "never"
-      }
-    ]
+    "object-curly-newline": "off",
+    "max-classes-per-file": "off"
   },
   "overrides": [
     {
