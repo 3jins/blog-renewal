@@ -11,7 +11,7 @@
     "startPrimaryDB": "sudo mongod --config config/mongod/primary.conf",
     "startSecondary0DB": "sudo mongod --config config/mongod/secondary0.conf",
     "startArbiterDB": "sudo mongod --config config/mongod/arbiter.conf",
-    "startDB": "sudo mongod --replSet blog; npm run startPrimaryDB; npm run startSecondary0DB; npm run startArbiterDB"
+    "startDB": "npm run startPrimaryDB; npm run startSecondary0DB; npm run startArbiterDB"
   },
   "author": "",
   "license": "ISC",
