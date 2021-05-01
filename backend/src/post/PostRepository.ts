@@ -39,10 +39,7 @@ export default class PostRepository {
       .findOne()
       .sort({ sort: -1 })
       .session(session) as PostDoc;
-    if (_.isEmpty(lastPost)) {
-      return 1;
-    }
-    return lastPost.postNo;
+    return _.isEmpty(lastPost) ? 1 : lastPost.postNo;
   };
 
   private getLatestVersionPost = async (session: ClientSession, title: string): Promise<PostDoc> => await Post

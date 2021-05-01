@@ -45,6 +45,13 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
     logLevel: LogLevel.ERROR,
   },
+  TAG_NOT_FOUND: {
+    code: 'TAG_NOT_FOUND',
+    errorMessage: '존재하는 tag가 아닙니다.',
+    loggingMessage: '{0}는 존재하는 tag가 아닙니다.',
+    httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
+    logLevel: LogLevel.ERROR,
+  }
 };
 
 export { BlogErrorCodeFormat, BlogErrorCode };
