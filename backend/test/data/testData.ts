@@ -1,6 +1,5 @@
 import Language from '@src/common/constant/Language';
-import * as path from 'path';
-import http2 from "http2";
+import http2 from 'http2';
 import LogLevel from '@src/common/logging/LogLevel';
 
 const root = process.env.PWD;
@@ -36,8 +35,17 @@ export const common = {
     name: 'Frontend',
     level: 1,
   },
-  tag: {
+  tag1: {
     name: 'Spring',
+    postList: [],
+  },
+  tag2: {
+    name: '우린 시간 앞에 무엇을 선택해야 할까',
+    postList: [],
+  },
+  tag3: {
+    name: '넹비ㅓ',
+    postList: [],
   },
   series: {
     name: '심슨가족이다, 그지 깽깽이들아!',
@@ -91,6 +99,17 @@ export const common = {
     isLatestVersion: true,
     commentCount: 0,
   },
+  post3: {
+    postNo: 3,
+    title: '릴러말즈에 관하여',
+    rawContent: '걔가 누군지는 잘 모르겠는데 우시앞무선은 장난 아니게 좋더라',
+    renderedContent: '<p>걔가 누군지는 잘 모르겠는데 우시앞무선은 장난 아니게 좋더라</p>',
+    language: Language.KO,
+    thumbnailContent: '너무 빨리 지나가',
+    isLatestVersion: true,
+    commentCount: 0,
+  },
+  postIdList: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439022', '507f1f77bcf86cd799439033'],
   comment1: {
     isCommentAuthor: false,
     content: '오늘 저녁 메뉴 추천해줘요!',
@@ -109,6 +128,7 @@ export const common = {
   },
 
   simpleText: 'Just quit, 채워진 바둑판처럼 그만 둬',
+  objectIdList: ['c0ffee0f0ff1cecafe15900d', 'c0ffee0f0ff1cecafe50900d', 'c0ffee0f0ff1cecafe15baad'],
 };
 
 export const blogErrorCode = {

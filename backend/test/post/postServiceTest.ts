@@ -3,7 +3,7 @@ import { deepEqual, instance, mock, verify } from 'ts-mockito';
 import PostService from '@src/post/PostService';
 import PostRepository from '@src/post/PostRepository';
 import { AddPostParamDto, CreatePostRepoParamDto } from '@src/post/PostDto';
-import { appPath, common as commonTestData } from '@test/data/testData';
+import { appPath } from '@test/data/testData';
 import fs from 'fs';
 import { File } from 'formidable';
 import Language from '@src/common/constant/Language';

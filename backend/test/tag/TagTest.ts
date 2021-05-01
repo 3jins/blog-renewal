@@ -5,7 +5,7 @@ import Tag from '@src/tag/Tag';
 
 export default (session: ClientSession) => ({
   updateTest: async () => {
-    const [newTag] = await Tag.create([commonTestData.tag], { session });
+    const [newTag] = await Tag.create([commonTestData.tag1], { session });
     const newPosts = await Post.create([{
       ...commonTestData.post1,
       tagList: [newTag._id],
@@ -16,7 +16,7 @@ export default (session: ClientSession) => ({
     await Tag.updateOne({ name: newTag.name }, { postList: newPosts.map((newPost) => newPost._id) }, { session });
 
     const tag = await Tag
-      .findOne({ name: commonTestData.tag.name })
+      .findOne({ name: commonTestData.tag1.name })
       .populate('postList')
       .session(session)
       .exec();

@@ -16,7 +16,7 @@ interface CreatedData {
 
 const createData = async (session: ClientSession): Promise<CreatedData> => {
   const ret: CreatedData = {
-    newTags: await Tag.create([commonTestData.tag], { session }),
+    newTags: await Tag.create([commonTestData.tag1], { session }),
     newCategory: (await Category.create([commonTestData.childCategory], { session }))[0],
     newSeries: (await Series.create([commonTestData.series], { session }))[0],
     newPosts: [],
