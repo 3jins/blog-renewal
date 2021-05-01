@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { ClientSession, Connection } from 'mongoose';
 import { should } from 'chai';
 import sinon from 'sinon';
@@ -42,7 +41,7 @@ describe('PostRepository test', () => {
 
   it('createPost', async () => {
     const categories: CategoryDoc = (await Category.create([commonTestData.childCategory], { session }))[0];
-    const tags: TagDoc[] = await Tag.create([commonTestData.tag], { session });
+    const tags: TagDoc[] = await Tag.create([commonTestData.tag1], { session });
     const series: SeriesDoc = (await Series.create([commonTestData.series], { session }))[0];
     const paramDto: CreatePostRepoParamDto = {
       ...commonTestData.post1,

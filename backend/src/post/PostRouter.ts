@@ -6,8 +6,6 @@ import _ from 'lodash';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import * as URL from '../common/constant/URL';
 import PostService from './PostService';
-import { File } from 'formidable';
-import Language from '@src/common/constant/Language';
 
 const postRouter = new Router();
 const koaBodyOptions = {
