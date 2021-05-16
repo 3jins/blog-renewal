@@ -39,9 +39,11 @@ export default (loggerStub, dummyBlogErrorCode) => ({
     loggerStub.warn.calledOnce.should.be.true;
     loggerStub.warn.args.should.have.lengthOf(1);
     loggerStub.warn.args[0].should.have.lengthOf(1);
-    loggerStub.warn.args[0][0].should.equal(
-      `다음 메시지에 대한 log level이 지정되지 않았습니다:\n- error code: ${dummyBlogErrorCode.TEST_DEFAULT.code}\n- message: ${commonTestData.simpleText}`,
-    );
+    loggerStub.warn.args[0][0].should.contain('다음 메시지에 대한 log level이 지정되지 않았습니다:\n');
+    loggerStub.warn.args[0][0].should.contain(`- error code: ${dummyBlogErrorCode.TEST_DEFAULT.code}\n`);
+    loggerStub.warn.args[0][0].should.contain(`- message: ${commonTestData.simpleText}\n`);
+    loggerStub.warn.args[0][0].should.contain('- raw error message:');
+    loggerStub.warn.args[0][0].should.contain('- stack:');
     _.keys(loggerStub)
       .filter((spyFunction) => spyFunction !== 'warn' && loggerStub[spyFunction].notCalled !== undefined)
       .forEach((spyFunction) => loggerStub[spyFunction].notCalled.should.be.true);
@@ -52,8 +54,9 @@ export default (loggerStub, dummyBlogErrorCode) => ({
     loggerStub.error.calledOnce.should.be.true;
     loggerStub.error.args.should.have.lengthOf(1);
     loggerStub.error.args[0].should.have.lengthOf(1);
-    loggerStub.error.args[0][0].should.equal(
-      `- error code: ${dummyBlogErrorCode.TEST_ERROR_WITH_PARAMS.code}\n- message: Parameters are given: ${params[0]}, ${params[1]}, and ${params[2]}.`, // eslint-disable-line max-len
-    );
+    loggerStub.error.args[0][0].should.contain(`- error code: ${dummyBlogErrorCode.TEST_ERROR_WITH_PARAMS.code}\n`);
+    loggerStub.error.args[0][0].should.contain(`- message: Parameters are given: ${params[0]}, ${params[1]}, and ${params[2]}.\n`);
+    loggerStub.error.args[0][0].should.contain('- raw error message:');
+    loggerStub.error.args[0][0].should.contain('- stack:');
   },
 });

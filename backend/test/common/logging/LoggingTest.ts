@@ -1,10 +1,10 @@
 import { should } from 'chai';
 import sinon from 'sinon';
 import { blogErrorCode as dummyBlogErrorCode } from '@test/data/testData';
-import LoggingUtilTest from './LoggingUtilTest';
 import Logger from '@src/common/logging/Logger';
 import { leaveLog } from '@src/common/logging/LoggingUtil';
 import LogLevel from '@src/common/logging/LogLevel';
+import LoggingUtilTest from './LoggingUtilTest';
 
 describe('logging test', () => {
   before(() => should());
