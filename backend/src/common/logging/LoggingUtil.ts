@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import BlogError from '@src/common/error/BlogError';
-import LogLevel from './LogLevel';
 import Logger from '@src/common/logging/Logger';
+import LogLevel from './LogLevel';
 
 const buildMessage = (blogError: BlogError): string => {
   const {
@@ -13,12 +13,12 @@ const buildMessage = (blogError: BlogError): string => {
   params.forEach((param, idx) => {
     replacedLoggingMessage = replacedLoggingMessage.replace(`{${idx}}`, param);
   });
-  const fullMessage = `- error code: ${code}\n- message: ${replacedLoggingMessage}`;
-  if (!_.isEmpty(rawErrorMessage)) {
-    fullMessage.concat(`\n- raw error message: ${rawErrorMessage}`);
+  let fullMessage = `- error code: ${code}\n- message: ${replacedLoggingMessage}`;
+  if (!_.isNil(rawErrorMessage)) {
+    fullMessage = fullMessage.concat(`\n- raw error message: ${rawErrorMessage}`);
   }
-  if (!_.isEmpty(stack)) {
-    fullMessage.concat(`\n- stack: ${stack}`);
+  if (!_.isNil(stack)) {
+    fullMessage = fullMessage.concat(`\n- stack: ${stack}`);
   }
 
   return fullMessage;
