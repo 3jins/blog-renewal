@@ -45,6 +45,13 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
     logLevel: LogLevel.ERROR,
   },
+  PARAMETER_EMPTY: {
+    code: 'PARAMETER_EMPTY',
+    errorMessage: '필요한 파라미터가 비어있습니다.',
+    loggingMessage: '필요한 파라미터가 비어있습니다. (비어있는 파라미터 리스트: {0})',
+    httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
+    logLevel: LogLevel.ERROR,
+  },
   TAG_NOT_FOUND: {
     code: 'TAG_NOT_FOUND',
     errorMessage: '존재하는 tag가 아닙니다.',
