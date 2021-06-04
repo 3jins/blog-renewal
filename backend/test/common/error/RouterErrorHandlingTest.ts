@@ -11,21 +11,18 @@ import { blogErrorCode, common as commonTestData } from '@test/data/testData';
 
 const tagService: TagService = mock(TagService);
 Container.set(TagService, instance(tagService));
+delete require.cache[require.resolve('@src/tag/TagRouter')];
 const TagRouter = require('@src/tag/TagRouter');
 
 describe('Router error handling test', () => {
   let server: Server;
   let request: supertest.SuperTest<supertest.Test>;
-
   const { tag2: { name: tagName }, postIdList } = commonTestData;
-  let encodedTagName;
 
   before(() => {
     should();
     server = startApp([TagRouter.default]);
     request = supertest(server);
-
-    encodedTagName = encodeURI(tagName);
   });
 
   it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - error handling`, async () => {
@@ -34,12 +31,15 @@ describe('Router error handling test', () => {
 
     await request
       .get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`)
-      .query(() => ({ name: encodedTagName, postId: postIdList[0] }))
+      .query(() => ({ name: tagName, postId: postIdList[0] }))
       .expect(blogErrorCode.TEST_ERROR.httpErrorCode)
       .expect((res) => {
         res.body.message.should.equal(commonTestData.simpleText);
       });
   });
 
-  after(() => endApp(server));
+  after(() => {
+    endApp(server);
+    console.log('RouterErrorHandlingTest.after');
+  });
 });

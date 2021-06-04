@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import Koa from 'koa';
+import koaBody from 'koa-body';
 import Router from '@koa/router';
 import cors from '@koa/cors';
 import config from 'config';
@@ -34,6 +35,7 @@ const makeApp = (router: Router): Koa => {
   const app = new Koa();
   app
     .use(cors({ origin: `${clientUrl}:${clientPort}` }))
+    .use(koaBody())
     .use(async (ctx, next) => {
       const { ip } = ctx.request;
       const rt = ctx.response.get('X-Response-Time');

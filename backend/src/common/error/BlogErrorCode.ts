@@ -58,7 +58,14 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     loggingMessage: '{0}는 존재하는 tag가 아닙니다.',
     httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
     logLevel: LogLevel.ERROR,
-  }
+  },
+  INVALID_REQUEST_PARAMETER: {
+    code: 'INVALID_REQUEST_PARAMETER',
+    errorMessage: '형식에 맞지 않는 요청 파라미터가 시스템에 인입되었습니다.',
+    loggingMessage: '형식에 맞지 않는 요청 파라미터({0})가 시스템에 인입되었습니다.',
+    httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
+    logLevel: LogLevel.ERROR,
+  },
 };
 
 export { BlogErrorCodeFormat, BlogErrorCode };
