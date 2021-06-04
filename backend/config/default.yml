@@ -4,4 +4,6 @@ path:
 logger:
   pino:
     option:
-      prettyPrint: true
+      prettyPrint:
+        translateTime: 'SYS:standard'
+

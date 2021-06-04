@@ -16,4 +16,4 @@ db:
 path:
   appData: /Users/sejin/Documents/blog-local
   image: /image
-  logging: stdout
+  logging: /log.txt
