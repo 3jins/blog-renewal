@@ -46,19 +46,19 @@ describe('TagRepository test', () => {
     let postIdList;
 
     beforeEach(async () => {
-      const tag1 = (await Tag.create([commonTestData.tag1], { session }))[0]; // Spring
-      const tag2 = (await Tag.create([commonTestData.tag2], { session }))[0]; // 우시앞무선
-      const tag3 = (await Tag.create([commonTestData.tag3], { session }))[0]; // 넹비ㅓ
+      const tag1 = (await Tag.insertMany([commonTestData.tag1], { session }))[0]; // Spring
+      const tag2 = (await Tag.insertMany([commonTestData.tag2], { session }))[0]; // 우시앞무선
+      const tag3 = (await Tag.insertMany([commonTestData.tag3], { session }))[0]; // 넹비ㅓ
 
-      const post1 = (await Post.create([{
+      const post1 = (await Post.insertMany([{
         ...commonTestData.post1,
         tagList: [tag1._id, tag3._id],
       }], { session }))[0];
-      const post2 = (await Post.create([{
+      const post2 = (await Post.insertMany([{
         ...commonTestData.post2,
         tagList: [tag3._id],
       }], { session }))[0];
-      const post3 = (await Post.create([{
+      const post3 = (await Post.insertMany([{
         ...commonTestData.post3,
         tagList: [tag2._id],
       }], { session }))[0];
@@ -146,9 +146,9 @@ describe('TagRepository test', () => {
     let postList;
 
     beforeEach(async () => {
-      const tag = (await Tag.create([commonTestData.tag2], { session }))[0]; // 우시앞무선
+      const tag = (await Tag.insertMany([commonTestData.tag2], { session }))[0]; // 우시앞무선
 
-      postList = (await Post.create([{
+      postList = (await Post.insertMany([{
         ...commonTestData.post1,
         tagList: [tag._id],
       }, {
@@ -204,18 +204,18 @@ describe('TagRepository test', () => {
     let postObjectIdList;
 
     beforeEach(async () => {
-      const tag1 = (await Tag.create([commonTestData.tag1], { session }))[0]; // Spring
-      const tag2 = (await Tag.create([commonTestData.tag2], { session }))[0]; // 우시앞무선
+      const tag1 = (await Tag.insertMany([commonTestData.tag1], { session }))[0]; // Spring
+      const tag2 = (await Tag.insertMany([commonTestData.tag2], { session }))[0]; // 우시앞무선
 
-      const post1 = (await Post.create([{
+      const post1 = (await Post.insertMany([{
         ...commonTestData.post1,
         tagList: [tag1._id],
       }], { session }))[0];
-      const post2 = (await Post.create([{
+      const post2 = (await Post.insertMany([{
         ...commonTestData.post2,
         tagList: [tag1._id],
       }], { session }))[0];
-      const post3 = (await Post.create([{
+      const post3 = (await Post.insertMany([{
         ...commonTestData.post3,
         tagList: [tag2._id],
       }], { session }))[0];
@@ -312,9 +312,9 @@ describe('TagRepository test', () => {
     let testTag;
 
     beforeEach(async () => {
-      [testTag] = (await Tag.create([commonTestData.tag1], { session })); // Spring
+      [testTag] = (await Tag.insertMany([commonTestData.tag1], { session })); // Spring
 
-      [testPost] = (await Post.create([{
+      [testPost] = (await Post.insertMany([{
         ...commonTestData.post1,
         tagList: [testTag._id, dummyTagId],
       }], { session }));

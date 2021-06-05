@@ -5,11 +5,11 @@ import Category from '@src/category/Category';
 
 export default (session: ClientSession) => ({
   createTest: async () => {
-    const [{ _id: parentCategoryId }] = await Category.create(
+    const [{ _id: parentCategoryId }] = await Category.insertMany(
       [commonTestData.parentCategory],
       { session },
     );
-    await Category.create([{
+    await Category.insertMany([{
       ...commonTestData.childCategory,
       parentCategory: parentCategoryId,
     }], { session });
@@ -32,9 +32,9 @@ export default (session: ClientSession) => ({
   },
 
   createWithDuplicatedCategoryNoTest: async () => {
-    const [category1] = await Category.create([commonTestData.childCategory], { session });
+    const [category1] = await Category.insertMany([commonTestData.childCategory], { session });
     Category
-      .create([{
+      .insertMany([{
         categoryNo: category1.categoryNo,
         name: commonTestData.duplicatedCategory.name,
       }], { session })
@@ -46,7 +46,7 @@ export default (session: ClientSession) => ({
   },
 
   deleteTest: async () => {
-    await Category.create([commonTestData.childCategory], { session });
+    await Category.insertMany([commonTestData.childCategory], { session });
     await Category
       .deleteOne({ categoryNo: commonTestData.childCategory.categoryNo })
       .session(session);

@@ -10,7 +10,7 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 export default class ImageRepository {
   public createImages = (imageList: CreateQuery<ImageDoc>[]) => useTransaction(async (session: ClientSession) => {
     await this.validateFileNameDuplication(imageList, session);
-    await Image.create(imageList, { session });
+    await Image.insertMany(imageList, { session });
   });
 
   private validateFileNameDuplication = async (imageList: CreateQuery<ImageDoc>[], session: ClientSession): Promise<void> => {

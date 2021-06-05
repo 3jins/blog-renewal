@@ -10,7 +10,7 @@ export default class PostRepository {
   public createPost = (paramDto: CreatePostRepoParamDto) => useTransaction(async (session: ClientSession) => {
     const postNo = await this.getNextPostNo(session);
     await Post
-      .create([{
+      .insertMany([{
         ...paramDto,
         postNo,
         category: paramDto.categoryId,
@@ -24,7 +24,7 @@ export default class PostRepository {
     const { title } = paramDto;
     const { _id: lastVersionPostId, postNo, commentCount } = await this.getLatestVersionPost(session, title);
     await Post
-      .create([{
+      .insertMany([{
         ...paramDto,
         postNo,
         lastVersionPost: lastVersionPostId,
