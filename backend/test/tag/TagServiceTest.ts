@@ -13,6 +13,7 @@ import {
 import { common as commonTestData } from '@test/data/testData';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import { errorShouldBeThrown } from '@test/TestUtil';
 
 describe('TagService test', () => {
   let tagService: TagService;
@@ -121,12 +122,11 @@ describe('TagService test', () => {
         originalName: tagName,
         tagToBe: {},
       };
-      try {
-        await tagService.updateTag(paramDto);
-      } catch (err) {
-        (err instanceof BlogError).should.be.true;
-        err.blogErrorCode.should.equal(BlogErrorCode.PARAMETER_EMPTY);
-      }
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.PARAMETER_EMPTY),
+        async (_paramDto) => tagService.updateTag(_paramDto),
+        paramDto,
+      );
     });
   });
 
