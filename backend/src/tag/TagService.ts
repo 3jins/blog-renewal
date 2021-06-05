@@ -46,7 +46,7 @@ export default class TagService {
   };
 
   public updateTag = async (paramDto: UpdateTagParamDto): Promise<void> => {
-    if (_.isNil(_.values(paramDto.tagToBe))) {
+    if (_.isNil(paramDto.tagToBe) || _.isEmpty(_.values(paramDto.tagToBe))) {
       throw new BlogError(BlogErrorCode.PARAMETER_EMPTY);
     }
     return this.tagRepository.updateTag({
