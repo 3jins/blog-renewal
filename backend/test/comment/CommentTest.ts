@@ -5,30 +5,30 @@ import Member from '@src/member/Member';
 import Post from '@src/post/Post';
 
 const createComments = async (postId: Schema.Types.ObjectId, session: ClientSession): Promise<Array<CommentDoc>> => {
-  const [masterMember, guestMember1, guestMember2] = await Member.create(
+  const [masterMember, guestMember1, guestMember2] = await Member.insertMany(
     [commonTestData.masterMember, commonTestData.guestMember1, commonTestData.guestMember2],
     { session },
   );
-  const [comment1] = await Comment.create([{
+  const [comment1] = await Comment.insertMany([{
     ...commonTestData.comment1,
     post: postId,
     member: guestMember2._id,
     isPostAuthor: false,
   }], { session });
-  const [comment2] = await Comment.create([{
+  const [comment2] = await Comment.insertMany([{
     ...commonTestData.comment2,
     post: postId,
     member: guestMember1._id,
     isPostAuthor: false,
   }], { session });
-  const [comment3] = await Comment.create([{
+  const [comment3] = await Comment.insertMany([{
     ...commonTestData.comment3,
     post: postId,
     member: masterMember._id,
     refComment: comment1._id,
     isPostAuthor: true,
   }], { session });
-  const [comment4] = await Comment.create([{
+  const [comment4] = await Comment.insertMany([{
     ...commonTestData.comment4,
     post: postId,
     member: guestMember2._id,
@@ -41,7 +41,7 @@ const createComments = async (postId: Schema.Types.ObjectId, session: ClientSess
 export default (session: ClientSession) => ({
   createTest: async () => {
     const littleBitAgo = Date.now();
-    const [{ _id: postId }] = await Post.create([commonTestData.post1], { session });
+    const [{ _id: postId }] = await Post.insertMany([commonTestData.post1], { session });
     await createComments(postId, session);
 
     const comments = await Comment

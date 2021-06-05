@@ -5,8 +5,8 @@ import Tag from '@src/tag/Tag';
 
 export default (session: ClientSession) => ({
   updateTest: async () => {
-    const [newTag] = await Tag.create([commonTestData.tag1], { session });
-    const newPosts = await Post.create([{
+    const [newTag] = await Tag.insertMany([commonTestData.tag1], { session });
+    const newPosts = await Post.insertMany([{
       ...commonTestData.post1,
       tagList: [newTag._id],
     }, {

@@ -4,7 +4,7 @@ import { common as commonTestData } from '@test/data/testData';
 
 export default (session: ClientSession) => ({
   createTest: async () => {
-    await Member.create([commonTestData.masterMember], { session });
+    await Member.insertMany([commonTestData.masterMember], { session });
 
     const results = await Member
       .find({ memberNo: commonTestData.masterMember.memberNo })

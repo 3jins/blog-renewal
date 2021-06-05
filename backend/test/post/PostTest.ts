@@ -16,13 +16,13 @@ interface CreatedData {
 
 const createData = async (session: ClientSession): Promise<CreatedData> => {
   const ret: CreatedData = {
-    newTags: await Tag.create([commonTestData.tag1], { session }),
-    newCategory: (await Category.create([commonTestData.childCategory], { session }))[0],
-    newSeries: (await Series.create([commonTestData.series], { session }))[0],
+    newTags: await Tag.insertMany([commonTestData.tag1], { session }),
+    newCategory: (await Category.insertMany([commonTestData.childCategory], { session }))[0],
+    newSeries: (await Series.insertMany([commonTestData.series], { session }))[0],
     newPosts: [],
-    newImage: (await Image.create([commonTestData.pngImage], { session }))[0],
+    newImage: (await Image.insertMany([commonTestData.pngImage], { session }))[0],
   };
-  ret.newPosts = await Post.create([{
+  ret.newPosts = await Post.insertMany([{
     ...commonTestData.post1,
     tagList: ret.newTags.map((tag) => tag._id),
     category: ret.newCategory._id,
