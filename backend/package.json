@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "pm2 start",
     "test": "mocha",
+    "coverage": "nyc npm run test",
     "startPrimaryDB": "sudo mongod --config config/mongod/primary.conf",
     "startSecondary0DB": "sudo mongod --config config/mongod/secondary0.conf",
     "startArbiterDB": "sudo mongod --config config/mongod/arbiter.conf",
@@ -35,6 +36,7 @@
     "typedi": "^0.8.0"
   },
   "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@types/chai": "^4.2.12",
     "@types/config": "0.0.36",
     "@types/koa": "^2.11.4",
@@ -56,6 +58,7 @@
     "eslint-plugin-prettier": "^3.1.4",
     "mocha": "^8.1.3",
     "nodemon": "^2.0.4",
+    "nyc": "^15.1.0",
     "simon": "^0.2.3",
     "sinon": "^9.2.0",
     "supertest": "^4.0.2",
