@@ -22,7 +22,7 @@ export default class TagRepository {
       findTagByNameDto,
       findTagByPostIdDto,
     }: FindTagRepoParamDto = paramDto;
-    const queryToFindTagByName: FilterQuery<TagDoc> = this.getQueryToFindTagByName(findTagByNameDto);
+    const queryToFindTagByName: FilterQuery<TagDoc> = this.makeQueryToFindTagByName(findTagByNameDto);
 
     const tagList = await Tag
       .find({ ...queryToFindTagByName })
@@ -39,7 +39,6 @@ export default class TagRepository {
       .insertMany([paramDto], { session });
 
     // Update post list
-    tagList.map((tag) => tag._id);
     await Post
       .updateMany({
         _id: { $in: paramDto.postList },
@@ -96,7 +95,7 @@ export default class TagRepository {
       .updateMany({ _id: { $in: tag.postList } }, { $pull: { tagList: tag._id } }, { session });
   });
 
-  private getQueryToFindTagByName = (paramDto: FindTagByNameDto | undefined): FilterQuery<TagDoc> => {
+  private makeQueryToFindTagByName = (paramDto: FindTagByNameDto | undefined): FilterQuery<TagDoc> => {
     if (_.isEmpty(paramDto)) {
       return {};
     }

@@ -307,9 +307,13 @@ describe('TagRepository test', () => {
   });
 
   describe('deleteTag test', () => {
-    const dummyTagId = new Types.ObjectId(commonTestData.objectIdList[0]);
+    let dummyTagId;
     let testPost;
     let testTag;
+
+    before(() => {
+      dummyTagId = new Types.ObjectId(commonTestData.objectIdList[0]);
+    });
 
     beforeEach(async () => {
       [testTag] = (await Tag.insertMany([commonTestData.tag1], { session })); // Spring
