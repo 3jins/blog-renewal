@@ -22,17 +22,41 @@ export const common = {
     memberNo: 3,
     name: 'Yongha Woo',
   },
-  parentCategory: {
+  category1: {
     categoryNo: 1,
-    name: 'Web',
+    name: 'software development',
   },
-  childCategory: {
+  category2: {
     categoryNo: 2,
-    name: 'Backend',
+    name: 'web',
     level: 1,
   },
+  category3: {
+    categoryNo: 3,
+    name: 'backend',
+    level: 2,
+  },
+  category4: {
+    categoryNo: 4,
+    name: 'frontend',
+    level: 2,
+  },
+  category5: {
+    categoryNo: 5,
+    name: 'mobile',
+    level: 1,
+  },
+  category6: {
+    categoryNo: 6,
+    name: 'life',
+  },
+  category7: {
+    categoryNo: 7,
+    name: 'etc',
+    level: 0,
+  },
   duplicatedCategory: {
-    name: 'Frontend',
+    name: 'software development',
     level: 1,
   },
   tag1: {

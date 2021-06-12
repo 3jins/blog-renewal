@@ -6,33 +6,33 @@ import Category from '@src/category/Category';
 export default (session: ClientSession) => ({
   createTest: async () => {
     const [{ _id: parentCategoryId }] = await Category.insertMany(
-      [commonTestData.parentCategory],
+      [commonTestData.category2],
       { session },
     );
     await Category.insertMany([{
-      ...commonTestData.childCategory,
+      ...commonTestData.category3,
       parentCategory: parentCategoryId,
     }], { session });
 
     const childCategory = await Category
-      .findOne({ categoryNo: commonTestData.childCategory.categoryNo })
+      .findOne({ categoryNo: commonTestData.category3.categoryNo })
       .populate('parentCategory')
       .session(session)
       .exec();
     (childCategory !== null).should.be.true;
-    childCategory!.categoryNo.should.equal(commonTestData.childCategory.categoryNo);
-    childCategory!.name.should.equal(commonTestData.childCategory.name);
+    childCategory!.categoryNo.should.equal(commonTestData.category3.categoryNo);
+    childCategory!.name.should.equal(commonTestData.category3.name);
     const { parentCategory } = childCategory!;
     if (parentCategory instanceof Category) {
       parentCategory._id.equals(parentCategoryId).should.be.true;
-      parentCategory.name.should.equal(commonTestData.parentCategory.name);
+      parentCategory.name.should.equal(commonTestData.category2.name);
       (parentCategory.level !== null).should.be.true;
-      parentCategory.level!.should.equal(0);
+      parentCategory.level!.should.equal(commonTestData.category2.level);
     }
   },
 
   createWithDuplicatedCategoryNoTest: async () => {
-    const [category1] = await Category.insertMany([commonTestData.childCategory], { session });
+    const [category1] = await Category.insertMany([commonTestData.category3], { session });
     Category
       .insertMany([{
         categoryNo: category1.categoryNo,
@@ -46,12 +46,12 @@ export default (session: ClientSession) => ({
   },
 
   deleteTest: async () => {
-    await Category.insertMany([commonTestData.childCategory], { session });
+    await Category.insertMany([commonTestData.category3], { session });
     await Category
-      .deleteOne({ categoryNo: commonTestData.childCategory.categoryNo })
+      .deleteOne({ categoryNo: commonTestData.category3.categoryNo })
       .session(session);
     const results = await Category
-      .find({ categoryNo: commonTestData.childCategory.categoryNo })
+      .find({ categoryNo: commonTestData.category3.categoryNo })
       .session(session);
     results.should.have.length(0);
   },
