@@ -10,8 +10,8 @@ export interface CategoryDoc extends Document {
 export const categorySchema = new Schema({
   categoryNo: { type: Number, required: true, unique: true },
   parentCategory: { type: Schema.Types.ObjectId, ref: 'category', default: null },
-  name: { type: String, required: true },
-  level: { type: Number, required: true, default: 0 },
+  name: { type: String, required: true, unique: true },
+  level: { type: Number, default: 0 },
 });
 
 export default model<CategoryDoc>('category', categorySchema, 'categories');

@@ -66,6 +66,20 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
     logLevel: LogLevel.ERROR,
   },
+  CATEGORY_NOT_FOUND: {
+    code: 'CATEGORY_NOT_FOUND',
+    errorMessage: '존재하는 category가 아닙니다.',
+    loggingMessage: '{1}:{0} 정보로는 category를 찾을 수 없습니다.',
+    httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
+    logLevel: LogLevel.ERROR,
+  },
+  CATEGORY_WITH_CHILDREN_CANNOT_BE_DELETED: {
+    code: 'CATEGORY_WITH_CHILDREN_CANNOT_BE_DELETED',
+    errorMessage: '하위 카테고리가 있어 삭제가 불가능합니다.',
+    loggingMessage: '하위 카테고리가 있어 삭제가 불가능합니다. (하위 카테고리 리스트: {0})',
+    httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
+    logLevel: LogLevel.ERROR,
+  },
 };
 
 export { BlogErrorCodeFormat, BlogErrorCode };

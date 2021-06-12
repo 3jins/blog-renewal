@@ -37,9 +37,9 @@ export default class PostRepository {
   private getNextPostNo = async (session: ClientSession): Promise<number> => {
     const lastPost: PostDoc = await Post
       .findOne()
-      .sort({ sort: -1 })
+      .sort({ postNo: -1 })
       .session(session) as PostDoc;
-    return _.isEmpty(lastPost) ? 1 : lastPost.postNo;
+    return _.isEmpty(lastPost) ? 1 : lastPost.postNo + 1;
   };
 
   private getLatestVersionPost = async (session: ClientSession, title: string): Promise<PostDoc> => await Post
