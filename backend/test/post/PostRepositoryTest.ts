@@ -40,7 +40,7 @@ describe('PostRepository test', () => {
   });
 
   it('createPost', async () => {
-    const categories: CategoryDoc = (await Category.insertMany([commonTestData.childCategory], { session }))[0];
+    const categories: CategoryDoc = (await Category.insertMany([commonTestData.category3], { session }))[0];
     const tags: TagDoc[] = await Tag.insertMany([commonTestData.tag1], { session });
     const series: SeriesDoc = (await Series.insertMany([commonTestData.series], { session }))[0];
     const paramDto: CreatePostRepoParamDto = {
