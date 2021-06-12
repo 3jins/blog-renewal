@@ -20,22 +20,6 @@ export default class TagService {
     return this.tagRepository.findTag(repoParamDto);
   };
 
-  private addNameQueryToFindTagRepoParamDto = (repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void => {
-    const { name, isOnlyExactNameFound } = paramDto;
-    if (!_.isNil(name) && !_.isNil(isOnlyExactNameFound)) {
-      const findTagByNameDto: FindTagByNameDto = { name: name!, isOnlyExactNameFound: isOnlyExactNameFound! };
-      Object.assign(repoParamDto, { findTagByNameDto });
-    }
-  };
-
-  private addPostIdQueryToFindTagRepoParamDto = (repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void => {
-    const { postIdList, isAndCondition } = paramDto;
-    if (!_.isNil(postIdList) && !_.isNil(isAndCondition)) {
-      const findTagByPostIdDto: FindTagByPostIdDto = { postIdList: postIdList!, isAndCondition: isAndCondition! };
-      Object.assign(repoParamDto, { findTagByPostIdDto });
-    }
-  }
-
   public createTag = async (paramDto: CreateTagParamDto): Promise<void> => {
     const { postIdList } = paramDto;
     const postList: Types.ObjectId[] = _.isNil(postIdList) ? [] : postIdList.map((postId) => new Types.ObjectId(postId));
@@ -55,4 +39,20 @@ export default class TagService {
   };
 
   public deleteTag = async (paramDto: DeleteTagParamDto): Promise<void> => this.tagRepository.deleteTag({ ...paramDto });
+
+  private addNameQueryToFindTagRepoParamDto = (repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void => {
+    const { name, isOnlyExactNameFound } = paramDto;
+    if (!_.isNil(name) && !_.isNil(isOnlyExactNameFound)) {
+      const findTagByNameDto: FindTagByNameDto = { name: name!, isOnlyExactNameFound: isOnlyExactNameFound! };
+      Object.assign(repoParamDto, { findTagByNameDto });
+    }
+  };
+
+  private addPostIdQueryToFindTagRepoParamDto = (repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void => {
+    const { postIdList, isAndCondition } = paramDto;
+    if (!_.isNil(postIdList) && !_.isNil(isAndCondition)) {
+      const findTagByPostIdDto: FindTagByPostIdDto = { postIdList: postIdList!, isAndCondition: isAndCondition! };
+      Object.assign(repoParamDto, { findTagByPostIdDto });
+    }
+  };
 }
