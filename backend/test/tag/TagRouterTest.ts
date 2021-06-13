@@ -140,7 +140,7 @@ describe('Tag router test', () => {
 
   // eslint-disable-next-line mocha/no-setup-in-describe
   describe(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.TAG}`, () => {
-    it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.TAG}`, async () => {
+    it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - normal case`, async () => {
       const requestDto: UpdateTagRequestDto = {
         originalName: tagName,
         tagToBe: {
