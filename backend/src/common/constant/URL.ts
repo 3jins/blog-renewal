@@ -3,6 +3,7 @@ const PREFIX = {
 };
 
 const ENDPOINT = {
+  CATEGORY: '/category',
   IMAGE: '/image',
   POST: '/post',
   TAG: '/tag',
