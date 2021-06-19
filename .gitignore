@@ -9,6 +9,9 @@
 **/.nyc_output
 **/coverage
 
+# local
+/backend/appData
+
 # production
 /backend/build
 /frontend/build/bundle.js
