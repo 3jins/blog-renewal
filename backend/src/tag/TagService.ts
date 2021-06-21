@@ -13,46 +13,48 @@ export default class TagService {
   public constructor(private readonly tagRepository: TagRepository) {
   }
 
-  public findTag = async (paramDto: FindTagParamDto): Promise<TagDoc[]> => {
+  public async findTag(paramDto: FindTagParamDto): Promise<TagDoc[]> {
     const repoParamDto: FindTagRepoParamDto = {};
     this.addNameQueryToFindTagRepoParamDto(repoParamDto, paramDto);
     this.addPostIdQueryToFindTagRepoParamDto(repoParamDto, paramDto);
     return this.tagRepository.findTag(repoParamDto);
-  };
+  }
 
-  public createTag = async (paramDto: CreateTagParamDto): Promise<void> => {
+  public async createTag(paramDto: CreateTagParamDto): Promise<void> {
     const { postIdList } = paramDto;
     const postList: Types.ObjectId[] = _.isNil(postIdList) ? [] : postIdList.map((postId) => new Types.ObjectId(postId));
     return this.tagRepository.createTag({
       postList,
       ...paramDto,
     });
-  };
+  }
 
-  public updateTag = async (paramDto: UpdateTagParamDto): Promise<void> => {
+  public async updateTag(paramDto: UpdateTagParamDto): Promise<void> {
     if (_.isNil(paramDto.tagToBe) || _.isEmpty(_.values(paramDto.tagToBe))) {
       throw new BlogError(BlogErrorCode.PARAMETER_EMPTY);
     }
     return this.tagRepository.updateTag({
       ...paramDto,
     });
-  };
+  }
 
-  public deleteTag = async (paramDto: DeleteTagParamDto): Promise<void> => this.tagRepository.deleteTag({ ...paramDto });
+  public async deleteTag(paramDto: DeleteTagParamDto): Promise<void> {
+    return this.tagRepository.deleteTag({ ...paramDto });
+  }
 
-  private addNameQueryToFindTagRepoParamDto = (repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void => {
+  private addNameQueryToFindTagRepoParamDto(repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void {
     const { name, isOnlyExactNameFound } = paramDto;
     if (!_.isNil(name) && !_.isNil(isOnlyExactNameFound)) {
       const findTagByNameDto: FindTagByNameDto = { name: name!, isOnlyExactNameFound: isOnlyExactNameFound! };
       Object.assign(repoParamDto, { findTagByNameDto });
     }
-  };
+  }
 
-  private addPostIdQueryToFindTagRepoParamDto = (repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void => {
+  private addPostIdQueryToFindTagRepoParamDto(repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void {
     const { postIdList, isAndCondition } = paramDto;
     if (!_.isNil(postIdList) && !_.isNil(isAndCondition)) {
       const findTagByPostIdDto: FindTagByPostIdDto = { postIdList: postIdList!, isAndCondition: isAndCondition! };
       Object.assign(repoParamDto, { findTagByPostIdDto });
     }
-  };
+  }
 }

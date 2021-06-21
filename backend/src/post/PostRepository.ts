@@ -7,42 +7,52 @@ import _ from 'lodash';
 
 @Service()
 export default class PostRepository {
-  public createPost = (paramDto: CreatePostRepoParamDto) => useTransaction(async (session: ClientSession) => {
-    const postNo = await this.getNextPostNo(session);
-    await Post
-      .insertMany([{
-        ...paramDto,
-        postNo,
-        category: paramDto.categoryId,
-        tagList: paramDto.tagIdList,
-        series: paramDto.seriesId,
-        thumbnailImage: paramDto.thumbnailImageId,
-      }], { session });
-  });
+  public createPost(paramDto: CreatePostRepoParamDto) {
+    return useTransaction(async (session: ClientSession) => {
+      const postNo = await this.getNextPostNo(session);
+      await Post
+        .insertMany([{
+          ...paramDto,
+          postNo,
+          category: paramDto.categoryId,
+          tagList: paramDto.tagIdList,
+          series: paramDto.seriesId,
+          thumbnailImage: paramDto.thumbnailImageId,
+        }], { session });
+    });
+  }
 
-  public addPostVersion = (paramDto: CreatePostRepoParamDto) => useTransaction(async (session: ClientSession) => {
-    const { title } = paramDto;
-    const { _id: lastVersionPostId, postNo, commentCount } = await this.getLatestVersionPost(session, title);
-    await Post
-      .insertMany([{
-        ...paramDto,
+  public addPostVersion(paramDto: CreatePostRepoParamDto) {
+    return useTransaction(async (session: ClientSession) => {
+      const { title } = paramDto;
+      const {
+        _id: lastVersionPostId,
         postNo,
-        lastVersionPost: lastVersionPostId,
         commentCount,
-      }], { session });
-    await Post
-      .updateOne({ _id: lastVersionPostId }, { isLatestVersion: false }, { session });
-  });
+      } = await this.getLatestVersionPost(session, title);
+      await Post
+        .insertMany([{
+          ...paramDto,
+          postNo,
+          lastVersionPost: lastVersionPostId,
+          commentCount,
+        }], { session });
+      await Post
+        .updateOne({ _id: lastVersionPostId }, { isLatestVersion: false }, { session });
+    });
+  }
 
-  private getNextPostNo = async (session: ClientSession): Promise<number> => {
+  private async getNextPostNo(session: ClientSession): Promise<number> {
     const lastPost: PostDoc = await Post
       .findOne()
       .sort({ postNo: -1 })
       .session(session) as PostDoc;
     return _.isEmpty(lastPost) ? 1 : lastPost.postNo + 1;
-  };
+  }
 
-  private getLatestVersionPost = async (session: ClientSession, title: string): Promise<PostDoc> => await Post
-    .findOne({ title, isLatestVersion: true })
-    .session(session) as PostDoc;
+  private async getLatestVersionPost(session: ClientSession, title: string): Promise<PostDoc> {
+    return await Post
+      .findOne({ title, isLatestVersion: true })
+      .session(session) as PostDoc;
+  }
 }

@@ -8,7 +8,7 @@ export default class PostService {
   public constructor(private readonly postRepository: PostRepository) {
   }
 
-  public createPost = (paramDto: AddPostParamDto): void => {
+  public createPost(paramDto: AddPostParamDto): void {
     const { post } = paramDto;
     const rawContent: string = this.readPostContent(post.path);
     const renderedContent = this.renderContent(rawContent);
@@ -18,12 +18,14 @@ export default class PostService {
       rawContent,
       renderedContent,
     });
-  };
+  }
 
-  private readPostContent = (path: string): string => fs.readFileSync(path).toString();
+  private readPostContent(path: string): string {
+    return fs.readFileSync(path).toString();
+  }
 
-  private renderContent = (rawContent: string): string => {
+  private renderContent(rawContent: string): string {
     // TODO: 렌더링 로직 구현
     return rawContent;
-  };
+  }
 }

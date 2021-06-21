@@ -33,6 +33,7 @@
       }
     ],
     "no-underscore-dangle": "off",
+    "class-methods-use-this": "off",
     "import/prefer-default-export": "off",
     "import/extensions": [
       "error",
@@ -45,9 +46,21 @@
       }
     ],
     "mocha/no-mocha-arrows": "off",
+    "chai-friendly/no-unused-expressions": "error",
     "lines-between-class-members": "off",
     "object-curly-newline": "off",
-    "max-classes-per-file": "off"
+    "max-classes-per-file": "off",
+    "no-useless-constructor": "off",
+    "no-undef": "off",
+    "no-empty-function": [
+      "error",
+      {
+        "allow": [
+          "constructors"
+        ]
+      }
+    ],
+    "no-unused-expressions": "off"
   },
   "overrides": [
     {
@@ -61,19 +74,7 @@
           {
             "args": "none"
           }
-        ],
-        "no-useless-constructor": "off",
-        "no-undef": "off",
-        "no-empty-function": [
-          "error",
-          {
-            "allow": [
-              "constructors"
-            ]
-          }
-        ],
-        "no-unused-expressions": "off",
-        "chai-friendly/no-unused-expressions": "error"
+        ]
       }
     }
   ]

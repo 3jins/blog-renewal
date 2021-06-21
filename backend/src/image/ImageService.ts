@@ -15,13 +15,13 @@ export default class ImageService {
   public constructor(private readonly imageRepository: ImageRepository) {
   }
 
-  public uploadImage = (paramDto: UploadImageParamDto) => {
+  public uploadImage(paramDto: UploadImageParamDto) {
     const { files } = paramDto;
     this.moveImage(files);
     this.saveImage(files);
-  };
+  }
 
-  private moveImage = (files: Files): void => {
+  private moveImage(files: Files): void {
     const newPath: PathLike = `${config.get('path.appData')}${config.get('path.image')}`;
     _.keys(files).forEach((fileName) => {
       const { path: filePath } = files[fileName];
@@ -32,13 +32,13 @@ export default class ImageService {
         throw new BlogError(BlogErrorCode.FILE_CANNOT_BE_MOVED, [filePath, newFilePath]);
       }
     });
-  };
+  }
 
-  private saveImage = (files: Files): void => {
+  private saveImage(files: Files): void {
     const imageList: ImageDoc[] = _.keys(files).map((fileName) => {
       const file = files[fileName];
       return ({ title: file.name, createdDate: new Date(), size: file.size });
     });
     this.imageRepository.createImages(imageList);
-  };
+  }
 }
