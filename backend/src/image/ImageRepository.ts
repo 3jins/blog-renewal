@@ -8,12 +8,14 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
 @Service()
 export default class ImageRepository {
-  public createImages = (imageList: CreateQuery<ImageDoc>[]) => useTransaction(async (session: ClientSession) => {
-    await this.validateFileNameDuplication(imageList, session);
-    await Image.insertMany(imageList, { session });
-  });
+  public createImages(imageList: CreateQuery<ImageDoc>[]) {
+    return useTransaction(async (session: ClientSession) => {
+      await this.validateFileNameDuplication(imageList, session);
+      await Image.insertMany(imageList, { session });
+    });
+  }
 
-  private validateFileNameDuplication = async (imageList: CreateQuery<ImageDoc>[], session: ClientSession): Promise<void> => {
+  private async validateFileNameDuplication(imageList: CreateQuery<ImageDoc>[], session: ClientSession): Promise<void> {
     const imageListWithoutDuplication = _.uniq(imageList.map((image) => image.title));
     const isDuplicatedNameExistInImageParams = imageListWithoutDuplication.length !== imageList.length;
     const duplicatedNamedImageList = _.uniq(_.flatten(
@@ -28,5 +30,5 @@ export default class ImageRepository {
       ));
       throw new BlogError(BlogErrorCode.DUPLICATED_FILE_NAME, [duplicatedNameList.join(', ')]);
     }
-  };
+  }
 }
