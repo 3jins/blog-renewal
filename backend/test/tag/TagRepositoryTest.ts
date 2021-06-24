@@ -76,7 +76,8 @@ describe('TagRepository test', () => {
           isOnlyExactNameFound: true,
         },
       };
-      const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      // const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      const tags = await tagRepository.findTag(paramDto);
       tags.should.have.lengthOf(1);
       tags[0].name.should.equal(commonTestData.tag2.name);
     });
@@ -88,7 +89,8 @@ describe('TagRepository test', () => {
           isOnlyExactNameFound: false,
         },
       };
-      const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      // const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      const tags = await tagRepository.findTag(paramDto);
       tags.should.have.lengthOf(1);
       tags[0].name.should.equal(commonTestData.tag2.name);
     });
@@ -101,7 +103,8 @@ describe('TagRepository test', () => {
         },
       };
 
-      const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      // const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      const tags = await tagRepository.findTag(paramDto);
       tags.should.have.lengthOf(2);
       tags[0].name.should.equal(commonTestData.tag1.name);
       tags[1].name.should.equal(commonTestData.tag3.name);
@@ -114,7 +117,8 @@ describe('TagRepository test', () => {
           isAndCondition: false,
         },
       };
-      const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      // const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      const tags = await tagRepository.findTag(paramDto);
       tags.should.have.lengthOf(2);
       tags[0].name.should.equal(commonTestData.tag2.name);
       tags[1].name.should.equal(commonTestData.tag3.name);
@@ -131,13 +135,15 @@ describe('TagRepository test', () => {
           isOnlyExactNameFound: true,
         },
       };
-      const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      // const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      const tags = await tagRepository.findTag(paramDto);
       tags.should.have.lengthOf(1);
       tags[0].name.should.equal(commonTestData.tag3.name);
     });
 
     it('findTag - with empty parameter', async () => {
-      const tags: TagDoc[] = await tagRepository.findTag({});
+      // const tags: TagDoc[] = await tagRepository.findTag({});
+      const tags = await tagRepository.findTag({});
       tags.should.have.lengthOf(3);
     });
   });

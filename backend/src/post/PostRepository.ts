@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { ClientSession } from 'mongoose';
 import Post, { PostDoc } from '@src/post/Post';
-import { useTransaction } from '@src/common/mongodb/TransactionUtil';
+import { useTransaction } from '@src/common/mongodb/TransactionDecorator';
 import { CreatePostRepoParamDto } from '@src/post/PostDto';
 import _ from 'lodash';
 

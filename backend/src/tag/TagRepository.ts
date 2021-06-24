@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { ClientSession, FilterQuery } from 'mongoose';
 import Tag, { TagDoc } from '@src/tag/Tag';
-import { useTransaction } from '@src/common/mongodb/TransactionUtil';
+import { transactional, useTransaction } from '@src/common/mongodb/TransactionDecorator';
 import {
   CreateTagRepoParamDto,
   DeleteTagRepoParamDto,
@@ -17,8 +17,10 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
 @Service()
 export default class TagRepository {
-  public findTag(paramDto: FindTagRepoParamDto): Promise<TagDoc[]> {
-    return useTransaction(async (session: ClientSession) => {
+  // TODO: 콜백 형태로 넘기는 건 부자연스러움. 다른 방법도 모색해볼 것. 그리고 리턴타입 안 맞아서 테스트도 실패하는디...;;
+  @transactional()
+  public findTag(paramDto: FindTagRepoParamDto) {
+    return async (session: ClientSession): Promise<TagDoc[]> => {
       const {
         findTagByNameDto,
         findTagByPostIdDto,
@@ -32,7 +34,7 @@ export default class TagRepository {
         .lean();
 
       return this.filterTagByPostId(tagList, findTagByPostIdDto);
-    });
+    };
   }
 
   public createTag(paramDto: CreateTagRepoParamDto) {

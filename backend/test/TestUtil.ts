@@ -1,5 +1,5 @@
 import { ClientSession } from 'mongoose';
-import * as TransactionUtil from '@src/common/mongodb/TransactionUtil';
+import * as TransactionUtil from '@src/common/mongodb/TransactionDecorator';
 import BlogError from '@src/common/error/BlogError';
 
 export const replaceUseTransactionForTest = async (sandbox, session: ClientSession): Promise<any> => sandbox.replace(

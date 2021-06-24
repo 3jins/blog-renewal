@@ -1,7 +1,7 @@
 import { Service } from 'typedi';
 import { ClientSession, FilterQuery, Types } from 'mongoose';
 import Category, { CategoryDoc } from '@src/category/Category';
-import { useTransaction } from '@src/common/mongodb/TransactionUtil';
+import { useTransaction } from '@src/common/mongodb/TransactionDecorator';
 import {
   CategoryToBeRepoParamDto,
   CreateCategoryRepoParamDto,

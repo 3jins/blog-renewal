@@ -1,16 +1,37 @@
 import sinon from 'sinon';
 import { should } from 'chai';
+import { ClientSession } from 'mongodb';
 import * as DbConnectionUtil from '@src/common/mongodb/DbConnectionUtil';
-import { useTransaction } from '@src/common/mongodb/TransactionUtil';
+import { transactional } from '@src/common/mongodb/TransactionDecorator';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { ClientSessionForTest, ConnectionForTest } from '@test/common/mongodb/MongodbMock';
 import { errorShouldBeThrown } from '@test/TestUtil';
 import { blogErrorCode } from '@test/data/testData';
 
+class TransactionalTestingClass {
+  public expectedError: BlogError = new BlogError(blogErrorCode.TEST_ERROR);
+
+  @transactional()
+  public success(param): Function {
+    return async (session: ClientSession): Promise<Object> => ({ param, session });
+  }
+
+  @transactional()
+  public failWithBlogError(): Function {
+    throw this.expectedError;
+  }
+
+  @transactional()
+  public failWithNormalError(): Function {
+    throw new Error(blogErrorCode.TEST_ERROR.errorMessage);
+  }
+}
+
 describe('TransactionUtil Test', () => {
   let sandbox;
   let clientSessionSpy;
+  const transactionalTestingInstance = new TransactionalTestingClass();
 
   before(() => {
     should();
@@ -29,22 +50,19 @@ describe('TransactionUtil Test', () => {
   });
 
   it('Transaction commit ok', async () => {
-    const successText = '^_______^';
-    const result = await useTransaction(async () => successText);
+    const successText: string = '^_______^';
+    const result = await transactionalTestingInstance.success(successText);
 
     clientSessionSpy.startTransaction.calledOnce.should.be.true;
     clientSessionSpy.commitTransaction.calledOnce.should.be.true;
     clientSessionSpy.endSession.calledOnce.should.be.true;
-    result.should.equal(successText);
+    result.should.deep.equal({ param: successText, session: clientSessionSpy });
   });
 
   it('Transaction rollback by a predicted error', async () => {
-    const expectedError = new BlogError(blogErrorCode.TEST_ERROR);
     await errorShouldBeThrown(
-      expectedError,
-      () => useTransaction(async () => {
-        throw expectedError;
-      }),
+      transactionalTestingInstance.expectedError,
+      () => transactionalTestingInstance.failWithBlogError(),
     );
 
     clientSessionSpy.startTransaction.calledOnce.should.be.true;
@@ -55,9 +73,7 @@ describe('TransactionUtil Test', () => {
   it('Transaction rollback by an unexpected error', async () => {
     await errorShouldBeThrown(
       new BlogError(BlogErrorCode.TRANSACTION_FAILED, [blogErrorCode.TEST_ERROR.errorMessage]),
-      () => useTransaction(async () => {
-        throw new Error(blogErrorCode.TEST_ERROR.errorMessage);
-      }),
+      () => transactionalTestingInstance.failWithNormalError(),
     );
 
     clientSessionSpy.startTransaction.calledOnce.should.be.true;
