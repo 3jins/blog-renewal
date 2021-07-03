@@ -22,7 +22,8 @@ export interface CreateTagRepoParamDto {
 
 export interface TagToBeRepoParamDto {
   name?: string;
-  postList?: string[];
+  postIdToBeAddedList: string[];
+  postIdToBeRemovedList: string[];
 }
 
 export interface UpdateTagRepoParamDto {

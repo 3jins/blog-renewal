@@ -100,6 +100,18 @@ describe('TagService test', () => {
       repoParamDto.name.should.equal(tagName);
       repoParamDto.postList.should.deep.equal(postList);
     });
+
+    it('tag create test - without postIdList', async () => {
+      const paramDto: CreateTagParamDto = {
+        name: tagName,
+      };
+      await tagService.createTag(paramDto);
+
+      verify(tagRepository.createTag(deepEqual<CreateTagRepoParamDto>({
+        name: tagName,
+        postList: [],
+      })));
+    });
   });
 
   describe('updateTag test', () => {
@@ -108,12 +120,20 @@ describe('TagService test', () => {
         originalName: tagName,
         tagToBe: {
           name: '돈 명예 평화 야\'망 사\'랑 또 뭐가 있더라',
-          postIdList,
+          postIdToBeAddedList: postIdList.splice(0, 2),
+          postIdToBeRemovedList: postIdList.splice(2, 1),
         },
       };
       await tagService.updateTag(paramDto);
 
-      const repoParamDto: UpdateTagRepoParamDto = { ...paramDto };
+      const repoParamDto: UpdateTagRepoParamDto = {
+        ...paramDto,
+        tagToBe: {
+          ...paramDto.tagToBe,
+          postIdToBeAddedList: paramDto.tagToBe.postIdToBeAddedList!,
+          postIdToBeRemovedList: paramDto.tagToBe.postIdToBeRemovedList!,
+        },
+      };
       verify(tagRepository.updateTag(deepEqual(repoParamDto))).once();
     });
 
@@ -127,6 +147,25 @@ describe('TagService test', () => {
         async (_paramDto) => tagService.updateTag(_paramDto),
         paramDto,
       );
+    });
+
+    it('tag update test - without postIdToBeAddedList and postIdToBeRemovedList', async () => {
+      const paramDto: UpdateTagParamDto = {
+        originalName: tagName,
+        tagToBe: {
+          name: commonTestData.simpleText,
+        },
+      };
+
+      await tagService.updateTag(paramDto);
+      verify(tagRepository.updateTag(deepEqual({
+        originalName: tagName,
+        tagToBe: {
+          name: commonTestData.simpleText,
+          postIdToBeAddedList: [],
+          postIdToBeRemovedList: [],
+        },
+      })));
     });
   });
 
