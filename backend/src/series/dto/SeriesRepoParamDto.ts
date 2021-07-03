@@ -16,8 +16,8 @@ export interface SeriesToBeRepoParamDto {
   name?: string;
   thumbnailContent?: string;
   thumbnailImage?: string;
-  postIdToBeAddedList: string[]; // TODO: service에서 디폴트로 [] 넣는지 테스트할 것
-  postIdToBeRemovedList: string[]; // TODO: service에서 디폴트로 [] 넣는지 테스트할 것
+  postIdToBeAddedList: string[];
+  postIdToBeRemovedList: string[];
 }
 
 export interface UpdateSeriesRepoParamDto {
