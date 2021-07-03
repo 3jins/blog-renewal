@@ -291,7 +291,7 @@ describe('TagRepository test', () => {
       post3!.tagList!.should.deep.equal([tagIdList[1], tagIdList[0]]);
     });
 
-    it('updateTag - with empty parameter', async () => {
+    it('updateTag - with empty parameter: no change', async () => {
       const paramDto: UpdateTagRepoParamDto = {
         originalName: commonTestData.tag2.name,
         tagToBe: {},

@@ -80,6 +80,20 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
     logLevel: LogLevel.ERROR,
   },
+  ALREADY_BELONG_TO_ANOTHER_SERIES: {
+    code: 'ALREADY_BELONG_TO_ANOTHER_SERIES',
+    errorMessage: '이미 다른 시리즈에 포함된 게시물이 있습니다.',
+    loggingMessage: '이미 다른 시리즈에 포함된 게시물이 있습니다. (postNo: {0}, seriesId: {1})',
+    httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
+    logLevel: LogLevel.ERROR,
+  },
+  SERIES_NOT_FOUND: {
+    code: 'SERIES_NOT_FOUND',
+    errorMessage: '존재하는 series가 아닙니다.',
+    loggingMessage: '{1}:{0} 정보로는 series를 찾을 수 없습니다.',
+    httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
+    logLevel: LogLevel.ERROR,
+  },
 };
 
 export { BlogErrorCodeFormat, BlogErrorCode };
