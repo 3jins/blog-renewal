@@ -7,12 +7,13 @@ export interface FindTagParamDto {
 
 export interface CreateTagParamDto {
   name: string;
-  postIdList: string[];
+  postIdList?: string[];
 }
 
 export interface TagToBeParamDto {
   name?: string;
-  postIdList?: string[];
+  postIdToBeAddedList?: string[];
+  postIdToBeRemovedList?: string[];
 }
 
 export interface UpdateTagParamDto {

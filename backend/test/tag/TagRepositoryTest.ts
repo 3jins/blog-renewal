@@ -3,7 +3,7 @@ import { should } from 'chai';
 import sinon from 'sinon';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
-import { abortTestTransaction, replaceUseTransactionForTest } from '@test/TestUtil';
+import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
 import TagRepository from '@src/tag/TagRepository';
 import {
   CreateTagRepoParamDto,
@@ -13,6 +13,8 @@ import {
 } from '@src/tag/dto/TagRepoParamDto';
 import Tag, { TagDoc } from '@src/tag/Tag';
 import Post, { PostDoc } from '@src/post/Post';
+import BlogError from '@src/common/error/BlogError';
+import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
 describe('TagRepository test', () => {
   let sandbox;
@@ -233,6 +235,8 @@ describe('TagRepository test', () => {
         originalName: commonTestData.tag1.name,
         tagToBe: {
           name: commonTestData.tag3.name,
+          postIdToBeAddedList: [],
+          postIdToBeRemovedList: [],
         },
       };
 
@@ -246,7 +250,8 @@ describe('TagRepository test', () => {
       const paramDto: UpdateTagRepoParamDto = {
         originalName: commonTestData.tag1.name,
         tagToBe: {
-          postList: [postIdList[1], postIdList[2]],
+          postIdToBeAddedList: [postIdList[2]],
+          postIdToBeRemovedList: [postIdList[0]],
         },
       };
 
@@ -271,7 +276,8 @@ describe('TagRepository test', () => {
         originalName: commonTestData.tag1.name,
         tagToBe: {
           name: commonTestData.tag3.name,
-          postList: [postIdList[1], postIdList[2]],
+          postIdToBeAddedList: [postIdList[2]],
+          postIdToBeRemovedList: [postIdList[0]],
         },
       };
 
@@ -294,7 +300,10 @@ describe('TagRepository test', () => {
     it('updateTag - with empty parameter: no change', async () => {
       const paramDto: UpdateTagRepoParamDto = {
         originalName: commonTestData.tag2.name,
-        tagToBe: {},
+        tagToBe: {
+          postIdToBeAddedList: [],
+          postIdToBeRemovedList: [],
+        },
       };
       await tagRepository.updateTag(paramDto);
       const tag1: (TagDoc | null) = await Tag.findOne({ name: commonTestData.tag1.name }).session(session).lean();
@@ -303,6 +312,24 @@ describe('TagRepository test', () => {
       (tag1 !== null).should.be.true;
       (tag2 !== null).should.be.true;
       (tag3 === null).should.be.true;
+    });
+
+    it('updateTag - with inexistent tag name', async () => {
+      const inexistentName = 'Oh yeah oh shit 이런 건 처음 들어';
+      const paramDto: UpdateTagRepoParamDto = {
+        originalName: inexistentName,
+        tagToBe: {
+          name: '쿵쿵쿵 옆집 사람들은 날 싫어해',
+          postIdToBeAddedList: [],
+          postIdToBeRemovedList: [],
+        },
+      };
+
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.TAG_NOT_FOUND, [inexistentName, 'name']),
+        async (_paramDto) => tagRepository.updateTag(_paramDto),
+        paramDto,
+      );
     });
   });
 

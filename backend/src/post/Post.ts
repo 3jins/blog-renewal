@@ -3,16 +3,16 @@ import Language from '@src/common/constant/Language';
 
 export interface PostDoc extends Document {
   postNo: number;
-  category?: Schema.Types.ObjectId;
-  tagList?: Array<Schema.Types.ObjectId>;
+  category?: string;
+  tagList?: string[];
   series?: string | null;
-  lastVersionPost?: Schema.Types.ObjectId;
+  lastVersionPost?: string;
   title: string;
   rawContent: string;
   renderedContent: string;
   language: Language;
   thumbnailContent: string;
-  thumbnailImage?: Schema.Types.ObjectId;
+  thumbnailImage?: string;
   createdDate?: Date;
   isLatestVersion?: boolean;
   isDeleted?: boolean;

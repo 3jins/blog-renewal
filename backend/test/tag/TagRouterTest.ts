@@ -94,7 +94,7 @@ describe('Tag router test', () => {
   // eslint-disable-next-line mocha/no-setup-in-describe
   describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.TAG}`, () => {
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - normal case`, async () => {
-      const requestDto: CreateTagRequestDto = { name: tagName, postIdList };
+      const requestDto: CreateTagRequestDto = { name: tagName };
       const paramDto: CreateTagParamDto = { ...requestDto };
 
       when(tagService.createTag(anything()))
@@ -104,7 +104,7 @@ describe('Tag router test', () => {
         .post(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`)
         .send(requestDto)
         .expect(201);
-      verify(tagService.createTag(deepEqual<CreateTagRequestDto>(paramDto))).once();
+      verify(tagService.createTag(deepEqual<CreateTagParamDto>(paramDto))).once();
     });
 
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - parameter error(key)`, async () => {
@@ -145,7 +145,8 @@ describe('Tag router test', () => {
         originalName: tagName,
         tagToBe: {
           name: '돈 명예 평화 야\'망 사\'랑 또 뭐가 있더라',
-          postIdList,
+          postIdToBeAddedList: postIdList.splice(0, 2),
+          postIdToBeRemovedList: postIdList.splice(2, 1),
         },
       };
       const paramDto: UpdateTagParamDto = { ...requestDto };

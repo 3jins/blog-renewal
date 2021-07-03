@@ -57,41 +57,34 @@ export default class TagRepository {
   public updateTag(paramDto: UpdateTagRepoParamDto) {
     return useTransaction(async (session: ClientSession) => {
       const { originalName, tagToBe } = paramDto;
-
-      // Get original postList
-      const tag: (TagDoc | null) = await Tag
-        .findOne({ name: originalName }, { postList: true }, { session })
-        .lean();
-      if (tag === null) {
-        throw new BlogError(BlogErrorCode.TAG_NOT_FOUND, [originalName]);
-      }
-      const { postList: postListToBe } = tagToBe;
-      const postListAsIs = tag.postList.map((post) => post.toString());
+      const { postIdToBeAddedList, postIdToBeRemovedList } = tagToBe;
+      const { _id: tagId }: TagDoc = await this.getTagByName(session, originalName);
 
       // Update tag
       await Tag
-        .updateOne({ name: originalName }, { ...tagToBe }).session(session);
+        .bulkWrite([{
+          updateOne: {
+            filter: { _id: tagId },
+            update: { ...tagToBe, $push: { postList: { $each: postIdToBeAddedList } } },
+          },
+        }, {
+          updateOne: {
+            filter: { _id: tagId },
+            update: { $pullAll: { postList: postIdToBeRemovedList } },
+          },
+        }], { session });
 
-      // Remove the tag from posts
-      const postToBeRemovedList = _.difference(postListAsIs, postListToBe);
+      // Update the tag field from posts
       await Post
-        .updateMany({ _id: { $in: postToBeRemovedList } }, { $pull: { tagList: tag._id } }, { session });
-
-      // Add the tag from posts
-      const postToBeAddedList = _.difference(postListToBe, postListAsIs);
+        .updateMany({ _id: { $in: postIdToBeRemovedList } }, { $pull: { tagList: tagId } }, { session });
       await Post
-        .updateMany({ _id: { $in: postToBeAddedList } }, { $push: { tagList: tag._id } }, { session });
+        .updateMany({ _id: { $in: postIdToBeAddedList } }, { $push: { tagList: tagId } }, { session });
     });
   }
 
   public deleteTag(paramDto: DeleteTagRepoParamDto) {
     return useTransaction(async (session: ClientSession) => {
-      // Get original postList
-      const tag: (TagDoc | null) = await Tag
-        .findOne(paramDto, { postList: true }, { session }).lean();
-      if (tag === null) {
-        throw new BlogError(BlogErrorCode.TAG_NOT_FOUND, [paramDto.name]);
-      }
+      const tag: TagDoc = await this.getTagByName(session, paramDto.name);
 
       // Delete tag
       await Tag
@@ -126,5 +119,14 @@ export default class TagRepository {
         : postIdList
           .reduce((globalResult, postId) => globalResult || (tag.postList as PostDoc[])
             .reduce((result, post) => result || postId === post._id.toString(), false), false)));
+  }
+
+  private async getTagByName(session: ClientSession, name: string): Promise<TagDoc> {
+    const tag: (TagDoc | null) = await Tag
+      .findOne({ name }, { _id: true, postList: true }, { session });
+    if (_.isEmpty(tag)) {
+      throw new BlogError(BlogErrorCode.TAG_NOT_FOUND, [name, 'name']);
+    }
+    return tag!;
   }
 }

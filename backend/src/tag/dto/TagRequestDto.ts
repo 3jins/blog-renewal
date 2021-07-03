@@ -9,12 +9,13 @@ export interface FindTagRequestDto {
 
 export interface CreateTagRequestDto {
   name: string;
-  postIdList: string[];
+  postIdList?: string[];
 }
 
 export interface TagToBeRequestDto {
   name?: string;
-  postIdList?: string[];
+  postIdToBeAddedList?: string[];
+  postIdToBeRemovedList?: string[];
 }
 
 export interface UpdateTagRequestDto {
@@ -42,9 +43,9 @@ export const CreateTagRequestSchema: JSONSchemaType<CreateTagRequestDto> = {
   additionalProperties: false,
   properties: {
     name: { type: 'string', nullable: false },
-    postIdList: { type: 'array', nullable: false, items: { type: 'string' } },
+    postIdList: { type: 'array', nullable: true, items: { type: 'string' } },
   },
-  required: ['name', 'postIdList'],
+  required: ['name'],
 };
 
 export const UpdateTagRequestSchema: JSONSchemaType<UpdateTagRequestDto> = {
@@ -56,7 +57,8 @@ export const UpdateTagRequestSchema: JSONSchemaType<UpdateTagRequestDto> = {
       type: 'object',
       properties: {
         name: { type: 'string', nullable: true },
-        postIdList: { type: 'array', nullable: true, items: { type: 'string' } },
+        postIdToBeAddedList: { type: 'array', nullable: true, items: { type: 'string' } },
+        postIdToBeRemovedList: { type: 'array', nullable: true, items: { type: 'string' } },
       },
       nullable: false,
     },

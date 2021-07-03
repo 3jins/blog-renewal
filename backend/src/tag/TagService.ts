@@ -2,7 +2,12 @@ import _ from 'lodash';
 import { Service } from 'typedi';
 import { Types } from 'mongoose';
 import { CreateTagParamDto, DeleteTagParamDto, FindTagParamDto, UpdateTagParamDto } from '@src/tag/dto/TagParamDto';
-import { FindTagByNameDto, FindTagByPostIdDto, FindTagRepoParamDto } from '@src/tag/dto/TagRepoParamDto';
+import {
+  FindTagByNameDto,
+  FindTagByPostIdDto,
+  FindTagRepoParamDto,
+  UpdateTagRepoParamDto,
+} from '@src/tag/dto/TagRepoParamDto';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
 import TagRepository from '@src/tag/TagRepository';
@@ -22,7 +27,9 @@ export default class TagService {
 
   public async createTag(paramDto: CreateTagParamDto): Promise<void> {
     const { postIdList } = paramDto;
-    const postList: Types.ObjectId[] = _.isNil(postIdList) ? [] : postIdList.map((postId) => new Types.ObjectId(postId));
+    const postList: Types.ObjectId[] = _.isNil(postIdList)
+      ? []
+      : postIdList!.map((postId) => new Types.ObjectId(postId));
     return this.tagRepository.createTag({
       postList,
       ...paramDto,
@@ -33,9 +40,7 @@ export default class TagService {
     if (_.isNil(paramDto.tagToBe) || _.isEmpty(_.values(paramDto.tagToBe))) {
       throw new BlogError(BlogErrorCode.PARAMETER_EMPTY);
     }
-    return this.tagRepository.updateTag({
-      ...paramDto,
-    });
+    return this.tagRepository.updateTag(this.makeUpdateTagRepoParamDto(paramDto));
   }
 
   public async deleteTag(paramDto: DeleteTagParamDto): Promise<void> {
@@ -56,5 +61,20 @@ export default class TagService {
       const findTagByPostIdDto: FindTagByPostIdDto = { postIdList: postIdList!, isAndCondition: isAndCondition! };
       Object.assign(repoParamDto, { findTagByPostIdDto });
     }
+  }
+
+  private makeUpdateTagRepoParamDto(paramDto: UpdateTagParamDto): UpdateTagRepoParamDto {
+    const { originalName, tagToBe } = paramDto;
+    const { postIdToBeAddedList, postIdToBeRemovedList } = tagToBe;
+
+    _.isNil({});
+    return {
+      originalName,
+      tagToBe: {
+        ...tagToBe,
+        postIdToBeAddedList: _.isNil(postIdToBeAddedList) ? [] : postIdToBeAddedList!,
+        postIdToBeRemovedList: _.isNil(postIdToBeRemovedList) ? [] : postIdToBeRemovedList!,
+      },
+    };
   }
 }
