@@ -71,9 +71,15 @@ export const common = {
     name: '넹비ㅓ',
     postList: [],
   },
-  series: {
+  series1: {
     name: '심슨가족이다, 그지 깽깽이들아!',
-    detail: '심슨가족 짤방들에 얽힌 이야기들',
+    thumbnailContent: '심슨가족 짤방들에 얽힌 이야기들',
+    postList: [],
+  },
+  series2: {
+    name: '네이버 취업기',
+    thumbnailContent: '내 워라밸을 망치러 온 나의 구원자',
+    postList: [],
   },
   gifImage: {
     title: 'iu-clap.gif',

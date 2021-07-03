@@ -5,7 +5,7 @@ export interface PostDoc extends Document {
   postNo: number;
   category?: Schema.Types.ObjectId;
   tagList?: Array<Schema.Types.ObjectId>;
-  series?: Schema.Types.ObjectId;
+  series?: string | null;
   lastVersionPost?: Schema.Types.ObjectId;
   title: string;
   rawContent: string;

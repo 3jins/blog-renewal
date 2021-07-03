@@ -2,7 +2,7 @@ import { Document, model, Schema } from 'mongoose';
 
 export interface TagDoc extends Document {
   name: string;
-  postList: Array<string>;
+  postList: string[];
 }
 
 export const tagSchema = new Schema({
