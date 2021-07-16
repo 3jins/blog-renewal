@@ -23,12 +23,12 @@ export default class SeriesService {
   }
 
   public async createSeries(paramDto: CreateSeriesParamDto): Promise<void> {
-    const { postIdList } = paramDto;
-    const postList: Types.ObjectId[] = _.isNil(postIdList)
+    const { postMetaIdList } = paramDto;
+    const postMetaList: Types.ObjectId[] = _.isNil(postMetaIdList)
       ? []
-      : postIdList!.map((postId) => new Types.ObjectId(postId));
+      : postMetaIdList!.map((postMetaId) => new Types.ObjectId(postMetaId));
     return this.seriesRepository.createSeries({
-      postList,
+      postMetaList,
       ...paramDto,
     });
   }
@@ -46,15 +46,15 @@ export default class SeriesService {
 
   private makeUpdateSeriesRepoParamDto(paramDto: UpdateSeriesParamDto): UpdateSeriesRepoParamDto {
     const { originalName, seriesToBe } = paramDto;
-    const { postIdToBeAddedList, postIdToBeRemovedList } = seriesToBe;
+    const { postMetaIdToBeAddedList, postMetaIdToBeRemovedList } = seriesToBe;
 
     _.isNil({});
     return {
       originalName,
       seriesToBe: {
         ...seriesToBe,
-        postIdToBeAddedList: _.isNil(postIdToBeAddedList) ? [] : postIdToBeAddedList!,
-        postIdToBeRemovedList: _.isNil(postIdToBeRemovedList) ? [] : postIdToBeRemovedList!,
+        postMetaIdToBeAddedList: _.isNil(postMetaIdToBeAddedList) ? [] : postMetaIdToBeAddedList!,
+        postMetaIdToBeRemovedList: _.isNil(postMetaIdToBeRemovedList) ? [] : postMetaIdToBeRemovedList!,
       },
     };
   }

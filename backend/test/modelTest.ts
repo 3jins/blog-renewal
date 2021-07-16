@@ -4,7 +4,7 @@ import { ClientSession, Connection } from 'mongoose';
 import MemberTest from './member/MemberTest';
 import CategoryTest from './category/CategoryTest';
 import TagTest from './tag/TagTest';
-import PostTest from './post/PostTest';
+// import PostTest from './post/PostTest';
 import CommentTest from './comment/CommentTest';
 
 /**
@@ -43,11 +43,11 @@ describe('model test', () => {
   });
 
   describe('tag test', () => {
-    it('create test', () => TagTest(session).updateTest());
+    it('update test', () => TagTest(session).updateTest());
   });
 
   describe('post test', () => {
-    it('create test', () => PostTest(session).createTest());
+    // it('create test', () => PostTest(session).createTest());
   });
 
   describe('comment test', () => {

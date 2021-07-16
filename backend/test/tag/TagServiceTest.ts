@@ -18,17 +18,17 @@ import { errorShouldBeThrown } from '@test/TestUtil';
 describe('TagService test', () => {
   let tagService: TagService;
   let tagRepository: TagRepository;
-  let postList: Types.ObjectId[];
+  let postMetaList: Types.ObjectId[];
 
   const {
     tag2: { name: tagName },
-    objectIdList: postIdList,
+    objectIdList: postMetaIdList,
   } = commonTestData;
 
   before(() => {
     tagRepository = spy(mock(TagRepository));
     tagService = new TagService(instance(tagRepository));
-    postList = postIdList.map((postId) => new Types.ObjectId(postId));
+    postMetaList = postMetaIdList.map((postMetaId) => new Types.ObjectId(postMetaId));
     should();
   });
 
@@ -53,15 +53,15 @@ describe('TagService test', () => {
       }))).once();
     });
 
-    it('findTag - by postIdList only', () => {
-      const postIdListOnlyParamDto: FindTagParamDto = {
-        postIdList,
+    it('findTag - by postMetaIdList only', () => {
+      const postMetaIdListOnlyParamDto: FindTagParamDto = {
+        postMetaIdList,
         isAndCondition: true,
       };
-      tagService.findTag(postIdListOnlyParamDto);
+      tagService.findTag(postMetaIdListOnlyParamDto);
       verify(tagRepository.findTag(deepEqual<FindTagRepoParamDto>({
-        findTagByPostIdDto: {
-          postIdList,
+        findTagByPostMetaIdDto: {
+          postMetaIdList,
           isAndCondition: true,
         },
       }))).once();
@@ -71,7 +71,7 @@ describe('TagService test', () => {
       const fullParamDto: FindTagParamDto = {
         name: tagName,
         isOnlyExactNameFound: true,
-        postIdList,
+        postMetaIdList,
         isAndCondition: true,
       };
       tagService.findTag(fullParamDto);
@@ -80,8 +80,8 @@ describe('TagService test', () => {
           name: tagName,
           isOnlyExactNameFound: true,
         },
-        findTagByPostIdDto: {
-          postIdList,
+        findTagByPostMetaIdDto: {
+          postMetaIdList,
           isAndCondition: true,
         },
       }))).once();
@@ -92,16 +92,16 @@ describe('TagService test', () => {
     it('tag create test', async () => {
       const paramDto: CreateTagParamDto = {
         name: tagName,
-        postIdList,
+        postMetaIdList,
       };
       await tagService.createTag(paramDto);
 
       const [repoParamDto] = capture<CreateTagRepoParamDto>(tagRepository.createTag).last();
       repoParamDto.name.should.equal(tagName);
-      repoParamDto.postList.should.deep.equal(postList);
+      repoParamDto.postMetaList.should.deep.equal(postMetaList);
     });
 
-    it('tag create test - without postIdList', async () => {
+    it('tag create test - without postMetaIdList', async () => {
       const paramDto: CreateTagParamDto = {
         name: tagName,
       };
@@ -109,7 +109,7 @@ describe('TagService test', () => {
 
       verify(tagRepository.createTag(deepEqual<CreateTagRepoParamDto>({
         name: tagName,
-        postList: [],
+        postMetaList: [],
       })));
     });
   });
@@ -120,8 +120,8 @@ describe('TagService test', () => {
         originalName: tagName,
         tagToBe: {
           name: '돈 명예 평화 야\'망 사\'랑 또 뭐가 있더라',
-          postIdToBeAddedList: postIdList.splice(0, 2),
-          postIdToBeRemovedList: postIdList.splice(2, 1),
+          postMetaIdToBeAddedList: postMetaIdList.splice(0, 2),
+          postMetaIdToBeRemovedList: postMetaIdList.splice(2, 1),
         },
       };
       await tagService.updateTag(paramDto);
@@ -130,8 +130,8 @@ describe('TagService test', () => {
         ...paramDto,
         tagToBe: {
           ...paramDto.tagToBe,
-          postIdToBeAddedList: paramDto.tagToBe.postIdToBeAddedList!,
-          postIdToBeRemovedList: paramDto.tagToBe.postIdToBeRemovedList!,
+          postMetaIdToBeAddedList: paramDto.tagToBe.postMetaIdToBeAddedList!,
+          postMetaIdToBeRemovedList: paramDto.tagToBe.postMetaIdToBeRemovedList!,
         },
       };
       verify(tagRepository.updateTag(deepEqual(repoParamDto))).once();
@@ -149,7 +149,7 @@ describe('TagService test', () => {
       );
     });
 
-    it('tag update test - without postIdToBeAddedList and postIdToBeRemovedList', async () => {
+    it('tag update test - without postMetaIdToBeAddedList and postMetaIdToBeRemovedList', async () => {
       const paramDto: UpdateTagParamDto = {
         originalName: tagName,
         tagToBe: {
@@ -162,8 +162,8 @@ describe('TagService test', () => {
         originalName: tagName,
         tagToBe: {
           name: commonTestData.simpleText,
-          postIdToBeAddedList: [],
-          postIdToBeRemovedList: [],
+          postMetaIdToBeAddedList: [],
+          postMetaIdToBeRemovedList: [],
         },
       })));
     });

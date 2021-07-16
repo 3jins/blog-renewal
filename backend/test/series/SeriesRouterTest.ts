@@ -26,7 +26,7 @@ describe('Series router test', () => {
   let server: Server;
   let request: supertest.SuperTest<supertest.Test>;
 
-  const { series2: { name: seriesName, thumbnailContent }, postIdList } = commonTestData;
+  const { series2: { name: seriesName, thumbnailContent }, postMetaIdList } = commonTestData;
 
   before(() => {
     should();
@@ -90,7 +90,7 @@ describe('Series router test', () => {
   // eslint-disable-next-line mocha/no-setup-in-describe
   describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`, () => {
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.SERIES} - normal case`, async () => {
-      const requestDto: CreateSeriesRequestDto = { name: seriesName, thumbnailContent, postIdList };
+      const requestDto: CreateSeriesRequestDto = { name: seriesName, thumbnailContent, postMetaIdList: postMetaIdList };
       const paramDto: CreateSeriesParamDto = { ...requestDto };
 
       when(seriesService.createSeries(anything()))
@@ -121,7 +121,7 @@ describe('Series router test', () => {
     });
 
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.SERIES} - parameter error(type of value)`, async () => {
-      const typeDistortedRequestDto = { name: seriesName, postIdList: true };
+      const typeDistortedRequestDto = { name: seriesName, postMetaIdList: true };
 
       await request
         .post(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`)
@@ -141,8 +141,8 @@ describe('Series router test', () => {
         originalName: seriesName,
         seriesToBe: {
           name: '돈 명예 평화 야\'망 사\'랑 또 뭐가 있더라',
-          postIdToBeAddedList: postIdList.slice(0, 2),
-          postIdToBeRemovedList: postIdList.slice(2, 1),
+          postMetaIdToBeAddedList: postMetaIdList.slice(0, 2),
+          postMetaIdToBeRemovedList: postMetaIdList.slice(2, 1),
         },
       };
       const paramDto: UpdateSeriesParamDto = { ...requestDto };
@@ -175,7 +175,7 @@ describe('Series router test', () => {
     });
 
     it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.SERIES} - parameter error(type of value)`, async () => {
-      const typeDistortedRequestDto = { name: seriesName, postIdList: [true, false] };
+      const typeDistortedRequestDto = { name: seriesName, postMetaIdList: [true, false] };
 
       await request
         .patch(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`)

@@ -2,7 +2,7 @@ import { ClientSession, Schema } from 'mongoose';
 import { common as commonTestData } from '@test/data/testData';
 import Comment, { CommentDoc } from '@src/comment/Comment';
 import Member from '@src/member/Member';
-import Post from '@src/post/Post';
+import Post from '@src/post/model/Post';
 
 const createComments = async (postId: Schema.Types.ObjectId, session: ClientSession): Promise<Array<CommentDoc>> => {
   const [masterMember, guestMember1, guestMember2] = await Member.insertMany(
@@ -41,7 +41,10 @@ const createComments = async (postId: Schema.Types.ObjectId, session: ClientSess
 export default (session: ClientSession) => ({
   createTest: async () => {
     const littleBitAgo = Date.now();
-    const [{ _id: postId }] = await Post.insertMany([commonTestData.post1], { session });
+    const [{ _id: postId }] = await Post.insertMany([{
+      ...commonTestData.post1,
+      createdDate: Date.now(),
+    }], { session });
     await createComments(postId, session);
 
     const comments = await Comment

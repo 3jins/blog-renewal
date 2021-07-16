@@ -23,7 +23,7 @@ import { Types } from 'mongoose';
 describe('SeriesService test', () => {
   let seriesService: SeriesService;
   let seriesRepository: SeriesRepository;
-  let postList: string[];
+  let postMetaList: string[];
   let gifImageId: string;
 
   const {
@@ -34,7 +34,7 @@ describe('SeriesService test', () => {
   before(() => {
     seriesRepository = spy(mock(SeriesRepository));
     seriesService = new SeriesService(instance(seriesRepository));
-    postList = objectIdList.slice(0, 2);
+    postMetaList = objectIdList.slice(0, 2);
     [, , gifImageId] = objectIdList;
     should();
   });
@@ -65,13 +65,13 @@ describe('SeriesService test', () => {
         name: seriesName,
         thumbnailContent,
         thumbnailImage: gifImageId,
-        postIdList: postList,
+        postMetaIdList: postMetaList,
       };
       await seriesService.createSeries(paramDto);
 
       const [repoParamDto] = capture<CreateSeriesRepoParamDto>(seriesRepository.createSeries).last();
       repoParamDto.name.should.equal(seriesName);
-      repoParamDto.postList.should.deep.equal(postList.map((postId) => new Types.ObjectId(postId)));
+      repoParamDto.postMetaList.should.deep.equal(postMetaList.map((postMetaId) => new Types.ObjectId(postMetaId)));
     });
 
     it('series create test - with minimal parameters', async () => {
@@ -83,7 +83,7 @@ describe('SeriesService test', () => {
 
       const [repoParamDto] = capture<CreateSeriesRepoParamDto>(seriesRepository.createSeries).last();
       repoParamDto.name.should.equal(seriesName);
-      repoParamDto.postList.should.deep.equal([]);
+      repoParamDto.postMetaList.should.deep.equal([]);
     });
   });
 
@@ -95,8 +95,8 @@ describe('SeriesService test', () => {
           name: '돈 명예 평화 야\'망 사\'랑 또 뭐가 있더라',
           thumbnailContent,
           thumbnailImage: gifImageId,
-          postIdToBeAddedList: [postList[0]],
-          postIdToBeRemovedList: [postList[1]],
+          postMetaIdToBeAddedList: [postMetaList[0]],
+          postMetaIdToBeRemovedList: [postMetaList[1]],
         },
       };
       await seriesService.updateSeries(paramDto);
@@ -105,8 +105,8 @@ describe('SeriesService test', () => {
         ...paramDto,
         seriesToBe: {
           ...paramDto.seriesToBe,
-          postIdToBeAddedList: paramDto.seriesToBe.postIdToBeAddedList!,
-          postIdToBeRemovedList: paramDto.seriesToBe.postIdToBeRemovedList!,
+          postMetaIdToBeAddedList: paramDto.seriesToBe.postMetaIdToBeAddedList!,
+          postMetaIdToBeRemovedList: paramDto.seriesToBe.postMetaIdToBeRemovedList!,
         },
       };
       verify(seriesRepository.updateSeries(deepEqual(repoParamDto))).once();
@@ -124,7 +124,7 @@ describe('SeriesService test', () => {
       );
     });
 
-    it('series update test - without postIdToBeAddedList and postIdToBeRemovedList', async () => {
+    it('series update test - without postMetaIdToBeAddedList and postMetaIdToBeRemovedList', async () => {
       const paramDto: UpdateSeriesParamDto = {
         originalName: seriesName,
         seriesToBe: {
@@ -137,8 +137,8 @@ describe('SeriesService test', () => {
         originalName: seriesName,
         seriesToBe: {
           name: commonTestData.simpleText,
-          postIdToBeAddedList: [],
-          postIdToBeRemovedList: [],
+          postMetaIdToBeAddedList: [],
+          postMetaIdToBeRemovedList: [],
         },
       })));
     });

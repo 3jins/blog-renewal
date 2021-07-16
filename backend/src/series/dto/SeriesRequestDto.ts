@@ -9,15 +9,15 @@ export interface CreateSeriesRequestDto {
   name: string;
   thumbnailContent: string;
   thumbnailImage?: string;
-  postIdList?: string[];
+  postMetaIdList?: string[];
 }
 
 export interface SeriesToBeRequestDto {
   name?: string;
   thumbnailContent?: string;
   thumbnailImage?: string;
-  postIdToBeAddedList?: string[];
-  postIdToBeRemovedList?: string[];
+  postMetaIdToBeAddedList?: string[];
+  postMetaIdToBeRemovedList?: string[];
 }
 
 export interface UpdateSeriesRequestDto {
@@ -43,7 +43,7 @@ export const CreateSeriesRequestSchema: JSONSchemaType<CreateSeriesRequestDto> =
   additionalProperties: false,
   properties: {
     name: { type: 'string', nullable: false },
-    postIdList: { type: 'array', nullable: true, items: { type: 'string' } },
+    postMetaIdList: { type: 'array', nullable: true, items: { type: 'string' } },
     thumbnailContent: { type: 'string', nullable: false },
     thumbnailImage: { type: 'string', nullable: true },
   },
@@ -59,8 +59,8 @@ export const UpdateSeriesRequestSchema: JSONSchemaType<UpdateSeriesRequestDto> =
       type: 'object',
       properties: {
         name: { type: 'string', nullable: true },
-        postIdToBeAddedList: { type: 'array', nullable: true, items: { type: 'string' } },
-        postIdToBeRemovedList: { type: 'array', nullable: true, items: { type: 'string' } },
+        postMetaIdToBeAddedList: { type: 'array', nullable: true, items: { type: 'string' } },
+        postMetaIdToBeRemovedList: { type: 'array', nullable: true, items: { type: 'string' } },
         thumbnailContent: { type: 'string', nullable: true },
         thumbnailImage: { type: 'string', nullable: true },
       },

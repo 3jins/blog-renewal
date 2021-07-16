@@ -1,17 +1,17 @@
 import { Service } from 'typedi';
 import { ClientSession, FilterQuery } from 'mongoose';
+import _ from 'lodash';
 import Tag, { TagDoc } from '@src/tag/Tag';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 import {
   CreateTagRepoParamDto,
   DeleteTagRepoParamDto,
   FindTagByNameDto,
-  FindTagByPostIdDto,
+  FindTagByPostMetaIdDto,
   FindTagRepoParamDto,
   UpdateTagRepoParamDto,
 } from '@src/tag/dto/TagRepoParamDto';
-import _ from 'lodash';
-import Post, { PostDoc } from '@src/post/Post';
+import PostMeta, { PostMetaDoc } from '@src/post/model/PostMeta';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
@@ -21,17 +21,17 @@ export default class TagRepository {
     return useTransaction(async (session: ClientSession) => {
       const {
         findTagByNameDto,
-        findTagByPostIdDto,
+        findTagByPostMetaIdDto,
       }: FindTagRepoParamDto = paramDto;
       const queryToFindTagByName: FilterQuery<TagDoc> = this.makeQueryToFindTagByName(findTagByNameDto);
 
       const tagList = await Tag
         .find({ ...queryToFindTagByName })
-        .populate('postList')
+        .populate('postMetaList')
         .session(session)
         .lean();
 
-      return this.filterTagByPostId(tagList, findTagByPostIdDto);
+      return this.filterTagByPostMetaId(tagList, findTagByPostMetaIdDto);
     });
   }
 
@@ -42,9 +42,9 @@ export default class TagRepository {
         .insertMany([paramDto], { session });
 
       // Update post list
-      await Post
+      await PostMeta
         .updateMany({
-          _id: { $in: paramDto.postList },
+          _id: { $in: paramDto.postMetaList },
         }, {
           $addToSet: {
             tagList:
@@ -57,7 +57,7 @@ export default class TagRepository {
   public updateTag(paramDto: UpdateTagRepoParamDto) {
     return useTransaction(async (session: ClientSession) => {
       const { originalName, tagToBe } = paramDto;
-      const { postIdToBeAddedList, postIdToBeRemovedList } = tagToBe;
+      const { postMetaIdToBeAddedList, postMetaIdToBeRemovedList } = tagToBe;
       const { _id: tagId }: TagDoc = await this.getTagByName(session, originalName);
 
       // Update tag
@@ -65,20 +65,20 @@ export default class TagRepository {
         .bulkWrite([{
           updateOne: {
             filter: { _id: tagId },
-            update: { ...tagToBe, $push: { postList: { $each: postIdToBeAddedList } } },
+            update: { ...tagToBe, $push: { postMetaList: { $each: postMetaIdToBeAddedList } } },
           },
         }, {
           updateOne: {
             filter: { _id: tagId },
-            update: { $pullAll: { postList: postIdToBeRemovedList } },
+            update: { $pullAll: { postMetaList: postMetaIdToBeRemovedList } },
           },
         }], { session });
 
       // Update the tag field from posts
-      await Post
-        .updateMany({ _id: { $in: postIdToBeRemovedList } }, { $pull: { tagList: tagId } }, { session });
-      await Post
-        .updateMany({ _id: { $in: postIdToBeAddedList } }, { $push: { tagList: tagId } }, { session });
+      await PostMeta
+        .updateMany({ _id: { $in: postMetaIdToBeRemovedList } }, { $pull: { tagList: tagId } }, { session });
+      await PostMeta
+        .updateMany({ _id: { $in: postMetaIdToBeAddedList } }, { $push: { tagList: tagId } }, { session });
     });
   }
 
@@ -91,40 +91,41 @@ export default class TagRepository {
         .deleteOne(paramDto, { session });
 
       // Remove the tag from posts
-      await Post
-        .updateMany({ _id: { $in: tag.postList } }, { $pull: { tagList: tag._id } }, { session });
+      await PostMeta
+        .updateMany({ _id: { $in: tag.postMetaList } }, { $pull: { tagList: tag._id } }, { session });
     });
   }
 
   private makeQueryToFindTagByName(paramDto: FindTagByNameDto | undefined): FilterQuery<TagDoc> {
-    if (_.isEmpty(paramDto)) {
+    if (_.isNil(paramDto)) {
       return {};
     }
     const { name, isOnlyExactNameFound } = paramDto!;
     return { name: isOnlyExactNameFound ? name : new RegExp(paramDto!.name, 'i') };
   }
 
-  private filterTagByPostId(tagList: FilterQuery<TagDoc>, paramDto: FindTagByPostIdDto | undefined): TagDoc[] {
-    if (_.isEmpty(paramDto)) {
+  private filterTagByPostMetaId(tagList: FilterQuery<TagDoc>, paramDto: FindTagByPostMetaIdDto | undefined): TagDoc[] {
+    if (_.isNil(paramDto)) {
       return tagList.map((tag) => tag);
     }
-    const { postIdList, isAndCondition } = paramDto!;
+    const { postMetaIdList, isAndCondition } = paramDto!;
 
     return tagList
       .filter((tag) => (isAndCondition
-        ? postIdList
-          .map((postId) => (tag.postList as PostDoc[])
-            .reduce((result, post) => result || postId === post._id.toString(), false)) // 조회한 postList들 중 _id가 사용자입력값인 postId와 일치하는 건이 있음.
+        ? postMetaIdList
+          .map((postMetaId) => (tag.postMetaList as PostMetaDoc[])
+            // 조회한 postMetaList들 중 _id가 사용자입력값인 postMetaId와 일치하는 건이 있음.
+            .reduce((result, postMeta) => result || postMetaId === postMeta._id.toString(), false))
           .reduce((globalResult, localResult) => globalResult && localResult) // 모든 사용자 입력값에 대해 그러해야 함.
-        : postIdList
-          .reduce((globalResult, postId) => globalResult || (tag.postList as PostDoc[])
-            .reduce((result, post) => result || postId === post._id.toString(), false), false)));
+        : postMetaIdList
+          .reduce((globalResult, postMetaId) => globalResult || (tag.postMetaList as PostMetaDoc[])
+            .reduce((result, post) => result || postMetaId === post._id.toString(), false), false)));
   }
 
   private async getTagByName(session: ClientSession, name: string): Promise<TagDoc> {
     const tag: (TagDoc | null) = await Tag
-      .findOne({ name }, { _id: true, postList: true }, { session });
-    if (_.isEmpty(tag)) {
+      .findOne({ name }, { _id: true, postMetaList: true }, { session });
+    if (_.isNil(tag)) {
       throw new BlogError(BlogErrorCode.TAG_NOT_FOUND, [name, 'name']);
     }
     return tag!;

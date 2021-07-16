@@ -3,19 +3,19 @@ import { JSONSchemaType } from 'ajv';
 export interface FindTagRequestDto {
   name?: string;
   isOnlyExactNameFound?: boolean;
-  postIdList?: string[];
+  postMetaIdList?: string[];
   isAndCondition?: boolean;
 }
 
 export interface CreateTagRequestDto {
   name: string;
-  postIdList?: string[];
+  postMetaIdList?: string[];
 }
 
 export interface TagToBeRequestDto {
   name?: string;
-  postIdToBeAddedList?: string[];
-  postIdToBeRemovedList?: string[];
+  postMetaIdToBeAddedList?: string[];
+  postMetaIdToBeRemovedList?: string[];
 }
 
 export interface UpdateTagRequestDto {
@@ -33,7 +33,7 @@ export const FindTagRequestSchema: JSONSchemaType<FindTagRequestDto> = {
   properties: {
     name: { type: 'string', nullable: true },
     isOnlyExactNameFound: { type: 'boolean', nullable: true },
-    postIdList: { type: 'array', nullable: true, items: { type: 'string' } },
+    postMetaIdList: { type: 'array', nullable: true, items: { type: 'string' } },
     isAndCondition: { type: 'boolean', nullable: true },
   },
 };
@@ -43,7 +43,7 @@ export const CreateTagRequestSchema: JSONSchemaType<CreateTagRequestDto> = {
   additionalProperties: false,
   properties: {
     name: { type: 'string', nullable: false },
-    postIdList: { type: 'array', nullable: true, items: { type: 'string' } },
+    postMetaIdList: { type: 'array', nullable: true, items: { type: 'string' } },
   },
   required: ['name'],
 };
@@ -57,8 +57,8 @@ export const UpdateTagRequestSchema: JSONSchemaType<UpdateTagRequestDto> = {
       type: 'object',
       properties: {
         name: { type: 'string', nullable: true },
-        postIdToBeAddedList: { type: 'array', nullable: true, items: { type: 'string' } },
-        postIdToBeRemovedList: { type: 'array', nullable: true, items: { type: 'string' } },
+        postMetaIdToBeAddedList: { type: 'array', nullable: true, items: { type: 'string' } },
+        postMetaIdToBeRemovedList: { type: 'array', nullable: true, items: { type: 'string' } },
       },
       nullable: false,
     },
