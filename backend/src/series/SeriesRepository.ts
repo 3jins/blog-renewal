@@ -9,7 +9,7 @@ import {
   UpdateSeriesRepoParamDto,
 } from '@src/series/dto/SeriesRepoParamDto';
 import _ from 'lodash';
-import Post, { PostDoc } from '@src/post/Post';
+import PostMeta, { PostMetaDoc } from '@src/post/model/PostMeta';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
@@ -20,7 +20,7 @@ export default class SeriesRepository {
       const queryToFindSeriesByName: FilterQuery<SeriesDoc> = this.makeQueryToFindSeriesByName(paramDto);
       return Series
         .find({ ...queryToFindSeriesByName })
-        .populate('postList')
+        .populate('postMetaList')
         .session(session)
         .lean();
     });
@@ -28,18 +28,18 @@ export default class SeriesRepository {
 
   public async createSeries(paramDto: CreateSeriesRepoParamDto): Promise<void> {
     return useTransaction(async (session: ClientSession) => {
-      const { postList } = paramDto;
+      const { postMetaList } = paramDto;
 
-      await this.validatePostList(session, postList);
+      await this.validatepostMetaList(session, postMetaList);
 
       // Create a series
       const series: SeriesDoc = (await Series
         .insertMany([paramDto], { session }))[0];
 
       // Update posts
-      await Post
+      await PostMeta
         .updateMany({
-          _id: { $in: postList },
+          _id: { $in: postMetaList },
         }, {
           series: series._id,
         }, { session });
@@ -49,9 +49,9 @@ export default class SeriesRepository {
   public async updateSeries(paramDto: UpdateSeriesRepoParamDto): Promise<void> {
     return useTransaction(async (session: ClientSession) => {
       const { originalName, seriesToBe } = paramDto;
-      const { postIdToBeAddedList, postIdToBeRemovedList } = seriesToBe;
+      const { postMetaIdToBeAddedList, postMetaIdToBeRemovedList } = seriesToBe;
 
-      await this.validatePostList(session, postIdToBeAddedList);
+      await this.validatepostMetaList(session, postMetaIdToBeAddedList);
       const seriesId: string = await this.getSeriesIdByName(session, originalName);
 
       // Update series
@@ -59,51 +59,51 @@ export default class SeriesRepository {
         .bulkWrite([{
           updateOne: {
             filter: { _id: seriesId },
-            update: { ...seriesToBe, $push: { postList: { $each: postIdToBeAddedList } } },
+            update: { ...seriesToBe, $push: { postMetaList: { $each: postMetaIdToBeAddedList } } },
           },
         }, {
           updateOne: {
             filter: { _id: seriesId },
-            update: { $pullAll: { postList: postIdToBeRemovedList } },
+            update: { $pullAll: { postMetaList: postMetaIdToBeRemovedList } },
           },
         }], { session });
 
       // Update the series field from posts
-      await Post
-        .updateMany({ _id: { $in: postIdToBeRemovedList } }, { series: null }, { session });
-      await Post
-        .updateMany({ _id: { $in: postIdToBeAddedList } }, { series: seriesId }, { session });
+      await PostMeta
+        .updateMany({ _id: { $in: postMetaIdToBeRemovedList } }, { series: null }, { session });
+      await PostMeta
+        .updateMany({ _id: { $in: postMetaIdToBeAddedList } }, { series: seriesId }, { session });
     });
   }
 
   public async deleteSeries(paramDto: DeleteSeriesRepoParamDto): Promise<void> {
     return useTransaction(async (session: ClientSession) => {
-      const postList: string[] = await this.getSeriesPostListByName(session, paramDto.name);
+      const postMetaList: string[] = await this.getSeriespostMetaListByName(session, paramDto.name);
 
       // Delete the series
       await Series
         .deleteOne(paramDto, { session });
 
       // Remove the series from posts
-      await Post
-        .updateMany({ _id: { $in: postList } }, { series: null }, { session });
+      await PostMeta
+        .updateMany({ _id: { $in: postMetaList } }, { series: null }, { session });
     });
   }
 
   private makeQueryToFindSeriesByName(paramDto: FindSeriesRepoParamDto): FilterQuery<SeriesDoc> {
-    if (_.isEmpty(paramDto)) {
+    if (_.isNil(paramDto)) {
       return {};
     }
     const { name, isOnlyExactNameFound } = paramDto!;
     return { name: isOnlyExactNameFound ? name : new RegExp(paramDto.name!, 'i') };
   }
 
-  private async validatePostList(session: ClientSession, postIdList: (Types.ObjectId | string)[]): Promise<void> {
-    const postList: PostDoc[] = await Post
-      .find({ _id: { $in: postIdList } }, { postNo: true, series: true }, { session });
+  private async validatepostMetaList(session: ClientSession, postMetaIdList: (Types.ObjectId | string)[]): Promise<void> {
+    const postMetaList: PostMetaDoc[] = await PostMeta
+      .find({ _id: { $in: postMetaIdList } }, { postNo: true, series: true }, { session });
 
-    if (_.some(postList, (post) => !_.isEmpty(post.series))) {
-      const { postNo, series } = _.find(postList, (post) => !_.isEmpty(post.series));
+    if (_.some(postMetaList, (postMeta) => !_.isNil(postMeta.series))) {
+      const { postNo, series } = _.find(postMetaList, (postMeta) => !_.isNil(postMeta.series));
       throw new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postNo, series.toString()]);
     }
   }
@@ -112,14 +112,14 @@ export default class SeriesRepository {
     return (await this.getSeriesByName(session, name, { _id: true }))._id;
   }
 
-  private async getSeriesPostListByName(session: ClientSession, name: string): Promise<string[]> {
-    return (await this.getSeriesByName(session, name, { postList: true })).postList;
+  private async getSeriespostMetaListByName(session: ClientSession, name: string): Promise<string[]> {
+    return (await this.getSeriesByName(session, name, { postMetaList: true })).postMetaList;
   }
 
   private async getSeriesByName(session: ClientSession, name: string, projection: Object): Promise<SeriesDoc> {
     const series: (SeriesDoc | null) = await Series
       .findOne({ name }, projection, { session });
-    if (_.isEmpty(series)) {
+    if (_.isNil(series)) {
       throw new BlogError(BlogErrorCode.SERIES_NOT_FOUND, [name, 'name']);
     }
     return series!;

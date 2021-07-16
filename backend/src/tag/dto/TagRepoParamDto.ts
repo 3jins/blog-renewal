@@ -5,25 +5,25 @@ export interface FindTagByNameDto {
   isOnlyExactNameFound: boolean;
 }
 
-export interface FindTagByPostIdDto {
-  postIdList: string[];
+export interface FindTagByPostMetaIdDto {
+  postMetaIdList: string[];
   isAndCondition: boolean;
 }
 
 export interface FindTagRepoParamDto {
   findTagByNameDto?: FindTagByNameDto;
-  findTagByPostIdDto?: FindTagByPostIdDto;
+  findTagByPostMetaIdDto?: FindTagByPostMetaIdDto;
 }
 
 export interface CreateTagRepoParamDto {
   name: string;
-  postList: Types.ObjectId[];
+  postMetaList: Types.ObjectId[];
 }
 
 export interface TagToBeRepoParamDto {
   name?: string;
-  postIdToBeAddedList: string[];
-  postIdToBeRemovedList: string[];
+  postMetaIdToBeAddedList: string[];
+  postMetaIdToBeRemovedList: string[];
 }
 
 export interface UpdateTagRepoParamDto {

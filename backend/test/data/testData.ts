@@ -61,25 +61,25 @@ export const common = {
   },
   tag1: {
     name: 'Spring',
-    postList: [],
+    postMetaList: [],
   },
   tag2: {
     name: '우린 시간 앞에 무엇을 선택해야 할까',
-    postList: [],
+    postMetaList: [],
   },
   tag3: {
     name: '넹비ㅓ',
-    postList: [],
+    postMetaList: [],
   },
   series1: {
     name: '심슨가족이다, 그지 깽깽이들아!',
     thumbnailContent: '심슨가족 짤방들에 얽힌 이야기들',
-    postList: [],
+    postMetaList: [],
   },
   series2: {
     name: '네이버 취업기',
     thumbnailContent: '내 워라밸을 망치러 온 나의 구원자',
-    postList: [],
+    postMetaList: [],
   },
   gifImage: {
     title: 'iu-clap.gif',
@@ -99,7 +99,6 @@ export const common = {
     language: Language.KO,
     thumbnailContent: '고양이',
     isLatestVersion: true,
-    commentCount: 0,
   },
   post1DataToBeUpdatedFirst: {
     rawContent: '왜 우리는 노드만으로 행복할 수 없는가?\n트렌드는 어디서 와 어디로 가는 중인가?\n',
@@ -117,7 +116,6 @@ export const common = {
     language: Language.KO,
     thumbnailContent: '강아지',
     isLatestVersion: true,
-    commentCount: 0,
   },
   post2En: {
     postNo: 2,
@@ -127,7 +125,6 @@ export const common = {
     language: Language.EN,
     thumbnailContent: 'sob',
     isLatestVersion: true,
-    commentCount: 0,
   },
   post3: {
     postNo: 3,
@@ -137,9 +134,8 @@ export const common = {
     language: Language.KO,
     thumbnailContent: '너무 빨리 지나가',
     isLatestVersion: true,
-    commentCount: 0,
   },
-  postIdList: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439022', '507f1f77bcf86cd799439033'],
+  postMetaIdList: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439022', '507f1f77bcf86cd799439033'],
   comment1: {
     isCommentAuthor: false,
     content: '오늘 저녁 메뉴 추천해줘요!',
@@ -159,6 +155,7 @@ export const common = {
 
   simpleText: 'Just quit, 채워진 바둑판처럼 그만 둬',
   objectIdList: ['c0ffee0f0ff1cecafe15900d', 'c0ffee0f0ff1cecafe50900d', 'c0ffee0f0ff1cecafe15baad'],
+  dateList: [new Date('1993-07-13T09:12:34.567+0900'), new Date('2019-10-24T19:03:12.345+0900'), new Date('2021-07-11T15:25:23.456+0900')],
 };
 
 export const blogErrorCode = {

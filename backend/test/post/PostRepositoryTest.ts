@@ -4,12 +4,10 @@ import sinon from 'sinon';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
 import { abortTestTransaction, replaceUseTransactionForTest } from '@test/TestUtil';
-import PostRepository from '@src/post/PostRepository';
-import { CreatePostRepoParamDto } from '@src/post/PostDto';
-import Tag, { TagDoc } from '@src/tag/Tag';
-import Category, { CategoryDoc } from '@src/category/Category';
-import Series, { SeriesDoc } from '@src/series/Series';
-import Post, { PostDoc } from '@src/post/Post';
+import PostRepository from '@src/post/repository/PostRepository';
+import { CreatePostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
+import Post, { PostDoc } from '@src/post/model/Post';
+import Image from '@src/image/Image';
 
 describe('PostRepository test', () => {
   let sandbox;
@@ -39,32 +37,54 @@ describe('PostRepository test', () => {
     await conn.close();
   });
 
-  it('createPost', async () => {
-    const categories: CategoryDoc = (await Category.insertMany([commonTestData.category3], { session }))[0];
-    const tags: TagDoc[] = await Tag.insertMany([commonTestData.tag1], { session });
-    const series: SeriesDoc = (await Series.insertMany([commonTestData.series1], { session }))[0];
-    const paramDto: CreatePostRepoParamDto = {
-      ...commonTestData.post1,
-      categoryId: categories._id,
-      tagIdList: tags.map((tag) => tag._id),
-      seriesId: series._id,
-    };
+  describe('createPost test', () => {
+    let gifImage;
 
-    await postRepository.createPost(paramDto);
-    const posts: PostDoc[] = await Post.find().session(session);
-    posts.should.have.lengthOf(1);
-    const post: PostDoc = posts[0];
-    post.should.not.be.empty;
-    post.should.contain(commonTestData.post1);
-    (post.lastVersionPost !== undefined).should.be.true;
-    (post.lastVersionPost === null).should.be.true;
-    (post.isLatestVersion !== undefined).should.be.true;
-    post.isLatestVersion!.should.be.true;
-    (post.isDeleted !== undefined).should.be.true;
-    post.isDeleted!.should.be.false;
-    (post.createdDate !== undefined).should.be.true;
-    post.createdDate!.getTime().should.closeTo(new Date().getTime(), 3000); // Expect difference to be less than 3 seconds
-    (post.commentCount !== undefined).should.be.true;
-    post.commentCount!.should.equal(0);
+    beforeEach(async () => {
+      [gifImage] = (await Image.insertMany([{
+        ...commonTestData.gifImage,
+      }], { session }));
+    });
+
+    it('createPost', async () => {
+      const paramDto1: CreatePostRepoParamDto = {
+        ...commonTestData.post1,
+        thumbnailImageId: gifImage,
+        lastUpdatedDate: commonTestData.dateList[0],
+      };
+      const paramDto2: CreatePostRepoParamDto = {
+        ...commonTestData.post2,
+        lastUpdatedDate: commonTestData.dateList[1],
+      };
+
+      await postRepository.createPost(paramDto1);
+      await postRepository.createPost(paramDto2);
+      const posts: PostDoc[] = await Post.find().session(session);
+      posts.should.have.lengthOf(2);
+      const [post1, post2]: PostDoc[] = posts;
+
+      post1.should.not.be.empty;
+      post2.should.not.be.empty;
+      post2.postNo.should.equal(post1.postNo + 1);
+
+      post1.title.should.equal(commonTestData.post1.title);
+      post1.rawContent.should.equal(commonTestData.post1.rawContent);
+      post1.renderedContent.should.equal(commonTestData.post1.renderedContent);
+      post1.language.should.equal(commonTestData.post1.language);
+      post1.thumbnailContent.should.equal(commonTestData.post1.thumbnailContent);
+      post1.thumbnailImage!.should.deep.equal(gifImage._id);
+      post1.lastUpdatedDate.should.deep.equal(commonTestData.dateList[0]);
+      post1.isLatestVersion.should.equal(commonTestData.post1.isLatestVersion);
+      (post1.lastVersionPost === null).should.be.true;
+      post2.title.should.equal(commonTestData.post2.title);
+      post2.rawContent.should.equal(commonTestData.post2.rawContent);
+      post2.renderedContent.should.equal(commonTestData.post2.renderedContent);
+      post2.language.should.equal(commonTestData.post2.language);
+      post2.thumbnailContent.should.equal(commonTestData.post2.thumbnailContent);
+      (post2.thumbnailImage === null).should.be.true;
+      post2.lastUpdatedDate.should.deep.equal(commonTestData.dateList[1]);
+      post2.isLatestVersion.should.equal(commonTestData.post2.isLatestVersion);
+      (post2.lastVersionPost === null).should.be.true;
+    });
   });
 });

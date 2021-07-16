@@ -1,19 +1,19 @@
 export interface FindTagParamDto {
   name?: string;
   isOnlyExactNameFound?: boolean;
-  postIdList?: string[];
+  postMetaIdList?: string[];
   isAndCondition?: boolean;
 }
 
 export interface CreateTagParamDto {
   name: string;
-  postIdList?: string[];
+  postMetaIdList?: string[];
 }
 
 export interface TagToBeParamDto {
   name?: string;
-  postIdToBeAddedList?: string[];
-  postIdToBeRemovedList?: string[];
+  postMetaIdToBeAddedList?: string[];
+  postMetaIdToBeRemovedList?: string[];
 }
 
 export interface UpdateTagParamDto {

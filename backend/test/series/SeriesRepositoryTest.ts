@@ -12,7 +12,7 @@ import {
   UpdateSeriesRepoParamDto,
 } from '@src/series/dto/SeriesRepoParamDto';
 import Series, { SeriesDoc } from '@src/series/Series';
-import Post, { PostDoc } from '@src/post/Post';
+import PostMeta, { PostMetaDoc } from '@src/post/model/PostMeta';
 import Image from '@src/image/Image';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
@@ -46,28 +46,31 @@ describe('SeriesRepository test', () => {
   });
 
   describe('findSeries test', () => {
-    let postIdList;
+    let postMetaIdList;
 
     beforeEach(async () => {
       const series1 = (await Series.insertMany([commonTestData.series1], { session }))[0]; // 심슨
       const series2 = (await Series.insertMany([commonTestData.series2], { session }))[0]; // 취업기
 
-      const post1 = (await Post.insertMany([{
-        ...commonTestData.post1,
+      const postMeta1 = (await PostMeta.insertMany([{
+        postNo: 1,
         series: series1._id,
+        createdDate: commonTestData.dateList[0],
       }], { session }))[0];
-      const post2 = (await Post.insertMany([{
-        ...commonTestData.post2,
+      const postMeta2 = (await PostMeta.insertMany([{
+        postNo: 2,
         series: series2._id,
+        createdDate: commonTestData.dateList[1],
       }], { session }))[0];
-      const post3 = (await Post.insertMany([{
-        ...commonTestData.post3,
+      const postMeta3 = (await PostMeta.insertMany([{
+        postNo: 3,
         series: series1._id,
+        createdDate: commonTestData.dateList[2],
       }], { session }))[0];
-      postIdList = [post1._id.toString(), post2._id.toString(), post3._id.toString()];
+      postMetaIdList = [postMeta1._id.toString(), postMeta2._id.toString(), postMeta3._id.toString()];
 
-      await Series.updateOne({ _id: series1._id }, { postList: [postIdList[0], postIdList[2]] }, { session });
-      await Series.updateOne({ _id: series2._id }, { postList: [postIdList[1]] }, { session });
+      await Series.updateOne({ _id: series1._id }, { postMetaList: [postMetaIdList[0], postMetaIdList[2]] }, { session });
+      await Series.updateOne({ _id: series2._id }, { postMetaList: [postMetaIdList[1]] }, { session });
     });
 
     it('findSeries - by exact name', async () => {
@@ -105,17 +108,19 @@ describe('SeriesRepository test', () => {
 
   describe('createSeries test', () => {
     let series2Id;
-    let postList;
+    let postMetaList;
     let gifImage;
 
     beforeEach(async () => {
       series2Id = (await Series.insertMany([commonTestData.series1], { session }))[0]._id; // 심슨
 
-      postList = (await Post.insertMany([{
-        ...commonTestData.post1,
+      postMetaList = (await PostMeta.insertMany([{
+        postNo: 1,
+        createdDate: commonTestData.dateList[0],
       }, {
-        ...commonTestData.post2,
+        postNo: 2,
         series: series2Id,
+        createdDate: commonTestData.dateList[1],
       }], { session }))
         .map((post) => post.toObject());
 
@@ -124,7 +129,7 @@ describe('SeriesRepository test', () => {
       }], { session }));
     });
 
-    it('createSeries - thumbnailImage: X, postList: empty', async () => {
+    it('createSeries - thumbnailImage: X, postMetaList: empty', async () => {
       const paramDto: CreateSeriesRepoParamDto = {
         ...commonTestData.series2,
       };
@@ -134,20 +139,20 @@ describe('SeriesRepository test', () => {
       const series: (SeriesDoc | null) = await Series.findOne({ name: commonTestData.series2.name }).session(session).lean();
       series!.should.not.be.empty;
       series!.name.should.equal(commonTestData.series2.name);
-      series!.postList!.should.be.empty;
+      series!.postMetaList!.should.be.empty;
 
-      const post1: (PostDoc | null) = await Post.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
-      (post1!.series! === null).should.be.true; // should not be updated
+      const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
+      (postMeta1!.series! === null).should.be.true; // should not be updated
 
-      const post2: (PostDoc | null) = await Post.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
-      post2!.series!.should.deep.equal(series2Id); // should not be updated
+      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
+      postMeta2!.series!.should.deep.equal(series2Id); // should not be updated
     });
 
-    it('createSeries - thumbnailImage: O, postList: O', async () => {
+    it('createSeries - thumbnailImage: O, postMetaList: O', async () => {
       const paramDto: CreateSeriesRepoParamDto = {
         ...commonTestData.series2,
         thumbnailImage: gifImage,
-        postList: [postList[0]],
+        postMetaList: [postMetaList[0]],
       };
 
       await seriesRepository.createSeries(paramDto);
@@ -156,24 +161,24 @@ describe('SeriesRepository test', () => {
       series!.should.not.be.empty;
       series!.name.should.equal(commonTestData.series2.name);
       series!.thumbnailImage!.should.deep.equal(gifImage._id);
-      series!.postList!.should.deep.equal([postList[0]._id]);
+      series!.postMetaList!.should.deep.equal([postMetaList[0]._id]);
 
-      const post1: (PostDoc | null) = await Post.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
-      post1!.series!.should.deep.equal(series!._id); // should be updated (added)
+      const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
+      postMeta1!.series!.should.deep.equal(series!._id); // should be updated (added)
 
-      const post2: (PostDoc | null) = await Post.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
-      post2!.series!.should.deep.equal(series2Id); // should not be updated
+      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
+      postMeta2!.series!.should.deep.equal(series2Id); // should not be updated
     });
 
-    it('createSeries - with postList but one of them is already belong to another series', async () => {
+    it('createSeries - with postMetaList but one of them is already belong to another series', async () => {
       const paramDto: CreateSeriesRepoParamDto = {
         ...commonTestData.series2,
         thumbnailImage: gifImage,
-        postList: [postList[1]],
+        postMetaList: [postMetaList[1]],
       };
 
       await errorShouldBeThrown(
-        new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postList[1].postNo, series2Id.toString()]),
+        new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postMetaList[1].postNo, series2Id.toString()]),
         async (_paramDto) => seriesRepository.createSeries(_paramDto),
         paramDto,
       );
@@ -182,18 +187,21 @@ describe('SeriesRepository test', () => {
 
   describe('updateSeries test', () => {
     let seriesId;
-    let postList;
+    let postMetaList;
     let gifImageId;
 
     beforeEach(async () => {
-      postList = (await Post.insertMany([{
-        ...commonTestData.post1,
+      postMetaList = (await PostMeta.insertMany([{
+        postNo: 1,
         series: seriesId,
+        createdDate: commonTestData.dateList[0],
       }, {
-        ...commonTestData.post2,
+        postNo: 2,
+        createdDate: commonTestData.dateList[1],
       }, {
-        ...commonTestData.post3,
+        postNo: 3,
         series: commonTestData.objectIdList[0],
+        createdDate: commonTestData.dateList[2],
       }], { session }))
         .map((post) => post.toObject());
 
@@ -204,7 +212,7 @@ describe('SeriesRepository test', () => {
       seriesId = (await Series.insertMany([{
         ...commonTestData.series1,
         thumbnailImage: gifImageId,
-        postList: [postList[0]],
+        postMetaList: [postMetaList[0]],
       }], { session }))[0]._id;
     });
 
@@ -214,8 +222,8 @@ describe('SeriesRepository test', () => {
         seriesToBe: {
           name: commonTestData.series2.name,
           thumbnailContent: commonTestData.series2.thumbnailContent,
-          postIdToBeAddedList: [postList[1]._id],
-          postIdToBeRemovedList: [postList[0]._id],
+          postMetaIdToBeAddedList: [postMetaList[1]._id],
+          postMetaIdToBeRemovedList: [postMetaList[0]._id],
         },
       };
 
@@ -227,26 +235,26 @@ describe('SeriesRepository test', () => {
       (series2 !== null).should.be.true;
       series2!.thumbnailContent.should.deep.equal(commonTestData.series2.thumbnailContent);
       series2!.thumbnailImage!.should.deep.equal(gifImageId);
-      series2!.postList.should.deep.equal([postList[1]._id]);
+      series2!.postMetaList.should.deep.equal([postMetaList[1]._id]);
 
-      const post1: (PostDoc | null) = await Post.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
-      (post1!.series === null).should.be.true;
+      const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
+      (postMeta1!.series === null).should.be.true;
 
-      const post2: (PostDoc | null) = await Post.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
-      post2!.series!.should.deep.equal(seriesId);
+      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
+      postMeta2!.series!.should.deep.equal(seriesId);
     });
 
     it('updateSeries - with postToBeAddedList but one of them is already belong to another series', async () => {
       const paramDto: UpdateSeriesRepoParamDto = {
         originalName: commonTestData.series1.name,
         seriesToBe: {
-          postIdToBeAddedList: [postList[2]._id],
-          postIdToBeRemovedList: [],
+          postMetaIdToBeAddedList: [postMetaList[2]._id],
+          postMetaIdToBeRemovedList: [],
         },
       };
 
       await errorShouldBeThrown(
-        new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postList[2].postNo, commonTestData.objectIdList[0]]),
+        new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postMetaList[2].postNo, commonTestData.objectIdList[0]]),
         async (_paramDto) => seriesRepository.updateSeries(_paramDto),
         paramDto,
       );
@@ -256,22 +264,22 @@ describe('SeriesRepository test', () => {
       const paramDto: UpdateSeriesRepoParamDto = {
         originalName: commonTestData.series1.name,
         seriesToBe: {
-          postIdToBeAddedList: [],
-          postIdToBeRemovedList: [postList[2]._id],
+          postMetaIdToBeAddedList: [],
+          postMetaIdToBeRemovedList: [postMetaList[2]._id],
         },
       };
 
       await seriesRepository.updateSeries(paramDto);
       const series: (SeriesDoc | null) = await Series.findOne({ name: commonTestData.series1.name }).session(session).lean();
-      series!.postList.should.deep.equal([postList[0]._id]);
+      series!.postMetaList.should.deep.equal([postMetaList[0]._id]);
     });
 
     it('updateSeries - with empty parameter: no change', async () => {
       const paramDto: UpdateSeriesRepoParamDto = {
         originalName: commonTestData.series1.name,
         seriesToBe: {
-          postIdToBeAddedList: [],
-          postIdToBeRemovedList: [],
+          postMetaIdToBeAddedList: [],
+          postMetaIdToBeRemovedList: [],
         },
       };
 
@@ -280,7 +288,7 @@ describe('SeriesRepository test', () => {
       (series1 !== null).should.be.true;
       series1!.thumbnailContent.should.deep.equal(commonTestData.series1.thumbnailContent);
       series1!.thumbnailImage!.should.deep.equal(gifImageId);
-      series1!.postList.should.deep.equal([postList[0]._id]);
+      series1!.postMetaList.should.deep.equal([postMetaList[0]._id]);
       const series2: (SeriesDoc | null) = await Series.findOne({ name: commonTestData.series2.name }).session(session).lean();
       (series2 === null).should.be.true;
     });
@@ -291,8 +299,8 @@ describe('SeriesRepository test', () => {
         originalName: inexistentName,
         seriesToBe: {
           name: '쿵쿵쿵 옆집 사람들은 날 싫어해',
-          postIdToBeAddedList: [],
-          postIdToBeRemovedList: [],
+          postMetaIdToBeAddedList: [],
+          postMetaIdToBeRemovedList: [],
         },
       };
 
@@ -311,12 +319,13 @@ describe('SeriesRepository test', () => {
     beforeEach(async () => {
       [testSeries] = (await Series.insertMany([commonTestData.series1], { session })); // Spring
 
-      [testPost] = (await Post.insertMany([{
-        ...commonTestData.post1,
+      [testPost] = (await PostMeta.insertMany([{
+        postNo: 1,
         series: testSeries._id,
+        createdDate: commonTestData.dateList[0],
       }], { session }));
 
-      await Series.updateOne({ _id: testSeries._id }, { postList: [testPost._id] }, { session });
+      await Series.updateOne({ _id: testSeries._id }, { postMetaList: [testPost._id] }, { session });
     });
 
     it('deleteSeries', async () => {
@@ -329,7 +338,7 @@ describe('SeriesRepository test', () => {
       const series: (SeriesDoc | null) = await Series.findOne({ name: commonTestData.series1.name }).session(session).lean();
       (series === null).should.be.true;
 
-      const post: (PostDoc | null) = await Post.findOne({ _id: testPost._id }).session(session).lean();
+      const post: (PostMetaDoc | null) = await PostMeta.findOne({ _id: testPost._id }).session(session).lean();
       (post!.series === null).should.be.true;
     });
   });

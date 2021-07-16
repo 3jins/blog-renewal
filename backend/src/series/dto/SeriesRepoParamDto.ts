@@ -9,15 +9,15 @@ export interface CreateSeriesRepoParamDto {
   name: string;
   thumbnailContent: string;
   thumbnailImage?: string;
-  postList: Types.ObjectId[];
+  postMetaList: Types.ObjectId[];
 }
 
 export interface SeriesToBeRepoParamDto {
   name?: string;
   thumbnailContent?: string;
   thumbnailImage?: string;
-  postIdToBeAddedList: string[];
-  postIdToBeRemovedList: string[];
+  postMetaIdToBeAddedList: string[];
+  postMetaIdToBeRemovedList: string[];
 }
 
 export interface UpdateSeriesRepoParamDto {

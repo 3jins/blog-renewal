@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import { CreateTagParamDto, DeleteTagParamDto, FindTagParamDto, UpdateTagParamDto } from '@src/tag/dto/TagParamDto';
 import {
   FindTagByNameDto,
-  FindTagByPostIdDto,
+  FindTagByPostMetaIdDto,
   FindTagRepoParamDto,
   UpdateTagRepoParamDto,
 } from '@src/tag/dto/TagRepoParamDto';
@@ -21,17 +21,17 @@ export default class TagService {
   public async findTag(paramDto: FindTagParamDto): Promise<TagDoc[]> {
     const repoParamDto: FindTagRepoParamDto = {};
     this.addNameQueryToFindTagRepoParamDto(repoParamDto, paramDto);
-    this.addPostIdQueryToFindTagRepoParamDto(repoParamDto, paramDto);
+    this.addPostMetaIdQueryToFindTagRepoParamDto(repoParamDto, paramDto);
     return this.tagRepository.findTag(repoParamDto);
   }
 
   public async createTag(paramDto: CreateTagParamDto): Promise<void> {
-    const { postIdList } = paramDto;
-    const postList: Types.ObjectId[] = _.isNil(postIdList)
+    const { postMetaIdList } = paramDto;
+    const postMetaList: Types.ObjectId[] = _.isNil(postMetaIdList)
       ? []
-      : postIdList!.map((postId) => new Types.ObjectId(postId));
+      : postMetaIdList!.map((postMetaId) => new Types.ObjectId(postMetaId));
     return this.tagRepository.createTag({
-      postList,
+      postMetaList,
       ...paramDto,
     });
   }
@@ -55,25 +55,25 @@ export default class TagService {
     }
   }
 
-  private addPostIdQueryToFindTagRepoParamDto(repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void {
-    const { postIdList, isAndCondition } = paramDto;
-    if (!_.isNil(postIdList) && !_.isNil(isAndCondition)) {
-      const findTagByPostIdDto: FindTagByPostIdDto = { postIdList: postIdList!, isAndCondition: isAndCondition! };
-      Object.assign(repoParamDto, { findTagByPostIdDto });
+  private addPostMetaIdQueryToFindTagRepoParamDto(repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void {
+    const { postMetaIdList, isAndCondition } = paramDto;
+    if (!_.isNil(postMetaIdList) && !_.isNil(isAndCondition)) {
+      const findTagByPostMetaIdDto: FindTagByPostMetaIdDto = { postMetaIdList: postMetaIdList!, isAndCondition: isAndCondition! };
+      Object.assign(repoParamDto, { findTagByPostMetaIdDto });
     }
   }
 
   private makeUpdateTagRepoParamDto(paramDto: UpdateTagParamDto): UpdateTagRepoParamDto {
     const { originalName, tagToBe } = paramDto;
-    const { postIdToBeAddedList, postIdToBeRemovedList } = tagToBe;
+    const { postMetaIdToBeAddedList, postMetaIdToBeRemovedList } = tagToBe;
 
     _.isNil({});
     return {
       originalName,
       tagToBe: {
         ...tagToBe,
-        postIdToBeAddedList: _.isNil(postIdToBeAddedList) ? [] : postIdToBeAddedList!,
-        postIdToBeRemovedList: _.isNil(postIdToBeRemovedList) ? [] : postIdToBeRemovedList!,
+        postMetaIdToBeAddedList: _.isNil(postMetaIdToBeAddedList) ? [] : postMetaIdToBeAddedList!,
+        postMetaIdToBeRemovedList: _.isNil(postMetaIdToBeRemovedList) ? [] : postMetaIdToBeRemovedList!,
       },
     };
   }

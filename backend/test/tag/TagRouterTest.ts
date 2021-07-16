@@ -26,7 +26,7 @@ describe('Tag router test', () => {
   let server: Server;
   let request: supertest.SuperTest<supertest.Test>;
 
-  const { tag2: { name: tagName }, postIdList } = commonTestData;
+  const { tag2: { name: tagName }, postMetaIdList } = commonTestData;
 
   before(() => {
     should();
@@ -40,7 +40,7 @@ describe('Tag router test', () => {
       const requestDto: FindTagRequestDto = {
         name: tagName,
         isOnlyExactNameFound: true,
-        postIdList,
+        postMetaIdList,
         isAndCondition: true,
       };
       const paramDto: FindTagParamDto = { ...requestDto };
@@ -76,7 +76,7 @@ describe('Tag router test', () => {
       const typeDistortedRequestDto = {
         name: tagName,
         isOnlyExactNameFound: 1,
-        postIdList,
+        postMetaIdList,
         isAndCondition: true,
       };
 
@@ -125,7 +125,7 @@ describe('Tag router test', () => {
     });
 
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - parameter error(type of value)`, async () => {
-      const typeDistortedRequestDto = { name: tagName, postIdList: true };
+      const typeDistortedRequestDto = { name: tagName, postMetaIdList: true };
 
       await request
         .post(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`)
@@ -145,8 +145,8 @@ describe('Tag router test', () => {
         originalName: tagName,
         tagToBe: {
           name: '돈 명예 평화 야\'망 사\'랑 또 뭐가 있더라',
-          postIdToBeAddedList: postIdList.splice(0, 2),
-          postIdToBeRemovedList: postIdList.splice(2, 1),
+          postMetaIdToBeAddedList: postMetaIdList.splice(0, 2),
+          postMetaIdToBeRemovedList: postMetaIdList.splice(2, 1),
         },
       };
       const paramDto: UpdateTagParamDto = { ...requestDto };
@@ -179,7 +179,7 @@ describe('Tag router test', () => {
     });
 
     it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - parameter error(type of value)`, async () => {
-      const typeDistortedRequestDto = { name: tagName, postIdList: [true, false] };
+      const typeDistortedRequestDto = { name: tagName, postMetaIdList: [true, false] };
 
       await request
         .patch(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`)

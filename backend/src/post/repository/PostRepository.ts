@@ -1,8 +1,8 @@
 import { Service } from 'typedi';
 import { ClientSession } from 'mongoose';
-import Post, { PostDoc } from '@src/post/Post';
+import Post, { PostDoc } from '@src/post/model/Post';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
-import { CreatePostRepoParamDto } from '@src/post/PostDto';
+import { CreatePostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
 import _ from 'lodash';
 
 @Service()
@@ -14,31 +14,8 @@ export default class PostRepository {
         .insertMany([{
           ...paramDto,
           postNo,
-          category: paramDto.categoryId,
-          tagList: paramDto.tagIdList,
-          series: paramDto.seriesId,
           thumbnailImage: paramDto.thumbnailImageId,
         }], { session });
-    });
-  }
-
-  public addPostVersion(paramDto: CreatePostRepoParamDto) {
-    return useTransaction(async (session: ClientSession) => {
-      const { title } = paramDto;
-      const {
-        _id: lastVersionPostId,
-        postNo,
-        commentCount,
-      } = await this.getLatestVersionPost(session, title);
-      await Post
-        .insertMany([{
-          ...paramDto,
-          postNo,
-          lastVersionPost: lastVersionPostId,
-          commentCount,
-        }], { session });
-      await Post
-        .updateOne({ _id: lastVersionPostId }, { isLatestVersion: false }, { session });
     });
   }
 
@@ -47,7 +24,7 @@ export default class PostRepository {
       .findOne()
       .sort({ postNo: -1 })
       .session(session) as PostDoc;
-    return _.isEmpty(lastPost) ? 1 : lastPost.postNo + 1;
+    return _.isNil(lastPost) ? 1 : lastPost.postNo + 1;
   }
 
   private async getLatestVersionPost(session: ClientSession, title: string): Promise<PostDoc> {

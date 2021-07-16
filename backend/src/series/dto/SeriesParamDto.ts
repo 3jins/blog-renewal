@@ -7,15 +7,15 @@ export interface CreateSeriesParamDto {
   name: string;
   thumbnailContent: string;
   thumbnailImage?: string;
-  postIdList?: string[];
+  postMetaIdList?: string[];
 }
 
 export interface SeriesToBeParamDto {
   name?: string;
   thumbnailContent?: string;
   thumbnailImage?: string;
-  postIdToBeAddedList?: string[];
-  postIdToBeRemovedList?: string[];
+  postMetaIdToBeAddedList?: string[];
+  postMetaIdToBeRemovedList?: string[];
 }
 
 export interface UpdateSeriesParamDto {

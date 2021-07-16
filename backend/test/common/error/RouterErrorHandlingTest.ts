@@ -17,7 +17,7 @@ const TagRouter = require('@src/tag/TagRouter');
 describe('Router error handling test', () => {
   let server: Server;
   let request: supertest.SuperTest<supertest.Test>;
-  const { tag2: { name: tagName }, postIdList } = commonTestData;
+  const { tag2: { name: tagName }, postMetaIdList } = commonTestData;
 
   before(() => {
     should();
@@ -31,7 +31,7 @@ describe('Router error handling test', () => {
 
     await request
       .get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`)
-      .query(() => ({ name: tagName, postId: postIdList[0] }))
+      .query(() => ({ name: tagName, postId: postMetaIdList[0] }))
       .expect(blogErrorCode.TEST_ERROR.httpErrorCode)
       .expect((res) => {
         res.body.message.should.equal(commonTestData.simpleText);
