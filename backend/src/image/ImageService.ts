@@ -1,14 +1,14 @@
 import fs, { PathLike } from 'fs';
 import path from 'path';
 import _ from 'lodash';
-import { Files } from 'formidable';
+import { File, Files } from 'formidable';
 import config from 'config';
 import { Service } from 'typedi';
-import { CreateQuery } from 'mongoose';
+import { DocumentDefinition } from 'mongoose';
 import BlogError from '@src/common/error/BlogError';
 import ImageRepository from '@src/image/ImageRepository';
 import { ImageDoc } from '@src/image/Image';
-import { UploadImageParamDto } from './ImageDto';
+import { UploadImageParamDto } from '@src/image/ImageDto';
 import { BlogErrorCode } from '../common/error/BlogErrorCode';
 
 @Service()
@@ -25,7 +25,7 @@ export default class ImageService {
   private moveImage(files: Files): void {
     const newPath: PathLike = `${config.get('path.appData')}${config.get('path.image')}`;
     _.keys(files).forEach((fileName) => {
-      const { path: filePath } = files[fileName];
+      const { path: filePath } = files[fileName] as File;
       const newFilePath = path.resolve(newPath.toString(), fileName);
       try {
         fs.renameSync(filePath, newFilePath);
@@ -36,9 +36,9 @@ export default class ImageService {
   }
 
   private async saveImage(files: Files): Promise<void> {
-    const imageList: CreateQuery<ImageDoc>[] = _.keys(files).map((fileName) => {
-      const file = files[fileName];
-      return ({ title: file.name, createdDate: Date.now(), size: file.size });
+    const imageList: DocumentDefinition<ImageDoc>[] = _.keys(files).map((fileName) => {
+      const file: File = files[fileName] as File;
+      return ({ title: file.name as string, createdDate: new Date(), size: file.size });
     });
     await this.imageRepository.createImages(imageList);
   }

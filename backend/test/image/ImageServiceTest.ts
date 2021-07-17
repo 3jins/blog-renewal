@@ -2,12 +2,12 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { should } from 'chai';
 import ImageService from '@src/image/ImageService';
-import { File, Files } from 'formidable';
+import { File, FileJSON, Files } from 'formidable';
 import fs from 'fs';
 import ImageRepository from '@src/image/ImageRepository';
 import { anyOfClass, capture, instance, mock, verify } from 'ts-mockito';
 import { ImageDoc } from '@src/image/Image';
-import { CreateQuery } from 'mongoose';
+import { DocumentDefinition } from 'mongoose';
 import { appPath } from '../data/testData';
 
 describe('ImageService test', () => {
@@ -30,8 +30,8 @@ describe('ImageService test', () => {
         path: filePath,
         name: fileName,
         type: 'application/octet-stream',
-        toJSON(): Object {
-          return {};
+        toJSON(): FileJSON {
+          return {} as FileJSON;
         },
       };
       return file;
@@ -41,7 +41,7 @@ describe('ImageService test', () => {
     imageService.uploadImage({ files });
     renameSyncStub.calledTwice.should.be.true;
     verify(imageRepository.createImages(anyOfClass(Array))).once();
-    const capturedImageList: CreateQuery<ImageDoc>[] = capture(imageRepository.createImages).last()[0];
+    const capturedImageList: DocumentDefinition<ImageDoc>[] = capture(imageRepository.createImages).last()[0];
     capturedImageList.map((capturedImage) => capturedImage.title).should.deep.equal(fileNameList);
   });
 });
