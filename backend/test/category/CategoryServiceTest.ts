@@ -25,7 +25,7 @@ describe('CategoryService test', () => {
   let categoryRepository: CategoryRepository;
 
   const {
-    category2: { categoryNo, name: categoryName, level: categoryLevel },
+    category2: { name: categoryName, level: categoryLevel },
     objectIdList: [categoryId],
   } = commonTestData;
 
@@ -38,7 +38,6 @@ describe('CategoryService test', () => {
   describe('findCategory test', () => {
     it('findCategory - full parameter', () => {
       const nameOnlyParamDto: FindCategoryParamDto = {
-        categoryNo,
         parentCategoryId: categoryId,
         name: categoryName,
         level: categoryLevel,
@@ -82,7 +81,7 @@ describe('CategoryService test', () => {
   describe('updateCategory test', () => {
     it('updateCategory - with full parameter', async () => {
       const paramDto: UpdateCategoryParamDto = {
-        categoryNo,
+        name: categoryName,
         categoryToBe: {
           parentCategoryId: categoryId,
           name: categoryName,
@@ -96,7 +95,7 @@ describe('CategoryService test', () => {
 
     it('updateCategory - with empty categoryToBe', async () => {
       const paramDto: UpdateCategoryParamDto = {
-        categoryNo,
+        name: categoryName,
         categoryToBe: {},
       };
       await errorShouldBeThrown(
@@ -110,7 +109,7 @@ describe('CategoryService test', () => {
   describe('deleteCategory test', () => {
     it('category delete test', async () => {
       const paramDto: DeleteCategoryParamDto = {
-        categoryNo,
+        name: categoryName,
       };
       await categoryService.deleteCategory(paramDto);
 

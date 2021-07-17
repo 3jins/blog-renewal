@@ -23,8 +23,8 @@ categoryRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, (ctx: Context) =
   const requestDto: FindCategoryRequestDto = getValidatedRequestDtoOf(FindCategoryRequestSchema, ctx.query);
 
   categoryService.findCategory(requestDto)
-    .then((categorys) => {
-      ctx.body = categorys;
+    .then((categories) => {
+      ctx.body = categories;
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });
 });
@@ -47,7 +47,7 @@ categoryRouter.patch(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, (ctx: Context)
     });
 });
 
-categoryRouter.delete(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:categoryNo`, (ctx: Context) => {
+categoryRouter.delete(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:name`, (ctx: Context) => {
   const requestDto: DeleteCategoryRequestDto = getValidatedRequestDtoOf(DeleteCategoryRequestSchema, ctx.params);
 
   categoryService.deleteCategory(requestDto)

@@ -1,7 +1,4 @@
-import { Types } from 'mongoose';
-
 export interface FindCategoryParamDto {
-  categoryNo?: number;
   parentCategoryId?: string;
   name?: string;
   level?: number;
@@ -18,10 +15,10 @@ export interface CategoryToBeParamDto {
 }
 
 export interface UpdateCategoryParamDto {
-  categoryNo: number;
+  name: string;
   categoryToBe: CategoryToBeParamDto;
 }
 
 export interface DeleteCategoryParamDto {
-  categoryNo: number;
+  name: string;
 }
