@@ -1,7 +1,6 @@
 import { Types } from 'mongoose';
 
 export interface FindCategoryRepoParamDto {
-  categoryNo?: number;
   parentCategoryId?: string;
   name?: string;
   level?: number;
@@ -18,10 +17,10 @@ export interface CategoryToBeRepoParamDto {
 }
 
 export interface UpdateCategoryRepoParamDto {
-  categoryNo: number;
+  name: string;
   categoryToBe: CategoryToBeRepoParamDto;
 }
 
 export interface DeleteCategoryRepoParamDto {
-  categoryNo: number;
+  name: string;
 }

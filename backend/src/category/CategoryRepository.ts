@@ -31,29 +31,28 @@ export default class CategoryRepository {
 
   public createCategory(paramDto: CreateCategoryRepoParamDto) {
     return useTransaction(async (session: ClientSession) => {
-      const categoryNo: number = await this.getNextCategoryNo(session);
       const parentCategoryLevel: number = await this.findParentCategoryLevel(session, paramDto.parentCategory);
       await Category
-        .insertMany({ categoryNo, level: parentCategoryLevel + 1, ...paramDto }, { session });
+        .insertMany({ level: parentCategoryLevel + 1, ...paramDto }, { session });
     });
   }
 
   public updateCategory(paramDto: UpdateCategoryRepoParamDto) {
     return useTransaction(async (session: ClientSession) => {
-      const { categoryNo, categoryToBe } = paramDto;
+      const { name, categoryToBe } = paramDto;
       const queryToUpdateCategory: UpdateQuery<CategoryDoc> = await this.makeQueryToUpdateCategory(session, categoryToBe);
       await Category
-        .updateOne({ categoryNo }, queryToUpdateCategory).session(session);
+        .updateOne({ name }, queryToUpdateCategory).session(session);
     });
   }
 
   public deleteCategory(paramDto: DeleteCategoryRepoParamDto) {
     return useTransaction(async (session: ClientSession) => {
-      const childCategoryList: CategoryDoc[] = await this.findChildCategoryList(session, paramDto.categoryNo);
+      const childCategoryList: CategoryDoc[] = await this.findChildCategoryList(session, paramDto.name);
       if (!_.isEmpty(childCategoryList)) {
         throw new BlogError(
           BlogErrorCode.CATEGORY_WITH_CHILDREN_CANNOT_BE_DELETED,
-          [childCategoryList.map((childCategory) => childCategory.categoryNo).join(', ')],
+          [childCategoryList.map((childCategory) => childCategory.name).join(', ')],
         );
       }
       await Category
@@ -62,11 +61,8 @@ export default class CategoryRepository {
   }
 
   private makeQueryToFindCategory(paramDto: FindCategoryRepoParamDto): FilterQuery<CategoryDoc> {
-    const { categoryNo, name, level } = paramDto;
+    const { name, level } = paramDto;
     const queryToFindCategory: FilterQuery<CategoryDoc> = {};
-    if (!_.isNil(categoryNo)) {
-      Object.assign(queryToFindCategory, { categoryNo });
-    }
     if (!_.isNil(name)) {
       Object.assign(queryToFindCategory, { name });
     }
@@ -95,14 +91,6 @@ export default class CategoryRepository {
       : categoryList.filter((category) => !_.isNil(category.parentCategory) && category.parentCategory._id.toString() === parentCategoryId);
   }
 
-  private async getNextCategoryNo(session: ClientSession): Promise<number> {
-    const lastCategory: CategoryDoc = await Category
-      .findOne()
-      .sort({ categoryNo: -1 })
-      .session(session) as CategoryDoc;
-    return _.isEmpty(lastCategory) ? 1 : lastCategory.categoryNo + 1;
-  }
-
   private async findParentCategoryLevel(session: ClientSession, parentCategoryId?: string | Types.ObjectId): Promise<number> {
     if (_.isNil(parentCategoryId)) {
       return -1;
@@ -116,13 +104,13 @@ export default class CategoryRepository {
     return parentCategory.level!;
   }
 
-  private async findChildCategoryList(session: ClientSession, categoryNo: number): Promise<CategoryDoc[]> {
+  private async findChildCategoryList(session: ClientSession, categoryName: string): Promise<CategoryDoc[]> {
     const category: (CategoryDoc | null) = await Category
-      .findOne({ categoryNo }, { _id: true }, { session });
+      .findOne({ name: categoryName }, { _id: true, name: true }, { session });
     if (category === null) {
-      throw new BlogError(BlogErrorCode.CATEGORY_NOT_FOUND, [String(categoryNo), 'categoryNo']);
+      throw new BlogError(BlogErrorCode.CATEGORY_NOT_FOUND, [String(categoryName), 'name']);
     }
     return Category
-      .find({ parentCategory: category.id }, { categoryNo: true }, { session });
+      .find({ parentCategory: category.id }, { name: true }, { session });
   }
 }

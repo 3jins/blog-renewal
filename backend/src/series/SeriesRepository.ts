@@ -30,7 +30,7 @@ export default class SeriesRepository {
     return useTransaction(async (session: ClientSession) => {
       const { postMetaList } = paramDto;
 
-      await this.validatepostMetaList(session, postMetaList);
+      await this.validatePostMetaList(session, postMetaList);
 
       // Create a series
       const series: SeriesDoc = (await Series
@@ -51,7 +51,7 @@ export default class SeriesRepository {
       const { originalName, seriesToBe } = paramDto;
       const { postMetaIdToBeAddedList, postMetaIdToBeRemovedList } = seriesToBe;
 
-      await this.validatepostMetaList(session, postMetaIdToBeAddedList);
+      await this.validatePostMetaList(session, postMetaIdToBeAddedList);
       const seriesId: string = await this.getSeriesIdByName(session, originalName);
 
       // Update series
@@ -98,13 +98,15 @@ export default class SeriesRepository {
     return { name: isOnlyExactNameFound ? name : new RegExp(paramDto.name!, 'i') };
   }
 
-  private async validatepostMetaList(session: ClientSession, postMetaIdList: (Types.ObjectId | string)[]): Promise<void> {
+  private async validatePostMetaList(session: ClientSession, postMetaIdList: (Types.ObjectId | string)[]): Promise<void> {
     const postMetaList: PostMetaDoc[] = await PostMeta
-      .find({ _id: { $in: postMetaIdList } }, { postNo: true, series: true }, { session });
+      .find({ _id: { $in: postMetaIdList } }, { postNo: true, series: true })
+      .populate('series')
+      .session(session);
 
     if (_.some(postMetaList, (postMeta) => !_.isNil(postMeta.series))) {
       const { postNo, series } = _.find(postMetaList, (postMeta) => !_.isNil(postMeta.series)) as PostMetaDoc;
-      throw new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postNo.toString(), series as string]);
+      throw new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postNo.toString(), series.name]);
     }
   }
 

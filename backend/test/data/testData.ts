@@ -23,35 +23,28 @@ export const common = {
     name: 'Yongha Woo',
   },
   category1: {
-    categoryNo: 1,
     name: 'software development',
   },
   category2: {
-    categoryNo: 2,
     name: 'web',
     level: 1,
   },
   category3: {
-    categoryNo: 3,
     name: 'backend',
     level: 2,
   },
   category4: {
-    categoryNo: 4,
     name: 'frontend',
     level: 2,
   },
   category5: {
-    categoryNo: 5,
     name: 'mobile',
     level: 1,
   },
   category6: {
-    categoryNo: 6,
     name: 'life',
   },
   category7: {
-    categoryNo: 7,
     name: 'etc',
     level: 0,
   },
@@ -79,6 +72,11 @@ export const common = {
   series2: {
     name: '네이버 취업기',
     thumbnailContent: '내 워라밸을 망치러 온 나의 구원자',
+    postMetaList: [],
+  },
+  series3: {
+    name: '블로그 개편기',
+    thumbnailContent: '기술블로그 개편에 진심인 편',
     postMetaList: [],
   },
   gifImage: {

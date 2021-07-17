@@ -1,7 +1,6 @@
 import { JSONSchemaType } from 'ajv';
 
 export interface FindCategoryRequestDto {
-  categoryNo?: number;
   parentCategoryId?: string;
   name?: string;
   level?: number;
@@ -18,19 +17,18 @@ export interface CategoryToBeRequestDto {
 }
 
 export interface UpdateCategoryRequestDto {
-  categoryNo: number;
+  name: string,
   categoryToBe: CategoryToBeRequestDto;
 }
 
 export interface DeleteCategoryRequestDto {
-  categoryNo: number,
+  name: string,
 }
 
 export const FindCategoryRequestSchema: JSONSchemaType<FindCategoryRequestDto> = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    categoryNo: { type: 'number', nullable: true },
     parentCategoryId: { type: 'string', nullable: true },
     name: { type: 'string', nullable: true },
     level: { type: 'number', nullable: true },
@@ -51,7 +49,7 @@ export const UpdateCategoryRequestSchema: JSONSchemaType<UpdateCategoryRequestDt
   type: 'object',
   additionalProperties: false,
   properties: {
-    categoryNo: { type: 'number', nullable: false },
+    name: { type: 'string', nullable: false },
     categoryToBe: {
       type: 'object',
       properties: {
@@ -61,14 +59,14 @@ export const UpdateCategoryRequestSchema: JSONSchemaType<UpdateCategoryRequestDt
       nullable: false,
     },
   },
-  required: ['categoryNo', 'categoryToBe'],
+  required: ['name', 'categoryToBe'],
 };
 
 export const DeleteCategoryRequestSchema: JSONSchemaType<DeleteCategoryRequestDto> = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    categoryNo: { type: 'number', nullable: false },
+    name: { type: 'string', nullable: false },
   },
-  required: ['categoryNo'],
+  required: ['name'],
 };

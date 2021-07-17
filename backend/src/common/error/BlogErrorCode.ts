@@ -83,7 +83,7 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
   ALREADY_BELONG_TO_ANOTHER_SERIES: {
     code: 'ALREADY_BELONG_TO_ANOTHER_SERIES',
     errorMessage: '이미 다른 시리즈에 포함된 게시물이 있습니다.',
-    loggingMessage: '이미 다른 시리즈에 포함된 게시물이 있습니다. (postNo: {0}, seriesId: {1})',
+    loggingMessage: '이미 다른 시리즈에 포함된 게시물이 있습니다. (postNo: {0}, seriesName: {1})',
     httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
     logLevel: LogLevel.ERROR,
   },

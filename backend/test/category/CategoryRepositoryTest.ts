@@ -70,17 +70,8 @@ describe('CategoryRepository test', () => {
       };
       const categories: CategoryDoc[] = await categoryRepository.findCategory(paramDto);
       categories.should.have.lengthOf(2);
-      categories[0].categoryNo.should.equal(catWeb.categoryNo);
-      categories[1].categoryNo.should.equal(catMobile.categoryNo);
-    });
-
-    it('findCategory - by categoryNo', async () => {
-      const paramDto: FindCategoryRepoParamDto = {
-        categoryNo: 5,
-      };
-      const categories: CategoryDoc[] = await categoryRepository.findCategory(paramDto);
-      categories.should.have.lengthOf(1);
-      categories[0].categoryNo.should.equal(catMobile.categoryNo);
+      categories[0]._id.should.deep.equal(catWeb._id);
+      categories[1]._id.should.deep.equal(catMobile._id);
     });
 
     it('findCategory - by name', async () => {
@@ -89,7 +80,7 @@ describe('CategoryRepository test', () => {
       };
       const categories: CategoryDoc[] = await categoryRepository.findCategory(paramDto);
       categories.should.have.lengthOf(1);
-      categories[0].categoryNo.should.equal(catBe.categoryNo);
+      categories[0]._id.should.deep.equal(catBe._id);
     });
 
     it('findCategory - by level', async () => {
@@ -98,9 +89,9 @@ describe('CategoryRepository test', () => {
       };
       const categories: CategoryDoc[] = await categoryRepository.findCategory(paramDto);
       categories.should.have.lengthOf(3);
-      categories[0].categoryNo.should.equal(catSwDev.categoryNo);
-      categories[1].categoryNo.should.equal(catLife.categoryNo);
-      categories[2].categoryNo.should.equal(catEtc.categoryNo);
+      categories[0]._id.should.deep.equal(catSwDev._id);
+      categories[1]._id.should.deep.equal(catLife._id);
+      categories[2]._id.should.deep.equal(catEtc._id);
     });
 
     it('findCategory - with empty parameter', async () => {
@@ -164,20 +155,6 @@ describe('CategoryRepository test', () => {
     });
   });
 
-  describe('getNextCategoryNo test', () => {
-    it('getNextCategoryNo - get defatul value', async () => {
-      const paramDto: CreateCategoryRepoParamDto = {
-        name: commonTestData.category1.name,
-      };
-      await categoryRepository.createCategory(paramDto);
-      const category: (CategoryDoc | null) = await Category
-        .findOne({ name: commonTestData.category1.name })
-        .session(session)
-        .lean();
-      category!.categoryNo.should.equal(1);
-    });
-  });
-
   describe('updateCategory test', () => {
     let catSwDev, catWeb, catBe, catFe; // eslint-disable-line
     beforeEach(async () => {
@@ -194,7 +171,7 @@ describe('CategoryRepository test', () => {
 
     it('updateCategory - change name', async () => {
       const paramDto: UpdateCategoryRepoParamDto = {
-        categoryNo: catWeb.categoryNo,
+        name: catWeb.name,
         categoryToBe: {
           name: commonTestData.category6.name,
         },
@@ -208,12 +185,12 @@ describe('CategoryRepository test', () => {
         .findOne({ name: commonTestData.category6.name }).session(session).lean();
       (categoryExpectedNotToBeFound === null).should.be.true;
       (categoryExpectedToBeFound !== null).should.be.true;
-      categoryExpectedToBeFound!.categoryNo.should.equal(commonTestData.category2.categoryNo);
+      categoryExpectedToBeFound!._id.should.deep.equal(catWeb._id);
     });
 
     it('updateCategory - change parentCategory', async () => {
       const paramDto: UpdateCategoryRepoParamDto = {
-        categoryNo: catFe.categoryNo,
+        name: catFe.name,
         categoryToBe: {
           parentCategoryId: catSwDev.id,
         },
@@ -222,9 +199,9 @@ describe('CategoryRepository test', () => {
       await categoryRepository.updateCategory(paramDto);
 
       const category: (CategoryDoc | null) = await Category
-        .findOne({ name: commonTestData.category4.name }).session(session).lean();
+        .findOne({ name: catFe.name }).session(session).lean();
       (category !== null).should.be.true;
-      category!.categoryNo.should.equal(commonTestData.category4.categoryNo);
+      category!._id.should.deep.equal(catFe._id);
       category!.parentCategory!.toString().should.equal(catSwDev.id);
       category!.level!.should.equal(catSwDev.level + 1);
     });
@@ -244,7 +221,7 @@ describe('CategoryRepository test', () => {
 
     it('deleteCategory - no child', async () => {
       const paramDto: DeleteCategoryRepoParamDto = {
-        categoryNo: catBe.categoryNo,
+        name: catBe.name,
       };
 
       await categoryRepository.deleteCategory(paramDto);
@@ -254,23 +231,23 @@ describe('CategoryRepository test', () => {
 
     it('deleteCategory - try deleting a category containing children', async () => {
       const paramDto: DeleteCategoryRepoParamDto = {
-        categoryNo: catWeb.categoryNo,
+        name: catWeb.name,
       };
 
       await errorShouldBeThrown(
-        new BlogError(BlogErrorCode.CATEGORY_WITH_CHILDREN_CANNOT_BE_DELETED, [`${catBe.categoryNo}, ${catFe.categoryNo}`]),
+        new BlogError(BlogErrorCode.CATEGORY_WITH_CHILDREN_CANNOT_BE_DELETED, [`${catBe.name}, ${catFe.name}`]),
         async (_paramDto) => categoryRepository.deleteCategory(_paramDto),
         paramDto,
       );
     });
 
-    it('deleteCategory - with wrong categoryNo', async () => {
+    it('deleteCategory - with wrong name', async () => {
       const paramDto: DeleteCategoryRepoParamDto = {
-        categoryNo: 1073741824,
+        name: '울려댔어사이렌텅빈길거리엔',
       };
 
       await errorShouldBeThrown(
-        new BlogError(BlogErrorCode.CATEGORY_NOT_FOUND, [String(paramDto.categoryNo), 'categoryNo']),
+        new BlogError(BlogErrorCode.CATEGORY_NOT_FOUND, [String(paramDto.name), 'name']),
         async (_paramDto) => categoryRepository.deleteCategory(_paramDto),
         paramDto,
       );

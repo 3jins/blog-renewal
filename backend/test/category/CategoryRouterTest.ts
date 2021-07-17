@@ -31,7 +31,8 @@ describe('Category router test', () => {
   let request: supertest.SuperTest<supertest.Test>;
 
   const {
-    category2: { categoryNo, name: categoryName, level: categoryLevel },
+    category2: { name: categoryName, level: categoryLevel },
+    category3: { name: categoryNameToBe },
     objectIdList: [categoryId],
   } = commonTestData;
 
@@ -45,7 +46,6 @@ describe('Category router test', () => {
   describe(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, () => {
     it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY} - normal case`, async () => {
       const requestDto: FindCategoryRequestDto = {
-        categoryNo,
         parentCategoryId: categoryId,
         name: categoryName,
         level: categoryLevel,
@@ -81,7 +81,6 @@ describe('Category router test', () => {
 
     it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY} - parameter error(type of value)`, async () => {
       const typeDistortedRequestDto = {
-        categoryNo,
         parentCategoryId: categoryId,
         name: categoryName,
         level: false,
@@ -139,9 +138,9 @@ describe('Category router test', () => {
   describe(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, () => {
     it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY} - normal case`, async () => {
       const requestDto: UpdateCategoryRequestDto = {
-        categoryNo,
+        name: categoryName,
         categoryToBe: {
-          name: categoryName,
+          name: categoryNameToBe,
           parentCategoryId: categoryId,
         },
       };
@@ -176,7 +175,7 @@ describe('Category router test', () => {
 
     it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY} - parameter error(type of value)`, async () => {
       const typeDistortedRequestDto = {
-        categoryNo,
+        name: categoryName,
         categoryToBe: true,
       };
 
@@ -198,25 +197,15 @@ describe('Category router test', () => {
         .thenResolve();
 
       await request
-        .delete(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/${categoryNo}`)
+        .delete(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/${categoryName}`)
         .expect(200);
-      verify(categoryService.deleteCategory(deepEqual<DeleteCategoryRequestDto>({ categoryNo }))).once();
+      verify(categoryService.deleteCategory(deepEqual<DeleteCategoryRequestDto>({ name: categoryName }))).once();
     });
 
     it(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY} - parameter error(parameter not passed)`, async () => {
       await request
         .delete(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`)
         .expect(http2.constants.HTTP_STATUS_NOT_FOUND);
-    });
-
-    it(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY} - parameter error(type of value)`, async () => {
-      await request
-        .delete(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/oneHundredTwentyFour`)
-        .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
-        .expect((res) => {
-          (!!(res.body.message)).should.be.true;
-          res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
-        });
     });
   });
 
