@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 export interface FindTagByNameDto {
-  name: string;
+  nameList: string[];
   isOnlyExactNameFound: boolean;
 }
 

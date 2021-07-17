@@ -100,8 +100,14 @@ export default class TagRepository {
     if (_.isNil(paramDto)) {
       return {};
     }
-    const { name, isOnlyExactNameFound } = paramDto!;
-    return { name: isOnlyExactNameFound ? name : new RegExp(paramDto!.name, 'i') };
+    const { nameList, isOnlyExactNameFound } = paramDto!;
+    return {
+      name: {
+        $in: isOnlyExactNameFound
+          ? nameList
+          : paramDto!.nameList.map((name) => new RegExp(name, 'i')),
+      },
+    };
   }
 
   private filterTagByPostMetaId(tagList: FilterQuery<TagDoc>, paramDto: FindTagByPostMetaIdDto | undefined): TagDoc[] {
