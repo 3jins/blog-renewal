@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { Files } from 'formidable';
 import config from 'config';
 import { Service } from 'typedi';
+import { CreateQuery } from 'mongoose';
 import BlogError from '@src/common/error/BlogError';
 import ImageRepository from '@src/image/ImageRepository';
 import { ImageDoc } from '@src/image/Image';
@@ -15,10 +16,10 @@ export default class ImageService {
   public constructor(private readonly imageRepository: ImageRepository) {
   }
 
-  public uploadImage(paramDto: UploadImageParamDto) {
+  public async uploadImage(paramDto: UploadImageParamDto): Promise<void> {
     const { files } = paramDto;
     this.moveImage(files);
-    this.saveImage(files);
+    await this.saveImage(files);
   }
 
   private moveImage(files: Files): void {
@@ -34,11 +35,11 @@ export default class ImageService {
     });
   }
 
-  private saveImage(files: Files): void {
-    const imageList: ImageDoc[] = _.keys(files).map((fileName) => {
+  private async saveImage(files: Files): Promise<void> {
+    const imageList: CreateQuery<ImageDoc>[] = _.keys(files).map((fileName) => {
       const file = files[fileName];
-      return ({ title: file.name, createdDate: new Date(), size: file.size });
+      return ({ title: file.name, createdDate: Date.now(), size: file.size });
     });
-    this.imageRepository.createImages(imageList);
+    await this.imageRepository.createImages(imageList);
   }
 }
