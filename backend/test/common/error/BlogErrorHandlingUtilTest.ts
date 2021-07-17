@@ -12,6 +12,7 @@ export default (leaveBlogErrorLogStub) => ({
 
     handleError(ctx, blogError);
     ctx.status.should.equal(errorCode.httpErrorCode);
+    // @ts-ignore
     ctx.body.message.should.equal(errorCode.errorMessage);
     leaveBlogErrorLogStub.calledOnce.should.be.true;
   },
@@ -23,6 +24,7 @@ export default (leaveBlogErrorLogStub) => ({
 
     handleError(ctx, new Error(errorMessage));
     ctx.status.should.equal(errorCode.httpErrorCode);
+    // @ts-ignore
     ctx.body.message.should.equal(errorCode.errorMessage);
     leaveBlogErrorLogStub.calledOnce.should.be.true;
     leaveBlogErrorLogStub.firstCall.firstArg.should.haveOwnProperty('_blogErrorCode');

@@ -1,21 +1,21 @@
 import _ from 'lodash';
 import { Service } from 'typedi';
 import Image, { ImageDoc } from '@src/image/Image';
-import { ClientSession, CreateQuery } from 'mongoose';
+import { ClientSession, DocumentDefinition } from 'mongoose';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
 @Service()
 export default class ImageRepository {
-  public async createImages(imageList: CreateQuery<ImageDoc>[]): Promise<void> {
+  public async createImages(imageList: DocumentDefinition<ImageDoc>[]): Promise<void> {
     return useTransaction(async (session: ClientSession) => {
       await this.validateFileNameDuplication(imageList, session);
       await Image.insertMany(imageList, { session });
     });
   }
 
-  private async validateFileNameDuplication(imageList: CreateQuery<ImageDoc>[], session: ClientSession): Promise<void> {
+  private async validateFileNameDuplication(imageList: DocumentDefinition<ImageDoc>[], session: ClientSession): Promise<void> {
     const imageTitleList: string[] = imageList.map((image) => image.title);
     const imageTitleListWithoutDuplication: string[] = _.uniq(imageTitleList);
     const isDuplicatedNameExistInImageParams = imageTitleListWithoutDuplication.length !== imageList.length;

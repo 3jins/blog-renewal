@@ -1,7 +1,7 @@
 import { should } from 'chai';
 import Image, { ImageDoc } from '@src/image/Image';
 import { common as commonTestData } from '@test/data/testData';
-import { ClientSession, Connection, CreateQuery } from 'mongoose';
+import { ClientSession, Connection, DocumentDefinition } from 'mongoose';
 import ImageRepository from '@src/image/ImageRepository';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { abortTestTransaction, replaceUseTransactionForTest } from '@test/TestUtil';
@@ -38,16 +38,16 @@ describe('ImageRepository test', () => {
   });
 
   it('createImages', async () => {
-    const imageCreateQueryList: CreateQuery<ImageDoc>[] = [commonTestData.gifImage, commonTestData.pngImage];
-    await imageRepository.createImages(imageCreateQueryList);
+    const imageDocumentDefinitionList: DocumentDefinition<ImageDoc>[] = [commonTestData.gifImage, commonTestData.pngImage];
+    await imageRepository.createImages(imageDocumentDefinitionList);
     const results = await Image.find().session(session).exec();
     results.should.have.lengthOf(2);
   });
 
   it('createImages - duplicated image file name', async () => {
-    const imageCreateQueryList: CreateQuery<ImageDoc>[] = [commonTestData.gifImage, commonTestData.gifImage];
+    const imageDocumentDefinitionList: DocumentDefinition<ImageDoc>[] = [commonTestData.gifImage, commonTestData.gifImage];
     try {
-      await imageRepository.createImages(imageCreateQueryList);
+      await imageRepository.createImages(imageDocumentDefinitionList);
     } catch (err) {
       (err instanceof BlogError).should.be.true;
       err.blogErrorCode.should.equal(BlogErrorCode.DUPLICATED_FILE_NAME);

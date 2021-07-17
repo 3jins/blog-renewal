@@ -1,5 +1,6 @@
-import { Document, model, Schema } from 'mongoose';
+import { Document, model, PopulatedDoc, Schema } from 'mongoose';
 import Language from '@src/common/constant/Language';
+import { ImageDoc } from '@src/image/Image';
 
 export interface PostDoc extends Document {
   postNo: number;
@@ -8,10 +9,10 @@ export interface PostDoc extends Document {
   renderedContent: string;
   language: Language;
   thumbnailContent: string;
-  thumbnailImage?: string;
+  thumbnailImage?: PopulatedDoc<ImageDoc>[];
   lastUpdatedDate: Date;
   isLatestVersion: boolean;
-  lastVersionPost?: string;
+  lastVersionPost?: PopulatedDoc<PostDoc>[];
 }
 
 export const postSchema = new Schema({
@@ -21,10 +22,10 @@ export const postSchema = new Schema({
   renderedContent: { type: String, required: true },
   language: { type: String, required: true },
   thumbnailContent: { type: String, required: true },
-  thumbnailImage: { type: Schema.Types.ObjectId, ref: 'image', required: false, default: null },
+  thumbnailImage: { type: 'ObjectId', ref: 'Image', required: false, default: null },
   lastUpdatedDate: { type: Date, required: true },
   isLatestVersion: { type: Boolean, required: true },
-  lastVersionPost: { type: Schema.Types.ObjectId, ref: 'post', required: false, default: null },
+  lastVersionPost: { type: 'ObjectId', ref: 'Post', required: false, default: null },
 });
 
-export default model<PostDoc>('post', postSchema, 'posts');
+export default model<PostDoc>('Post', postSchema, 'Posts');
