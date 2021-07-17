@@ -103,8 +103,8 @@ export default class SeriesRepository {
       .find({ _id: { $in: postMetaIdList } }, { postNo: true, series: true }, { session });
 
     if (_.some(postMetaList, (postMeta) => !_.isNil(postMeta.series))) {
-      const { postNo, series } = _.find(postMetaList, (postMeta) => !_.isNil(postMeta.series));
-      throw new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postNo, series.toString()]);
+      const { postNo, series } = _.find(postMetaList, (postMeta) => !_.isNil(postMeta.series)) as PostMetaDoc;
+      throw new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postNo.toString(), series as string]);
     }
   }
 

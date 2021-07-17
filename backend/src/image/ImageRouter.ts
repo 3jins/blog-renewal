@@ -17,8 +17,10 @@ imageRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.IMAGE}`, koaBody(koaBodyOption
   if (_.isEmpty(ctx.request.files)) {
     throw new Error(BlogErrorCode.FILE_NOT_UPLOADED.code);
   }
-  imageService.uploadImage({ files: ctx.request.files! });
-  ctx.status = 200;
+  imageService.uploadImage({ files: ctx.request.files! })
+    .then(() => {
+      ctx.status = 200;
+    });
 });
 
 export default imageRouter;
