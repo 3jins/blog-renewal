@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import Language from '@src/common/constant/Language';
 
 export interface CreatePostRepoParamDto {
+  postNo: number;
   title: string;
   rawContent: string;
   renderedContent: string;

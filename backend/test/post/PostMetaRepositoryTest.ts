@@ -74,7 +74,6 @@ describe('PostMetaRepository test', () => {
     it('createPostMeta', async () => {
       const tagIdList = tagList.map((tag) => tag._id);
       const paramDto: CreatePostMetaRepoParamDto = {
-        postNo: post.postNo,
         categoryId: categoryList[0]._id,
         tagIdList,
         seriesId: seriesList[0]._id,
