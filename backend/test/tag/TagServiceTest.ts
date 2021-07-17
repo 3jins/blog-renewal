@@ -47,7 +47,7 @@ describe('TagService test', () => {
       tagService.findTag(nameOnlyParamDto);
       verify(tagRepository.findTag(deepEqual<FindTagRepoParamDto>({
         findTagByNameDto: {
-          name: tagName,
+          nameList: [tagName],
           isOnlyExactNameFound: true,
         },
       }))).once();
@@ -77,7 +77,7 @@ describe('TagService test', () => {
       tagService.findTag(fullParamDto);
       verify(tagRepository.findTag(deepEqual<FindTagRepoParamDto>({
         findTagByNameDto: {
-          name: tagName,
+          nameList: [tagName],
           isOnlyExactNameFound: true,
         },
         findTagByPostMetaIdDto: {

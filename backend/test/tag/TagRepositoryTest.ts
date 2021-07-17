@@ -77,19 +77,20 @@ describe('TagRepository test', () => {
     it('findTag - by exact name', async () => {
       const paramDto: FindTagRepoParamDto = {
         findTagByNameDto: {
-          name: commonTestData.tag2.name,
+          nameList: [commonTestData.tag2.name, commonTestData.tag3.name],
           isOnlyExactNameFound: true,
         },
       };
       const tags: TagDoc[] = await tagRepository.findTag(paramDto);
-      tags.should.have.lengthOf(1);
-      tags[0].name.should.equal(commonTestData.tag2.name);
+      tags.should.have.lengthOf(2);
+      tags[0].name.should.equal(commonTestData.tag3.name);
+      tags[1].name.should.equal(commonTestData.tag2.name);
     });
 
     it('findTag - by name (like search)', async () => {
       const paramDto: FindTagRepoParamDto = {
         findTagByNameDto: {
-          name: '시간 앞에',
+          nameList: ['시간 앞에'],
           isOnlyExactNameFound: false,
         },
       };
@@ -132,7 +133,7 @@ describe('TagRepository test', () => {
           isAndCondition: true,
         },
         findTagByNameDto: {
-          name: commonTestData.tag3.name,
+          nameList: [commonTestData.tag3.name],
           isOnlyExactNameFound: true,
         },
       };

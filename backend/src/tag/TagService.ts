@@ -50,7 +50,7 @@ export default class TagService {
   private addNameQueryToFindTagRepoParamDto(repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void {
     const { name, isOnlyExactNameFound } = paramDto;
     if (!_.isNil(name) && !_.isNil(isOnlyExactNameFound)) {
-      const findTagByNameDto: FindTagByNameDto = { name: name!, isOnlyExactNameFound: isOnlyExactNameFound! };
+      const findTagByNameDto: FindTagByNameDto = { nameList: [name!], isOnlyExactNameFound: isOnlyExactNameFound! };
       Object.assign(repoParamDto, { findTagByNameDto });
     }
   }
