@@ -12,12 +12,12 @@ export const useTransaction = async (callback: Function): Promise<any> => {
   try {
     const result = await callback(session);
     await session.commitTransaction();
-    session.endSession();
+    await session.endSession();
     leaveLog('Transaction committed well!', LogLevel.INFO);
     return result;
   } catch (err) {
     await session.abortTransaction();
-    session.endSession();
+    await session.endSession();
     if (err instanceof (BlogError)) { // known error
       throw err;
     }

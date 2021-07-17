@@ -12,4 +12,4 @@ export const imageSchema = new mongoose.Schema({
   size: { type: Number, required: true },
 });
 
-export default mongoose.model<ImageDoc>('image', imageSchema, 'images');
+export default mongoose.model<ImageDoc>('Image', imageSchema, 'Images');

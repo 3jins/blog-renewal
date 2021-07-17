@@ -1,10 +1,12 @@
-import { Document, model, Schema } from 'mongoose';
+import { Document, model, PopulatedDoc, Schema } from 'mongoose';
+import { PostDoc } from '@src/post/model/Post';
+import { MemberDoc } from '@src/member/Member';
 
 export interface CommentDoc extends Document {
-  post: Schema.Types.ObjectId;
-  member: Schema.Types.ObjectId;
-  refComment?: Schema.Types.ObjectId;
-  lastVersionComment?: Schema.Types.ObjectId;
+  post: PopulatedDoc<PostDoc>[];
+  member: PopulatedDoc<MemberDoc>[];
+  refComment?: PopulatedDoc<CommentDoc>[];
+  lastVersionComment?: PopulatedDoc<CommentDoc>[];
   isPostAuthor: boolean;
   content: string;
   createdDate?: Date;
@@ -12,14 +14,14 @@ export interface CommentDoc extends Document {
 }
 
 export const commentSchema = new Schema({
-  post: { type: Schema.Types.ObjectId, ref: 'post', required: true },
-  member: { type: Schema.Types.ObjectId, ref: 'Member', required: true },
-  refComment: { type: Schema.Types.ObjectId, ref: 'comment', default: null },
-  lastVersionComment: { type: Schema.Types.ObjectId, ref: 'comment', default: null },
+  post: { type: 'ObjectId', ref: 'Post', required: true },
+  member: { type: 'ObjectId', ref: 'Member', required: true },
+  refComment: { type: 'ObjectId', ref: 'Comment', default: null },
+  lastVersionComment: { type: 'ObjectId', ref: 'Comment', default: null },
   isPostAuthor: { type: Boolean, required: true },
   content: { type: String, required: true },
   createdDate: { type: Date, required: true, default: Date.now },
   isLatestVersion: { type: Boolean, required: true, default: true },
 });
 
-export default model<CommentDoc>('comment', commentSchema, 'comments');
+export default model<CommentDoc>('Comment', commentSchema, 'Comments');

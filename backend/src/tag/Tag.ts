@@ -1,13 +1,14 @@
-import { Document, model, Schema } from 'mongoose';
+import { Document, model, PopulatedDoc, Schema } from 'mongoose';
+import { PostMetaDoc } from '@src/post/model/PostMeta';
 
 export interface TagDoc extends Document {
   name: string;
-  postMetaList: string[];
+  postMetaList: PopulatedDoc<PostMetaDoc>,
 }
 
 export const tagSchema = new Schema({
   name: { type: String, required: true, unique: true },
-  postMetaList: [{ type: Schema.Types.ObjectId, ref: 'postMeta' }],
+  postMetaList: [{ type: 'ObjectId', ref: 'PostMeta' }],
 });
 
-export default model<TagDoc>('tag', tagSchema, 'tags');
+export default model<TagDoc>('Tag', tagSchema, 'Tags');

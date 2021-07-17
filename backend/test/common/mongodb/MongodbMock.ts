@@ -1,5 +1,6 @@
 /* eslint-disable no-empty-function */
-import { ClientSession, Connection, Promise } from 'mongoose';
+import { ClientSession } from 'mongodb';
+import { Connection, Promise } from 'mongoose';
 
 // @ts-ignore
 export class ClientSessionForTest implements ClientSession {
@@ -12,7 +13,8 @@ export class ClientSessionForTest implements ClientSession {
 
   commitTransaction = (): Promise<void> => Promise.resolve(undefined);
 
-  endSession = (): void => {};
+  // eslint-disable-next-line no-unused-vars
+  endSession = async (options?: Object): Promise<void> => {};
 
   startTransaction = (): void => {};
 }
