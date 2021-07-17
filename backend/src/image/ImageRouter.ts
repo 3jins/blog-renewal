@@ -1,3 +1,4 @@
+import * as http2 from 'http2';
 import Router from '@koa/router';
 import koaBody from 'koa-body';
 import { Context } from 'koa';
@@ -19,7 +20,7 @@ imageRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.IMAGE}`, koaBody(koaBodyOption
   }
   imageService.uploadImage({ files: ctx.request.files! })
     .then(() => {
-      ctx.status = 200;
+      ctx.status = http2.constants.HTTP_STATUS_CREATED;
     });
 });
 
