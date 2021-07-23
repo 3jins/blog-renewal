@@ -152,7 +152,7 @@ export const common = {
   },
 
   simpleText: 'Just quit, 채워진 바둑판처럼 그만 둬',
-  objectIdList: ['c0ffee0f0ff1cecafe15900d', 'c0ffee0f0ff1cecafe50900d', 'c0ffee0f0ff1cecafe15baad'],
+  objectIdList: ['c0ffee0f0ff1cecafe15900d', 'c0ffee0f0ff1cecafe50900d', 'c0ffee0f0ff1cecafe15baad', '7a57e0f0ff1cec0ffee50bad'],
   dateList: [new Date('1993-07-13T09:12:34.567+0900'), new Date('2019-10-24T19:03:12.345+0900'), new Date('2021-07-11T15:25:23.456+0900')],
 };
 

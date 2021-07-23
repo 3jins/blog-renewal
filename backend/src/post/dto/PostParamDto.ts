@@ -1,13 +1,19 @@
 import { Types } from 'mongoose';
 import { File } from 'formidable';
+import Language from '@src/common/constant/Language';
 
-export interface CreatePostParamDto {
+export interface CreateNewPostParamDto {
+  // post meta
+  categoryName?: string;
+  tagNameList?: string[];
+  seriesName?: string;
+  isPrivate?: boolean;
+
+  // post
   post: File;
-  title: string;
-  rawContent: string;
-  renderedContent: string;
-  isLatestVersion: boolean;
-  lastVersionPost?: Types.ObjectId;
+  language: Language;
+  thumbnailContent: string;
+  thumbnailImageId?: string;
 }
 
 export interface AddPostParamDto {
