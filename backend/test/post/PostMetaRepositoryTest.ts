@@ -10,7 +10,6 @@ import Tag, { TagDoc } from '@src/tag/Tag';
 import Category, { CategoryDoc } from '@src/category/Category';
 import Series, { SeriesDoc } from '@src/series/Series';
 import PostMeta, { PostMetaDoc } from '@src/post/model/PostMeta';
-import Post, { PostDoc } from '@src/post/model/Post';
 
 describe('PostMetaRepository test', () => {
   let sandbox;
@@ -44,7 +43,6 @@ describe('PostMetaRepository test', () => {
     let tagList: TagDoc[];
     let categoryList: CategoryDoc[];
     let seriesList: SeriesDoc[];
-    let post: PostDoc;
 
     beforeEach(async () => {
       tagList = await Tag.insertMany([{
@@ -65,34 +63,33 @@ describe('PostMetaRepository test', () => {
         ...commonTestData.series1,
         ...commonTestData.series2,
       }], { session });
-      [post] = await Post.insertMany([{
-        ...commonTestData.post1,
-        lastUpdatedDate: commonTestData.dateList[0],
-      }], { session });
     });
 
     it('createPostMeta', async () => {
+      const paramDto1: CreatePostMetaRepoParamDto = {
+        createdDate: commonTestData.dateList[0],
+      };
       const tagIdList = tagList.map((tag) => tag._id);
-      const paramDto: CreatePostMetaRepoParamDto = {
-        postNo: post.postNo,
+      const paramDto2: CreatePostMetaRepoParamDto = {
         categoryId: categoryList[0]._id,
         tagIdList,
         seriesId: seriesList[0]._id,
-        createdDate: commonTestData.dateList[0],
+        createdDate: commonTestData.dateList[1],
       };
 
-      await postMetaRepository.createPostMeta(paramDto);
+      await postMetaRepository.createPostMeta(paramDto1);
+      await postMetaRepository.createPostMeta(paramDto2);
 
-      const [postMeta]: PostMetaDoc[] = await PostMeta.find().session(session);
-      postMeta.postNo.should.equal(post.postNo);
-      postMeta.category!.should.deep.equal(categoryList[0]._id);
-      postMeta.tagList!.should.deep.equal(tagIdList);
-      postMeta.series!.should.deep.equal(seriesList[0]._id);
-      postMeta.createdDate!.should.deep.equal(commonTestData.dateList[0]);
-      postMeta.isDeleted!.should.be.false;
-      postMeta.commentCount!.should.equal(0);
-      postMeta.isPrivate!.should.be.false;
-      postMeta.isDeprecated!.should.be.false;
+      const [postMeta1, postMeta2]: PostMetaDoc[] = await PostMeta.find().sort({ postNo: 1 }).session(session);
+      postMeta2.postNo.should.equal(postMeta1.postNo + 1);
+      postMeta2.category!.should.deep.equal(categoryList[0]._id);
+      postMeta2.tagList!.should.deep.equal(tagIdList);
+      postMeta2.series!.should.deep.equal(seriesList[0]._id);
+      postMeta2.createdDate!.should.deep.equal(commonTestData.dateList[1]);
+      postMeta2.isDeleted!.should.be.false;
+      postMeta2.commentCount!.should.equal(0);
+      postMeta2.isPrivate!.should.be.false;
+      postMeta2.isDeprecated!.should.be.false;
     });
   });
 });

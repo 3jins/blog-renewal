@@ -10,4 +10,8 @@ const ENDPOINT = {
   TAG: '/tag',
 };
 
-export { PREFIX, ENDPOINT };
+const BEHAVIOR = {
+  NEW: '/new',
+};
+
+export { PREFIX, ENDPOINT, BEHAVIOR };
