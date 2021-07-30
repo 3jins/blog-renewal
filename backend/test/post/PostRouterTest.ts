@@ -17,7 +17,7 @@ Container.set(PostService, instance(postService));
 const PostRouter = require('@src/post/PostRouter');
 
 describe('Post router test', () => {
-  const FILE_NAME = 'test.md';
+  const FILE_NAME = 'gfm+.md';
 
   let server: Server;
   let request: supertest.SuperTest<supertest.Test>;

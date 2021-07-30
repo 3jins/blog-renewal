@@ -8,6 +8,7 @@
 # testing
 **/.nyc_output
 **/coverage
+/backend/test/data/rendered
 
 # local
 /backend/appData

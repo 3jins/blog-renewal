@@ -7,6 +7,7 @@ import PostRepository from '@src/post/repository/PostRepository';
 import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
+import { renderContent } from '@src/common/markdown/MarkedUtil';
 import { CreatePostMetaRepoParamDto } from '@src/post/dto/PostMetaRepoParamDto';
 import { CreateNewPostParamDto } from '@src/post/dto/PostParamDto';
 import { CreatePostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
@@ -72,7 +73,7 @@ export default class PostService {
   private makeCreatePostRepoParamDto(postNo: number, paramDto: CreateNewPostParamDto, currentDate: Date): CreatePostRepoParamDto {
     const { post } = paramDto;
     const rawContent: string = this.readPostContent(post.path);
-    const renderedContent = this.renderContent(rawContent);
+    const renderedContent = renderContent(rawContent);
     const createPostRepoParamDto: CreatePostRepoParamDto = {
       postNo,
       title: post.name as string,
@@ -91,10 +92,5 @@ export default class PostService {
 
   private readPostContent(path: string): string {
     return fs.readFileSync(path).toString();
-  }
-
-  private renderContent(rawContent: string): string {
-    // TODO: 렌더링 로직 구현
-    return rawContent;
   }
 }

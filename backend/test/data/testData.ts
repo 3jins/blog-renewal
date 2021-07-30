@@ -7,6 +7,7 @@ export const appPath = {
   root,
   testRoot: `${root}/test`,
   testData: `${root}/test/data`,
+  renderedHtml: `${root}/test/data/rendered`,
 };
 
 export const common = {

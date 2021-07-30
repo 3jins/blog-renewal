@@ -40,6 +40,5 @@ describe('Router error handling test', () => {
 
   after(() => {
     endApp(server);
-    console.log('RouterErrorHandlingTest.after');
   });
 });
