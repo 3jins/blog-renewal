@@ -1,6 +1,9 @@
 import { ClientSession } from 'mongoose';
 import * as TransactionUtil from '@src/common/mongodb/TransactionUtil';
 import BlogError from '@src/common/error/BlogError';
+import { appPath } from '@test/data/testData';
+import fs from 'fs';
+import { File, FileJSON } from 'formidable';
 
 export const replaceUseTransactionForTest = async (sandbox, session: ClientSession): Promise<any> => sandbox.replace(
   TransactionUtil,
@@ -41,4 +44,22 @@ export const errorShouldBeThrown = async (errorShouldBe: Error, callback: Functi
     }
   }
   isAnyErrorThrown.should.be.true;
+};
+
+export const extractFileInfoFromRawFile = (fileName: string): { file: File, fileContent: string } => {
+  const filePath = `${appPath.testData}/${fileName}`;
+  const fileStream: Buffer = fs.readFileSync(filePath);
+  const fileContent: string = fileStream.toString();
+  const fileStat: fs.Stats = fs.statSync(filePath);
+  const file: File = {
+    size: fileStream.byteLength,
+    path: filePath,
+    name: fileName,
+    type: 'application/octet-stream',
+    lastModifiedDate: fileStat.mtime,
+    toJSON(): FileJSON {
+      return {} as FileJSON;
+    },
+  };
+  return { file, fileContent };
 };
