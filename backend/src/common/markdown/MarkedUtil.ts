@@ -2,8 +2,9 @@ import _ from 'lodash';
 import marked, { Tokenizer, TokensList } from 'marked';
 import hljs from 'highlight.js';
 import katex from 'katex';
+import { Heading } from '@src/post/model/Post';
 
-export const renderContent = (rawContent: string) => {
+export const renderContent = (rawContent: string): { renderedContent: string, toc: Heading[] } => {
   const MATH: string = 'Math';
 
   const renderer = {
@@ -146,6 +147,10 @@ export const renderContent = (rawContent: string) => {
       }
     });
 
-  // TODO: tokenList로부터 TOC 추출
-  return marked.parser(tokenList);
+  const toc: Heading[] = (tokenList
+    .filter((token) => token.type === 'heading') as Heading[])
+    .map((token) => ({ depth: token.depth, text: token.text }));
+  const renderedContent: string = marked.parser(tokenList);
+
+  return { renderedContent, toc };
 };

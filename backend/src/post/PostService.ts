@@ -73,12 +73,13 @@ export default class PostService {
   private makeCreatePostRepoParamDto(postNo: number, paramDto: CreateNewPostParamDto, currentDate: Date): CreatePostRepoParamDto {
     const { post } = paramDto;
     const rawContent: string = this.readPostContent(post.path);
-    const renderedContent = renderContent(rawContent);
+    const { renderedContent, toc } = renderContent(rawContent);
     const createPostRepoParamDto: CreatePostRepoParamDto = {
       postNo,
       title: post.name as string,
       rawContent,
       renderedContent,
+      toc,
       language: paramDto.language,
       thumbnailContent: paramDto.thumbnailContent,
       lastUpdatedDate: currentDate,
