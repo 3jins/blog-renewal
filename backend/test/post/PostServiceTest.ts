@@ -253,7 +253,6 @@ describe('PostService test', () => {
     });
 
     it('content rendering test - GFM + alpha', async () => {
-      // TODO: toc 렌더링하는 것도 추가
       fileName = 'gfm+';
       const { file } = extractFileInfoFromRawFile(`${fileName}.md`);
       const serviceParamDto: CreateNewPostParamDto = {
@@ -267,7 +266,28 @@ describe('PostService test', () => {
 
       verify(postRepository.createPost(anything())).once();
       const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).last();
-      renderedHtml = createPostRepoParamDto.renderedContent;
+      createPostRepoParamDto.toc.should.deep.equal([
+        { depth: 2, text: 'ul/li' },
+        { depth: 3, text: 'only plain text' },
+        { depth: 3, text: 'with other elements' },
+        { depth: 2, text: '테이블' },
+        { depth: 3, text: 'list indentation 없음 / 2 x 3' },
+        { depth: 3, text: 'list indentation 1단계 (2 spaces) / 2 x 3' },
+        { depth: 2, text: '강조문법' },
+        { depth: 3, text: 'bold' },
+        { depth: 3, text: 'italic' },
+        { depth: 3, text: 'bold and italic' },
+        { depth: 3, text: 'strike-out' },
+        { depth: 3, text: 'should be excluded in code blocks' },
+        { depth: 3, text: 'should be excluded in inline code' },
+        { depth: 2, text: 'Raw HTML' },
+        { depth: 3, text: 'list indentation 없음' },
+        { depth: 3, text: 'list indentation 1단계 (2 spaces)' },
+        { depth: 2, text: 'New Lines' },
+        { depth: 3, text: 'single new line between normal lines' },
+        { depth: 3, text: 'two new lines between normal lines' },
+        { depth: 3, text: 'three new lines between normal lines' },
+      ]);
     });
 
     it('content rendering test - code blocks', async () => {
@@ -284,7 +304,18 @@ describe('PostService test', () => {
 
       verify(postRepository.createPost(anything())).once();
       const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).last();
-      renderedHtml = createPostRepoParamDto.renderedContent;
+      createPostRepoParamDto.toc.should.deep.equal([
+        { depth: 2, text: '코드' },
+        { depth: 3, text: 'list indentation 없음' },
+        { depth: 3, text: 'list indentation 1단계 (tab)' },
+        { depth: 3, text: 'list indentation 1단계 (2 spaces)' },
+        { depth: 3, text: 'list indentation 1단계 (4 spaces)' },
+        { depth: 3, text: 'list indentation 2단계 (tab)' },
+        { depth: 3, text: 'list indentation 2단계 (2 spaces)' },
+        { depth: 3, text: 'list indentation 2단계 (4 spaces)' },
+        { depth: 3, text: 'list indentation 2단계 (tab & 2 spaces mixed)' },
+        { depth: 3, text: 'inline code' },
+      ]);
     });
 
     it('content rendering test - mathematical expressions', async () => {
@@ -302,6 +333,25 @@ describe('PostService test', () => {
       verify(postRepository.createPost(anything())).once();
       const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).last();
       renderedHtml = createPostRepoParamDto.renderedContent;
+      createPostRepoParamDto.toc.should.deep.equal([
+        { depth: 2, text: '수식 (block)' },
+        { depth: 3, text: '간단한 수식' },
+        { depth: 3, text: 'list indentation 없음' },
+        { depth: 3, text: 'list indentation 1단계 (tab)' },
+        { depth: 3, text: 'list indentation 1단계 (2 spaces)' },
+        { depth: 3, text: 'list indentation 1단계 (4 spaces)' },
+        { depth: 3, text: 'list indentation 2단계 (tab)' },
+        { depth: 3, text: 'list indentation 2단계 (2 spaces)' },
+        { depth: 3, text: 'list indentation 2단계 (4 spaces)' },
+        { depth: 2, text: '수식 (inline)' },
+        { depth: 3, text: 'list indentation 없음' },
+        { depth: 3, text: 'list indentation 1단계 (tab)' },
+        { depth: 3, text: 'list indentation 1단계 (2 spaces)' },
+        { depth: 3, text: 'list indentation 1단계 (4 spaces)' },
+        { depth: 3, text: 'list indentation 2단계 (tab)' },
+        { depth: 3, text: 'list indentation 2단계 (2 spaces)' },
+        { depth: 3, text: 'list indentation 2단계 (4 spaces)' },
+      ]);
     });
   });
 });
