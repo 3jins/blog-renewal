@@ -2,5 +2,10 @@
   "extends": "@istanbuljs/nyc-config-typescript",
   "reporter": ["html", "text"],
   "all": true,
-  "check-coverage": true
+  "check-coverage": true,
+  "exclude": [
+    "test/",
+    "coverage/",
+    "src/common/markdown/MarkedUtil.ts"
+  ]
 }
