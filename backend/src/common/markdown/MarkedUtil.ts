@@ -15,6 +15,82 @@ export const renderContent = (rawContent: string) => {
   };
 
   const tokenizer: Tokenizer = {
+    /**
+     * emStrong
+     *
+     * - Little fix of Copy-and-paste from emStrong tokenizer code of `markedjs` library.
+     *   - v2.1.3
+     *   - https://github.com/markedjs/marked/blob/825a9f82af05448d85618bbac6ade8fbf9df286b/src/Tokenizer.js#L549-L609
+     *   - https://github.com/markedjs/marked/blob/825a9f82af05448d85618bbac6ade8fbf9df286b/src/rules.js#L176-L182
+     * - Check this issue:
+     *   - https://github.com/markedjs/marked/issues/2154#issuecomment-890300422
+     */
+    // @ts-ignore
+    emStrong(src, maskedSrc, prevChar = '') {
+      /* eslint-disable */
+      const rules = {
+        lDelim: /^(?:\*+(?:([_])|[^\s*]))|^_+(?:([*])|([^\s_]))/,
+        rDelimAst: /__[^_*]*?\*[^_*]*?__|[_](\*+)(?=[\s]|$)|[^*_\s](\*+)(?=[_\s]|$)|[_\s](\*+)(?=[^*_\s])|[\s](\*+)(?=[_])|[_](\*+)(?=[_])|[^*_\s](\*+)(?=[^*_\s])/,
+        rDelimUnd: /\*\*[^_*]*?_[^_*]*?\*\*|[*](_+)(?=[\s]|$)|[^*_\s](_+)(?=[*\s]|$)|[*\s](_+)(?=[^*_\s])|[\s](_+)(?=[*])|[*](_+)(?=[*])/,
+      };
+
+      let match = rules.lDelim.exec(src);
+      if (!match) return;
+
+      if (match[3] && prevChar.match(/[\p{L}\p{N}]/u)) return;
+
+      const nextChar = match[1] || match[2] || '';
+
+      if (!nextChar || (nextChar && (prevChar === ''))) {
+        const lLength = match[0].length - 1;
+        let rDelim, rLength, delimTotal = lLength, midDelimTotal = 0;
+
+        const endReg = match[0][0] === '*' ? rules.rDelimAst : rules.rDelimUnd;
+        endReg.lastIndex = 0;
+
+        maskedSrc = maskedSrc.slice(-1 * src.length + lLength);
+
+        while ((match = endReg.exec(maskedSrc)) != null) {
+          rDelim = match[1] || match[2] || match[3] || match[4] || match[5] || match[6];
+          if (!rDelim) {
+            continue;
+          }
+
+          rLength = rDelim.length;
+
+          if (match[3] || match[4]) {
+            delimTotal += rLength;
+            continue;
+          }
+          if ((match[5] || match[6]) && (lLength % 3 && !((lLength + rLength) % 3))) {
+            midDelimTotal += rLength;
+            continue;
+          }
+
+          delimTotal -= rLength;
+
+          if (delimTotal > 0) continue;
+
+          rLength = Math.min(rLength, rLength + delimTotal + midDelimTotal);
+
+          if (Math.min(lLength, rLength) % 2) {
+            return {
+              type: 'em',
+              raw: src.slice(0, lLength + match.index + rLength + 1),
+              text: src.slice(1, lLength + match.index + rLength),
+            };
+          }
+
+          return {
+            type: 'strong',
+            raw: src.slice(0, lLength + match.index + rLength + 1),
+            text: src.slice(2, lLength + match.index + rLength - 1),
+          };
+        }
+      }
+      /* eslint-enable */
+    },
+
     // @ts-ignore
     inlineText(src) {
       const cap = src.match(/(\s*)([^$\n]*)\$([^$\n]+)\$([^$\n]*)/);
