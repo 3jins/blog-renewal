@@ -7,7 +7,7 @@ import PostRepository from '@src/post/repository/PostRepository';
 import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
-import { renderContent } from '@src/common/markdown/MarkedUtil';
+import { renderContent } from '@src/common/marked/MarkedContentRenderingUtil';
 import { CreatePostMetaRepoParamDto } from '@src/post/dto/PostMetaRepoParamDto';
 import { CreateNewPostParamDto } from '@src/post/dto/PostParamDto';
 import { CreatePostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
@@ -71,17 +71,17 @@ export default class PostService {
   }
 
   private makeCreatePostRepoParamDto(postNo: number, paramDto: CreateNewPostParamDto, currentDate: Date): CreatePostRepoParamDto {
-    const { post } = paramDto;
+    const { post, language, thumbnailContent } = paramDto;
     const rawContent: string = this.readPostContent(post.path);
-    const { renderedContent, toc } = renderContent(rawContent);
+    const { renderedContent, toc, defaultThumbnailContent } = renderContent(rawContent);
     const createPostRepoParamDto: CreatePostRepoParamDto = {
       postNo,
       title: post.name as string,
       rawContent,
       renderedContent,
       toc,
-      language: paramDto.language,
-      thumbnailContent: paramDto.thumbnailContent,
+      language,
+      thumbnailContent: _.isNil(thumbnailContent) ? defaultThumbnailContent : thumbnailContent,
       lastUpdatedDate: currentDate,
       isLatestVersion: true,
     };

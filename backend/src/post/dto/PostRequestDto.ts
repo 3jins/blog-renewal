@@ -10,7 +10,7 @@ export interface CreateNewPostRequestDto {
 
   // post
   language: Language;
-  thumbnailContent: string;
+  thumbnailContent?: string;
   thumbnailImageId?: string;
 }
 
@@ -24,8 +24,8 @@ export const CreateNewPostRequestSchema: JSONSchemaType<CreateNewPostRequestDto>
     isPrivate: { type: 'boolean', nullable: true },
 
     language: { type: 'string', nullable: false },
-    thumbnailContent: { type: 'string', nullable: false },
+    thumbnailContent: { type: 'string', nullable: true },
     thumbnailImageId: { type: 'string', nullable: true },
   },
-  required: ['language', 'thumbnailContent'],
+  required: ['language'],
 };
