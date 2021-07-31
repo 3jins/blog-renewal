@@ -3,8 +3,9 @@ import marked, { Tokenizer, TokensList } from 'marked';
 import hljs from 'highlight.js';
 import katex from 'katex';
 import { Heading } from '@src/post/model/Post';
+import { makeDefaultThumbnailContent, makeToc } from '@src/common/marked/MarkedMetaDataUtil';
 
-export const renderContent = (rawContent: string): { renderedContent: string, toc: Heading[] } => {
+export const renderContent = (rawContent: string): { renderedContent: string, toc: Heading[], defaultThumbnailContent: string } => {
   const MATH: string = 'Math';
 
   const renderer = {
@@ -147,10 +148,9 @@ export const renderContent = (rawContent: string): { renderedContent: string, to
       }
     });
 
-  const toc: Heading[] = (tokenList
-    .filter((token) => token.type === 'heading') as Heading[])
-    .map((token) => ({ depth: token.depth, text: token.text }));
   const renderedContent: string = marked.parser(tokenList);
+  const toc: Heading[] = makeToc(tokenList);
+  const defaultThumbnailContent: string = makeDefaultThumbnailContent(tokenList);
 
-  return { renderedContent, toc };
+  return { renderedContent, toc, defaultThumbnailContent };
 };

@@ -12,7 +12,7 @@ export interface CreateNewPostParamDto {
   // post
   post: File;
   language: Language;
-  thumbnailContent: string;
+  thumbnailContent?: string;
   thumbnailImageId?: string;
 }
 

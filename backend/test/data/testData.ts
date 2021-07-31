@@ -97,7 +97,6 @@ export const common = {
     renderedContent: '<h2>온 김에 스프링하기</h2><p>왜 우리는 노드만으로 행복할 수 없는가</p>',
     toc: [{ depth: 2, text: '온 김에 스프링하기' }],
     language: Language.KO,
-    thumbnailContent: '고양이',
     isLatestVersion: true,
   },
   post1DataToBeUpdatedFirst: {
@@ -115,7 +114,6 @@ export const common = {
     renderedContent: '<p>심슨가족 시리즈의 무대가 되는 도시다. Pivotal의 Spring과는 별 관계가 없다.</p>',
     toc: [],
     language: Language.KO,
-    thumbnailContent: '강아지',
     isLatestVersion: true,
   },
   post2En: {
@@ -124,7 +122,6 @@ export const common = {
     rawContent: 'It\'s the city set for Simpson series. It has little related points with Spring of Pivotal.',
     renderedContent: '<p>It\'s the city set for Simpson series. It has little related points with Spring of Pivotal.</p>',
     language: Language.EN,
-    thumbnailContent: 'sob',
     isLatestVersion: true,
   },
   post3: {
@@ -133,7 +130,6 @@ export const common = {
     rawContent: '걔가 누군지는 잘 모르겠는데 우시앞무선은 장난 아니게 좋더라',
     renderedContent: '<p>걔가 누군지는 잘 모르겠는데 우시앞무선은 장난 아니게 좋더라</p>',
     language: Language.KO,
-    thumbnailContent: '너무 빨리 지나가',
     isLatestVersion: true,
   },
   postMetaIdList: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439022', '507f1f77bcf86cd799439033'],

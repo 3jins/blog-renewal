@@ -57,10 +57,11 @@ describe('PostService test', () => {
       ({ file, fileContent } = extractFileInfoFromRawFile('gfm+.md'));
     });
 
-    it('createNewPost test - categoryName: X, seriesName: X, tagNameList: X, isPrivate: X, thumbnailImageId: X', async () => {
+    it('createNewPost test - categoryName: X, seriesName: X, tagNameList: X, isPrivate: X, thumbnailImageId: X, thumbnailContent: O', async () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
         ...commonTestData.post1,
+        thumbnailContent: commonTestData.simpleText, // Absence of thumbnailContent will be tested in marked rendering section
       };
       when(postMetaRepository.createPostMeta(anything()))
         .thenResolve(commonTestData.post1.postNo);
@@ -85,17 +86,18 @@ describe('PostService test', () => {
       createPostRepoParamDto.renderedContent.should.not.be.empty;
       createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
       createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
-      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.post1.thumbnailContent);
+      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleText);
       (createPostRepoParamDto.thumbnailImageId === undefined).should.be.true;
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
       createPostRepoParamDto.lastUpdatedDate!.should.within(date1, date2);
     });
 
-    it('createNewPost test - categoryName: O, seriesName: O, tagNameList: O, isPrivate: O, thumbnailImageId: O', async () => {
+    it('createNewPost test - categoryName: O, seriesName: O, tagNameList: O, isPrivate: O, thumbnailImageId: O, thumbnailContent: O', async () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
         ...commonTestData.post1,
+        thumbnailContent: commonTestData.simpleText,
         thumbnailImageId: gifImageId,
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
@@ -139,7 +141,7 @@ describe('PostService test', () => {
       createPostRepoParamDto.renderedContent.should.not.be.empty;
       createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
       createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
-      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.post1.thumbnailContent);
+      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleText);
       (createPostRepoParamDto.thumbnailImageId!.equals(gifImageId)).should.be.true;
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
@@ -150,6 +152,7 @@ describe('PostService test', () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
         ...commonTestData.post1,
+        thumbnailContent: commonTestData.simpleText,
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
@@ -180,6 +183,7 @@ describe('PostService test', () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
         ...commonTestData.post1,
+        thumbnailContent: commonTestData.simpleText,
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
@@ -210,6 +214,7 @@ describe('PostService test', () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
         ...commonTestData.post1,
+        thumbnailContent: commonTestData.simpleText,
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
@@ -288,6 +293,8 @@ describe('PostService test', () => {
         { depth: 3, text: 'two new lines between normal lines' },
         { depth: 3, text: 'three new lines between normal lines' },
       ]);
+      createPostRepoParamDto.thumbnailContent.length.should.be.greaterThan(0);
+      createPostRepoParamDto.thumbnailContent.length.should.be.lessThanOrEqual(303);
     });
 
     it('content rendering test - code blocks', async () => {
@@ -316,6 +323,8 @@ describe('PostService test', () => {
         { depth: 3, text: 'list indentation 2단계 (tab & 2 spaces mixed)' },
         { depth: 3, text: 'inline code' },
       ]);
+      createPostRepoParamDto.thumbnailContent.length.should.be.greaterThan(0);
+      createPostRepoParamDto.thumbnailContent.length.should.be.lessThanOrEqual(303);
     });
 
     it('content rendering test - mathematical expressions', async () => {
@@ -352,6 +361,8 @@ describe('PostService test', () => {
         { depth: 3, text: 'list indentation 2단계 (2 spaces)' },
         { depth: 3, text: 'list indentation 2단계 (4 spaces)' },
       ]);
+      createPostRepoParamDto.thumbnailContent.length.should.be.greaterThan(0);
+      createPostRepoParamDto.thumbnailContent.length.should.be.lessThanOrEqual(303);
     });
   });
 });

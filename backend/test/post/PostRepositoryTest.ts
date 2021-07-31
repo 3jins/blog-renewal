@@ -49,11 +49,13 @@ describe('PostRepository test', () => {
     it('createPost', async () => {
       const paramDto1: CreatePostRepoParamDto = {
         ...commonTestData.post1,
+        thumbnailContent: commonTestData.simpleText,
         thumbnailImageId: gifImage,
         lastUpdatedDate: commonTestData.dateList[0],
       };
       const paramDto2: CreatePostRepoParamDto = {
         ...commonTestData.post2,
+        thumbnailContent: commonTestData.simpleText,
         lastUpdatedDate: commonTestData.dateList[1],
       };
 
@@ -71,7 +73,7 @@ describe('PostRepository test', () => {
       post1.rawContent.should.equal(commonTestData.post1.rawContent);
       post1.renderedContent.should.equal(commonTestData.post1.renderedContent);
       post1.language.should.equal(commonTestData.post1.language);
-      post1.thumbnailContent.should.equal(commonTestData.post1.thumbnailContent);
+      post1.thumbnailContent.should.equal(commonTestData.simpleText);
       post1.thumbnailImage!.should.deep.equal(gifImage._id);
       post1.lastUpdatedDate.should.deep.equal(commonTestData.dateList[0]);
       post1.isLatestVersion.should.equal(commonTestData.post1.isLatestVersion);
@@ -80,7 +82,7 @@ describe('PostRepository test', () => {
       post2.rawContent.should.equal(commonTestData.post2.rawContent);
       post2.renderedContent.should.equal(commonTestData.post2.renderedContent);
       post2.language.should.equal(commonTestData.post2.language);
-      post2.thumbnailContent.should.equal(commonTestData.post2.thumbnailContent);
+      post2.thumbnailContent.should.equal(commonTestData.simpleText);
       (post2.thumbnailImage === null).should.be.true;
       post2.lastUpdatedDate.should.deep.equal(commonTestData.dateList[1]);
       post2.isLatestVersion.should.equal(commonTestData.post2.isLatestVersion);

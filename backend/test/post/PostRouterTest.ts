@@ -34,7 +34,6 @@ describe('Post router test', () => {
       const requestDto: CreateNewPostRequestDto = {
         seriesName: commonTestData.series1.name,
         language: Language.KO,
-        thumbnailContent: '뚜샤!',
       };
 
       when(postService.createNewPost(anything()))
@@ -55,7 +54,6 @@ describe('Post router test', () => {
       const requestDto: CreateNewPostRequestDto = {
         seriesName: commonTestData.series1.name,
         language: Language.KO,
-        thumbnailContent: '뚜샤!',
       };
 
       await request
@@ -90,7 +88,6 @@ describe('Post router test', () => {
       const typeDistortedRequestDto = {
         seriesName: commonTestData.series1.name,
         language: Language.KO,
-        thumbnailContent: '뚜샤!',
       };
 
       await request
