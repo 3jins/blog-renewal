@@ -6,7 +6,7 @@ import { CreatePostMetaRepoParamDto } from '@src/post/dto/PostMetaRepoParamDto';
 import _ from 'lodash';
 
 @Service()
-export default class PostRepository {
+export default class PostMetaRepository {
   public createPostMeta(paramDto: CreatePostMetaRepoParamDto): Promise<number> {
     return useTransaction(async (session: ClientSession) => {
       const postNo: number = await this.getNextPostNo(session);

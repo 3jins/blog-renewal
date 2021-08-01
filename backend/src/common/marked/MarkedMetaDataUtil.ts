@@ -1,16 +1,24 @@
 import { Heading } from '@src/post/model/Post';
-import { TokensList } from 'marked';
+import { Token, TokensList } from 'marked';
 
 export const makeToc = (tokenList: TokensList): Heading[] => (tokenList
   .filter((token) => token.type === 'heading') as Heading[])
   .map((token) => ({ depth: token.depth, text: token.text }));
 
-export const makeDefaultThumbnailContent = (tokenList: TokensList): string => tokenList
-  .filter((token) => token.type === 'paragraph')
+const _assembleNestedTokens = (nestedTokens: Token[]) => nestedTokens
   // @ts-ignore
-  .map((token) => token.tokens
-    .map((nestedToken) => (['br', 'space'].includes(nestedToken.type) ? ' ' : nestedToken.text))
-    .join(''))
-  .join(' ')
-  .slice(0, 300)
-  .concat('...');
+  .map((nestedToken) => (['br', 'space'].includes(nestedToken.type) ? ' ' : nestedToken.text))
+  .join('');
+
+export const makeDefaultThumbnailContent = (tokenList: TokensList): string => {
+  const THUMBNAIL_MAX_LENGTH = 300;
+  const defaultThumbnailContent = tokenList
+    .filter((token) => token.type === 'paragraph')
+    // @ts-ignore
+    .map((token) => _assembleNestedTokens(token.tokens))
+    .join(' ')
+    .slice(0, THUMBNAIL_MAX_LENGTH);
+  return defaultThumbnailContent.length === THUMBNAIL_MAX_LENGTH
+    ? defaultThumbnailContent.concat('...')
+    : defaultThumbnailContent;
+};

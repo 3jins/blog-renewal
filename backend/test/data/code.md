@@ -25,7 +25,7 @@ public class Main {
 			System.out.prinltln("곤니치와 세카이");
 		}
 	}
- 	```
+	```
 
 ### list indentation 1단계 (2 spaces)
 - level 1
@@ -54,7 +54,7 @@ public class Main {
 ### list indentation 2단계 (tab)
 - level 1
 	- level 2
-    	```java
+		```java
 		import java.lang.*;
 		
 		public class Main {
@@ -62,7 +62,7 @@ public class Main {
 				System.out.prinltln("곰방와 세카이");
 			}
 		}
-    	```
+		```
 
 ### list indentation 2단계 (2 spaces)
 - level 1
