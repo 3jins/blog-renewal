@@ -9,17 +9,17 @@ export default class PostRepository {
   public createPost(paramDto: CreatePostRepoParamDto) {
     return useTransaction(async (session: ClientSession) => {
       const { postNo } = paramDto;
-      const latestVersionPost: PostDoc | null = await this.getLatestVersionPost(session, postNo);
+      const lastVersionPost: PostDoc | null = await this.getLastVersionPost(session, postNo);
       await Post
         .insertMany([{
           ...paramDto,
           thumbnailImage: paramDto.thumbnailImageId,
-          latestVersionPost,
+          lastVersionPost: lastVersionPost === null ? null : lastVersionPost!._id,
         }], { session });
     });
   }
 
-  private async getLatestVersionPost(session: ClientSession, postNo: number): Promise<PostDoc | null> {
+  private async getLastVersionPost(session: ClientSession, postNo: number): Promise<PostDoc | null> {
     return await Post
       .findOne({ postNo, isLatestVersion: true }, { _id: true })
       .session(session) as PostDoc;
