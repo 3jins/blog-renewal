@@ -2,7 +2,7 @@ import { Document, model, PopulatedDoc, Schema } from 'mongoose';
 
 export interface CategoryDoc extends Document {
   name: string;
-  parentCategory?: PopulatedDoc<CategoryDoc>[];
+  parentCategory?: PopulatedDoc<CategoryDoc>;
   level?: number;
 }
 

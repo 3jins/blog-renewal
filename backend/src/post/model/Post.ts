@@ -15,10 +15,10 @@ export interface PostDoc extends Document {
   toc: Heading[];
   language: Language;
   thumbnailContent: string;
-  thumbnailImage?: PopulatedDoc<ImageDoc>[];
+  thumbnailImage?: PopulatedDoc<ImageDoc>;
   lastUpdatedDate: Date;
   isLatestVersion: boolean;
-  lastVersionPost?: PopulatedDoc<PostDoc>[];
+  lastVersionPost?: PopulatedDoc<PostDoc>;
 }
 
 export const postSchema = new Schema({

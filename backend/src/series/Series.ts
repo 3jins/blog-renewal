@@ -5,8 +5,8 @@ import { ImageDoc } from '@src/image/Image';
 export interface SeriesDoc extends Document {
   name: string;
   thumbnailContent: string;
-  thumbnailImage?: PopulatedDoc<ImageDoc>[];
-  postMetaList: PopulatedDoc<PostMetaDoc>,
+  thumbnailImage?: PopulatedDoc<ImageDoc>;
+  postMetaList: PopulatedDoc<PostMetaDoc>[],
 }
 
 export const seriesSchema = new Schema({

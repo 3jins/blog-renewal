@@ -3,10 +3,10 @@ import { PostDoc } from '@src/post/model/Post';
 import { MemberDoc } from '@src/member/Member';
 
 export interface CommentDoc extends Document {
-  post: PopulatedDoc<PostDoc>[];
-  member: PopulatedDoc<MemberDoc>[];
-  refComment?: PopulatedDoc<CommentDoc>[];
-  lastVersionComment?: PopulatedDoc<CommentDoc>[];
+  post: PopulatedDoc<PostDoc>;
+  member: PopulatedDoc<MemberDoc>;
+  refComment?: PopulatedDoc<CommentDoc>;
+  lastVersionComment?: PopulatedDoc<CommentDoc>;
   isPostAuthor: boolean;
   content: string;
   createdDate?: Date;
