@@ -1,13 +1,13 @@
-import { Types } from 'mongoose';
 import { File } from 'formidable';
 import Language from '@src/common/constant/Language';
 
 export interface CreateNewPostParamDto {
   // post meta
   categoryName?: string;
-  tagNameList?: string[];
   seriesName?: string;
+  tagNameList?: string[];
   isPrivate?: boolean;
+  isDraft?: boolean;
 
   // post
   post: File;
@@ -16,12 +16,20 @@ export interface CreateNewPostParamDto {
   thumbnailImageId?: string;
 }
 
-export interface AddPostParamDto {
+export interface AddUpdatedVersionPostParamDto {
+  postNo: number;
   post: File;
-  title: string;
-  rawContent: string;
-  renderedContent: string;
-  isLatestVersion: boolean;
-  createdDate: Date;
-  lastVersionPost?: Types.ObjectId;
+  language: Language;
+  thumbnailContent?: string;
+  thumbnailImageId?: string;
+}
+
+export interface UpdatePostMetaDataParamDto {
+  postNo: number;
+  categoryName?: string;
+  seriesName?: string;
+  tagNameList?: string[];
+  isPrivate?: boolean;
+  isDeprecated?: boolean;
+  isDraft?: boolean;
 }

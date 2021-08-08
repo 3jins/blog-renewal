@@ -6,25 +6,27 @@ import { CategoryDoc } from '@src/category/Category';
 export interface PostMetaDoc extends Document {
   postNo: number;
   category?: PopulatedDoc<CategoryDoc>;
-  tagList?: PopulatedDoc<TagDoc>[];
   series?: PopulatedDoc<SeriesDoc>;
+  tagList: PopulatedDoc<TagDoc>[];
   createdDate: Date;
   isDeleted?: boolean;
   commentCount?: number;
   isPrivate?: boolean;
   isDeprecated?: boolean;
+  isDraft?: boolean;
 }
 
 export const postMetaSchema = new Schema({
   postNo: { type: Number, required: true },
   category: { type: 'ObjectId', ref: 'Category', default: null },
-  tagList: [{ type: 'ObjectId', ref: 'Tag', default: [] }],
   series: { type: 'ObjectId', ref: 'Series', default: null },
+  tagList: [{ type: 'ObjectId', ref: 'Tag', default: [] }],
   createdDate: { type: Date, required: true },
   isDeleted: { type: Boolean, required: false, default: false },
   commentCount: { type: Number, required: false, default: 0 },
   isPrivate: { type: Boolean, required: false, default: false },
   isDeprecated: { type: Boolean, required: false, default: false },
+  isDraft: { type: Boolean, required: false, default: false },
 });
 
 export default model<PostMetaDoc>('PostMeta', postMetaSchema, 'PostMeta');

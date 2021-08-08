@@ -99,11 +99,7 @@ export const common = {
     language: Language.KO,
     isLatestVersion: true,
   },
-  post1DataToBeUpdatedFirst: {
-    rawContent: '왜 우리는 노드만으로 행복할 수 없는가?\n트렌드는 어디서 와 어디로 가는 중인가?\n',
-    renderedContent: '<p>왜 우리는 노드만으로 행복할 수 없는가?<br/>트렌드는 어디서 와 어디로 가는 중인가?<br/></p>',
-  },
-  post1DataToBeUpdatedSecond: {
+  post1DataToBeUpdated: {
     rawContent: '왜 우리는 노드만으로 행복할 수 없는가?\n트렌드는 어디서 와 어디로 가는 중인가?\n원해 이 모든 걸 하나로 아울러 주는 hack.\n',
     renderedContent: '<p>왜 우리는 노드만으로 행복할 수 없는가?<br/>트렌드는 어디서 와 어디로 가는 중인가?<br/>원해 이 모든 걸 하나로 아울러 주는 hack.<br/></p>',
   },

@@ -16,7 +16,7 @@ export interface PostDoc extends Document {
   language: Language;
   thumbnailContent: string;
   thumbnailImage?: PopulatedDoc<ImageDoc>;
-  lastUpdatedDate: Date;
+  updatedDate: Date;
   isLatestVersion: boolean;
   lastVersionPost?: PopulatedDoc<PostDoc>;
 }
@@ -30,7 +30,7 @@ export const postSchema = new Schema({
   language: { type: String, required: true },
   thumbnailContent: { type: String, required: true },
   thumbnailImage: { type: 'ObjectId', ref: 'Image', required: false, default: null },
-  lastUpdatedDate: { type: Date, required: true },
+  updatedDate: { type: Date, required: true },
   isLatestVersion: { type: Boolean, required: true },
   lastVersionPost: { type: 'ObjectId', ref: 'Post', required: false, default: null },
 });

@@ -91,10 +91,7 @@ export default class SeriesRepository {
   }
 
   private makeQueryToFindSeriesByName(paramDto: FindSeriesRepoParamDto): FilterQuery<SeriesDoc> {
-    if (_.isNil(paramDto)) {
-      return {};
-    }
-    const { name, isOnlyExactNameFound } = paramDto!;
+    const { name, isOnlyExactNameFound } = paramDto;
     return { name: isOnlyExactNameFound ? name : new RegExp(paramDto.name!, 'i') };
   }
 
