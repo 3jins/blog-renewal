@@ -101,6 +101,13 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
     logLevel: LogLevel.WARN,
   },
+  POST_NOT_FOUND: {
+    code: 'POST_NOT_FOUND',
+    errorMessage: 'post를 찾을 수 없습니다.',
+    loggingMessage: '{1}:{0} 정보로는 post를 찾을 수 없습니다.',
+    httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
+    logLevel: LogLevel.WARN,
+  },
 };
 
 export { BlogErrorCodeFormat, BlogErrorCode };

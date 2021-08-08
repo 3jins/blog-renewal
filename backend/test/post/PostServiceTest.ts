@@ -9,15 +9,17 @@ import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
 import { CreatePostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
-import { CreateNewPostParamDto } from '@src/post/dto/PostParamDto';
+import { CreateNewPostParamDto, AddUpdatedVersionPostParamDto, UpdatePostMetaDataParamDto } from '@src/post/dto/PostParamDto';
 import { appPath, common as commonTestData } from '@test/data/testData';
-import { CreatePostMetaRepoParamDto } from '@src/post/dto/PostMetaRepoParamDto';
+import { CreatePostMetaRepoParamDto, UpdatePostMetaRepoParamDto } from '@src/post/dto/PostMetaRepoParamDto';
 import { CategoryDoc } from '@src/category/Category';
 import { SeriesDoc } from '@src/series/Series';
 import { TagDoc } from '@src/tag/Tag';
 import { errorShouldBeThrown, extractFileInfoFromRawFile } from '@test/TestUtil';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import Language from '@src/common/constant/Language';
+import { PostMetaDoc } from '@src/post/model/PostMeta';
 
 describe('PostService test', () => {
   let postService: PostService;
@@ -53,7 +55,6 @@ describe('PostService test', () => {
 
     beforeEach(async () => {
       [gifImageId] = commonTestData.objectIdList;
-
       ({ file, fileContent } = extractFileInfoFromRawFile('gfm+.md'));
     });
 
@@ -90,10 +91,10 @@ describe('PostService test', () => {
       (createPostRepoParamDto.thumbnailImageId === undefined).should.be.true;
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
-      createPostRepoParamDto.lastUpdatedDate!.should.within(date1, date2);
+      createPostRepoParamDto.updatedDate!.should.within(date1, date2);
     });
 
-    it('createNewPost test - categoryName: O, seriesName: O, tagNameList: O, isPrivate: O, thumbnailImageId: O, thumbnailContent: O', async () => {
+    it('createNewPost test - categoryName: O, seriesName: O, tagNameList: O, isPrivate: O, isDraft: O, thumbnailImageId: O, thumbnailContent: O', async () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
         ...commonTestData.post1,
@@ -103,6 +104,7 @@ describe('PostService test', () => {
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
         isPrivate: true,
+        isDraft: true,
       };
       when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name })))
         .thenResolve([{ _id: commonTestData.objectIdList[0] } as CategoryDoc]);
@@ -132,6 +134,7 @@ describe('PostService test', () => {
       createPostMetaRepoParamDto.tagIdList!.should.deep.equal([commonTestData.objectIdList[2], commonTestData.objectIdList[3]]);
       createPostMetaRepoParamDto.createdDate.should.within(date1, date2);
       createPostMetaRepoParamDto.isPrivate!.should.be.true;
+      createPostMetaRepoParamDto.isDraft!.should.be.true;
 
       verify(postRepository.createPost(anything())).once();
       const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).last();
@@ -145,7 +148,7 @@ describe('PostService test', () => {
       (createPostRepoParamDto.thumbnailImageId!.equals(gifImageId)).should.be.true;
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
-      createPostRepoParamDto.lastUpdatedDate!.should.within(date1, date2);
+      createPostRepoParamDto.updatedDate!.should.within(date1, date2);
     });
 
     it('createNewPost test - with inexistent categoryName', async () => {
@@ -363,6 +366,224 @@ describe('PostService test', () => {
       ]);
       createPostRepoParamDto.thumbnailContent.length.should.be.greaterThan(0);
       createPostRepoParamDto.thumbnailContent.length.should.be.lessThanOrEqual(303);
+    });
+  });
+
+  describe('addUpdatedVersionPost test', () => {
+    let gifImageId: string;
+    let file: File;
+    let fileContent: string;
+
+    beforeEach(async () => {
+      [gifImageId] = commonTestData.objectIdList;
+      ({ file, fileContent } = extractFileInfoFromRawFile('gfm+.md'));
+    });
+
+    it('addUpdatedVersionPost test - thumbnailContent: O, thumbnailImage: O', async () => {
+      const paramDto: AddUpdatedVersionPostParamDto = {
+        postNo: commonTestData.post2.postNo,
+        post: file,
+        language: Language.KO,
+        thumbnailContent: commonTestData.simpleText,
+        thumbnailImageId: gifImageId,
+      };
+      const date1 = new Date();
+      await postService.addUpdatedVersionPost(paramDto);
+      const date2 = new Date();
+      verify(postRepository.createPost(anything())).once();
+      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).first();
+      createPostRepoParamDto.postNo.should.equal(commonTestData.post2.postNo);
+      createPostRepoParamDto.title.should.equal(file.name);
+      createPostRepoParamDto.rawContent.should.equal(fileContent);
+      createPostRepoParamDto.renderedContent.should.not.be.empty;
+      createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
+      createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
+      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleText);
+      (createPostRepoParamDto.thumbnailImageId!.equals(gifImageId)).should.be.true;
+      createPostRepoParamDto.isLatestVersion.should.be.true;
+      (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
+      createPostRepoParamDto.updatedDate!.should.within(date1, date2);
+    });
+
+    it('addUpdatedVersionPost test - thumbnailContent: X, thumbnailImage: X', async () => {
+      const paramDto: AddUpdatedVersionPostParamDto = {
+        postNo: commonTestData.post2.postNo,
+        post: file,
+        language: Language.KO,
+      };
+      const date1 = new Date();
+      await postService.addUpdatedVersionPost(paramDto);
+      const date2 = new Date();
+      verify(postRepository.createPost(anything())).once();
+      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).first();
+      createPostRepoParamDto.postNo.should.equal(commonTestData.post2.postNo);
+      createPostRepoParamDto.title.should.equal(file.name);
+      createPostRepoParamDto.rawContent.should.equal(fileContent);
+      createPostRepoParamDto.renderedContent.should.not.be.empty;
+      createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
+      createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
+      createPostRepoParamDto.thumbnailContent.should.not.be.empty;
+      (createPostRepoParamDto.thumbnailImageId === undefined).should.be.true;
+      createPostRepoParamDto.isLatestVersion.should.be.true;
+      (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
+      createPostRepoParamDto.updatedDate!.should.within(date1, date2);
+    });
+  });
+
+  describe('updatePostMetaData test', () => {
+    it('updatePostMetaData - with full parameter', async () => {
+      const paramDto: UpdatePostMetaDataParamDto = {
+        postNo: commonTestData.post1.postNo,
+        categoryName: commonTestData.category1.name,
+        seriesName: commonTestData.series1.name,
+        tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
+        isPrivate: true,
+        isDeprecated: true,
+        isDraft: true,
+      };
+
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+        .thenResolve([{
+          isPrivate: false,
+          isDeprecated: false,
+          isDraft: false,
+        } as PostMetaDoc]);
+      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name })))
+        .thenResolve([{ _id: commonTestData.objectIdList[0] } as CategoryDoc]);
+      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name })))
+        .thenResolve([{ _id: commonTestData.objectIdList[1] } as SeriesDoc]);
+      when(tagRepository.findTag(deepEqual({
+        findTagByNameDto: {
+          nameList: [commonTestData.tag1.name, commonTestData.tag2.name],
+          isOnlyExactNameFound: true,
+        },
+      })))
+        .thenResolve([
+          { _id: commonTestData.objectIdList[2], name: commonTestData.tag1.name } as TagDoc,
+          { _id: commonTestData.objectIdList[3], name: commonTestData.tag2.name } as TagDoc,
+        ]);
+
+      await postService.updatePostMetaData(paramDto);
+      verify(postMetaRepository.updatePostMeta(anything())).once();
+      const [updatePostMetaRepoParamDto] = capture<UpdatePostMetaRepoParamDto>(postMetaRepository.updatePostMeta).first();
+      updatePostMetaRepoParamDto.categoryId!.should.equal(commonTestData.objectIdList[0]);
+      updatePostMetaRepoParamDto.seriesId!.should.equal(commonTestData.objectIdList[1]);
+      updatePostMetaRepoParamDto.tagIdList!.should.deep.equal([commonTestData.objectIdList[2], commonTestData.objectIdList[3]]);
+      updatePostMetaRepoParamDto.isPrivate!.should.be.true;
+      updatePostMetaRepoParamDto.isDeprecated!.should.be.true;
+      updatePostMetaRepoParamDto.isDraft!.should.be.true;
+    });
+
+    it('updatePostMetaData - with inexistent postNo', async () => {
+      const paramDto: UpdatePostMetaDataParamDto = {
+        postNo: commonTestData.post1.postNo,
+      };
+
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+        .thenResolve([]);
+
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.POST_NOT_FOUND, [commonTestData.post1.postNo.toString(), 'postNo']),
+        (_param) => postService.updatePostMetaData(_param),
+        paramDto,
+      );
+    });
+
+    it('updatePostMetaData - with inexistent categoryName', async () => {
+      const paramDto: UpdatePostMetaDataParamDto = {
+        postNo: commonTestData.post1.postNo,
+        categoryName: commonTestData.category1.name,
+      };
+
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+        .thenResolve([{
+          isPrivate: false,
+          isDeprecated: false,
+          isDraft: false,
+        } as PostMetaDoc]);
+      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name })))
+        .thenResolve([]);
+
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.CATEGORY_NOT_FOUND, [commonTestData.category1.name, 'name']),
+        (_param) => postService.updatePostMetaData(_param),
+        paramDto,
+      );
+    });
+
+    it('updatePostMetaData - with inexistent seriesName', async () => {
+      const paramDto: UpdatePostMetaDataParamDto = {
+        postNo: commonTestData.post1.postNo,
+        seriesName: commonTestData.series1.name,
+      };
+
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+        .thenResolve([{
+          isPrivate: false,
+          isDeprecated: false,
+          isDraft: false,
+        } as PostMetaDoc]);
+      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name })))
+        .thenResolve([]);
+
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.SERIES_NOT_FOUND, [commonTestData.series1.name, 'name']),
+        (_param) => postService.updatePostMetaData(_param),
+        paramDto,
+      );
+    });
+
+    it('updatePostMetaData - with inexistent tagNames', async () => {
+      const paramDto: UpdatePostMetaDataParamDto = {
+        postNo: commonTestData.post1.postNo,
+        tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name, commonTestData.tag3.name],
+      };
+
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+        .thenResolve([{
+          isPrivate: false,
+          isDeprecated: false,
+          isDraft: false,
+        } as PostMetaDoc]);
+      when(tagRepository.findTag(deepEqual({
+        findTagByNameDto: {
+          nameList: [commonTestData.tag1.name, commonTestData.tag2.name, commonTestData.tag3.name],
+          isOnlyExactNameFound: true,
+        },
+      })))
+        .thenResolve([{ _id: commonTestData.objectIdList[0], name: commonTestData.tag3.name } as TagDoc]);
+ㅋ
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.TAGS_NOT_FOUND, ['name', `${commonTestData.tag1.name}, ${commonTestData.tag2.name}`]),
+        (_param) => postService.updatePostMetaData(_param),
+        paramDto,
+      );
+    });
+
+    it('updatePostMetaData - with empty parameter', async () => {
+      const paramDto: UpdatePostMetaDataParamDto = {
+        postNo: commonTestData.post1.postNo,
+      };
+
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+        .thenResolve([{
+          isPrivate: false,
+          isDeprecated: false,
+          isDraft: false,
+          category: commonTestData.objectIdList[1],
+          series: commonTestData.objectIdList[2],
+          tagList: [commonTestData.objectIdList[3], commonTestData.objectIdList[0]],
+        } as PostMetaDoc]);
+
+      await postService.updatePostMetaData(paramDto);
+      verify(postMetaRepository.updatePostMeta(anything())).once();
+      const [updatePostMetaRepoParamDto] = capture<UpdatePostMetaRepoParamDto>(postMetaRepository.updatePostMeta).first();
+      updatePostMetaRepoParamDto.categoryId!.should.equal(commonTestData.objectIdList[1]);
+      updatePostMetaRepoParamDto.seriesId!.should.equal(commonTestData.objectIdList[2]);
+      updatePostMetaRepoParamDto.tagIdList!.should.deep.equal([commonTestData.objectIdList[3], commonTestData.objectIdList[0]]);
+      updatePostMetaRepoParamDto.isPrivate!.should.be.false;
+      updatePostMetaRepoParamDto.isDeprecated!.should.be.false;
+      updatePostMetaRepoParamDto.isDraft!.should.be.false;
     });
   });
 });

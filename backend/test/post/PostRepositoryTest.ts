@@ -51,12 +51,12 @@ describe('PostRepository test', () => {
         ...commonTestData.post1,
         thumbnailContent: commonTestData.simpleText,
         thumbnailImageId: gifImage,
-        lastUpdatedDate: commonTestData.dateList[0],
+        updatedDate: commonTestData.dateList[0],
       };
       const paramDto2: CreatePostRepoParamDto = {
         ...commonTestData.post2,
         thumbnailContent: commonTestData.simpleText,
-        lastUpdatedDate: commonTestData.dateList[1],
+        updatedDate: commonTestData.dateList[1],
       };
 
       await postRepository.createPost(paramDto1);
@@ -75,7 +75,7 @@ describe('PostRepository test', () => {
       post1.language.should.equal(commonTestData.post1.language);
       post1.thumbnailContent.should.equal(commonTestData.simpleText);
       post1.thumbnailImage!.should.deep.equal(gifImage._id);
-      post1.lastUpdatedDate.should.deep.equal(commonTestData.dateList[0]);
+      post1.updatedDate.should.deep.equal(commonTestData.dateList[0]);
       post1.isLatestVersion.should.equal(commonTestData.post1.isLatestVersion);
       (post1.lastVersionPost === null).should.be.true;
       post2.title.should.equal(commonTestData.post2.title);
@@ -84,9 +84,33 @@ describe('PostRepository test', () => {
       post2.language.should.equal(commonTestData.post2.language);
       post2.thumbnailContent.should.equal(commonTestData.simpleText);
       (post2.thumbnailImage === null).should.be.true;
-      post2.lastUpdatedDate.should.deep.equal(commonTestData.dateList[1]);
+      post2.updatedDate.should.deep.equal(commonTestData.dateList[1]);
       post2.isLatestVersion.should.equal(commonTestData.post2.isLatestVersion);
       (post2.lastVersionPost === null).should.be.true;
+    });
+
+    it('createPost - add new version of the same post', async () => {
+      const paramDto1: CreatePostRepoParamDto = {
+        ...commonTestData.post1,
+        thumbnailContent: commonTestData.simpleText,
+        updatedDate: commonTestData.dateList[0],
+      };
+      const paramDto2: CreatePostRepoParamDto = {
+        ...commonTestData.post1,
+        thumbnailContent: commonTestData.simpleText,
+        updatedDate: commonTestData.dateList[1],
+        rawContent: commonTestData.post1DataToBeUpdated.rawContent,
+        renderedContent: commonTestData.post1DataToBeUpdated.renderedContent,
+      };
+
+      await postRepository.createPost(paramDto1);
+      await postRepository.createPost(paramDto2);
+      const posts: PostDoc[] = await Post.find().session(session);
+      posts.should.have.lengthOf(2);
+      const [post1, post2]: PostDoc[] = posts;
+      post1.postNo.should.be.equal(post2.postNo);
+      (post1.lastVersionPost === null).should.be.true;
+      post2.lastVersionPost.should.deep.equal(post1._id);
     });
   });
 });

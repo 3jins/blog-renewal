@@ -11,7 +11,7 @@ export interface CreatePostRepoParamDto {
   language: Language;
   thumbnailContent: string;
   thumbnailImageId?: Types.ObjectId;
-  lastUpdatedDate?: Date;
+  updatedDate?: Date;
   isLatestVersion: boolean;
   lastVersionPost?: Types.ObjectId;
 }

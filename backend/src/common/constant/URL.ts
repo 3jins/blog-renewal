@@ -12,6 +12,7 @@ const ENDPOINT = {
 
 const BEHAVIOR = {
   NEW: '/new',
+  NEW_VERSION: '/new-version',
 };
 
 export { PREFIX, ENDPOINT, BEHAVIOR };
