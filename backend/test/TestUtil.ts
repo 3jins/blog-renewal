@@ -38,9 +38,9 @@ export const errorShouldBeThrown = async (errorShouldBe: Error, callback: Functi
     isAnyErrorThrown = true;
     if (errorShouldBe instanceof BlogError) {
       (error instanceof BlogError).should.be.true;
-      assertThrownErrorIsExpectedBlogError(error, errorShouldBe);
+      assertThrownErrorIsExpectedBlogError(error as BlogError, errorShouldBe);
     } else {
-      assertThrownErrorIsExpectedError(error, errorShouldBe);
+      assertThrownErrorIsExpectedError(error as Error, errorShouldBe);
     }
   }
   isAnyErrorThrown.should.be.true;

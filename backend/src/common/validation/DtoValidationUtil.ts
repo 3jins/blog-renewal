@@ -1,6 +1,4 @@
-import { Schema } from 'ajv/lib/types/index';
-import { JSONSchemaType } from 'ajv/lib/types/json-schema';
-import Ajv from 'ajv';
+import Ajv, { Schema, JSONSchemaType } from 'ajv';
 import addFormats from 'ajv-formats';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';

@@ -50,7 +50,7 @@ describe('ImageRepository test', () => {
       await imageRepository.createImages(imageDocumentDefinitionList);
     } catch (err) {
       (err instanceof BlogError).should.be.true;
-      err.blogErrorCode.should.equal(BlogErrorCode.DUPLICATED_FILE_NAME);
+      (err as BlogError).blogErrorCode.should.equal(BlogErrorCode.DUPLICATED_FILE_NAME);
     }
   });
 });

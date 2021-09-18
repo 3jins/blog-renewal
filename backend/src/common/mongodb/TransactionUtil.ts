@@ -21,6 +21,6 @@ export const useTransaction = async (callback: Function): Promise<any> => {
     if (err instanceof (BlogError)) { // known error
       throw err;
     }
-    throw new BlogError(BlogErrorCode.TRANSACTION_FAILED, [err.message]);
+    throw new BlogError(BlogErrorCode.TRANSACTION_FAILED, [(err as Error).message]);
   }
 };
