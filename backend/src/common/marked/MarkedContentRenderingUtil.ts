@@ -43,7 +43,7 @@ export const renderContent = (rawContent: string): { renderedContent: string, to
 
       const nextChar = match[1] || match[2] || '';
 
-      if (!nextChar || (nextChar && (prevChar === ''))) {
+      if (!nextChar || (nextChar && (prevChar === ''))) { // No need to check punctuation here
         const lLength = match[0].length - 1;
         let rDelim, rLength, delimTotal = lLength, midDelimTotal = 0;
 
@@ -54,19 +54,19 @@ export const renderContent = (rawContent: string): { renderedContent: string, to
 
         while ((match = endReg.exec(maskedSrc)) != null) {
           rDelim = match[1] || match[2] || match[3] || match[4] || match[5] || match[6];
-          if (!rDelim) {
-            continue;
-          }
+
+          if (!rDelim) continue;
 
           rLength = rDelim.length;
 
           if (match[3] || match[4]) {
             delimTotal += rLength;
             continue;
-          }
-          if ((match[5] || match[6]) && (lLength % 3 && !((lLength + rLength) % 3))) {
-            midDelimTotal += rLength;
-            continue;
+          } else if (match[5] || match[6]) {
+            if (lLength % 3 && !((lLength + rLength) % 3)) {
+              midDelimTotal += rLength;
+              continue;
+            }
           }
 
           delimTotal -= rLength;
@@ -76,17 +76,21 @@ export const renderContent = (rawContent: string): { renderedContent: string, to
           rLength = Math.min(rLength, rLength + delimTotal + midDelimTotal);
 
           if (Math.min(lLength, rLength) % 2) {
+            const text = src.slice(1, lLength + match.index + rLength);
             return {
               type: 'em',
               raw: src.slice(0, lLength + match.index + rLength + 1),
-              text: src.slice(1, lLength + match.index + rLength),
+              text,
+              tokens: this.lexer.inlineTokens(text, [])
             };
           }
 
+          const text = src.slice(2, lLength + match.index + rLength - 1);
           return {
             type: 'strong',
             raw: src.slice(0, lLength + match.index + rLength + 1),
-            text: src.slice(2, lLength + match.index + rLength - 1),
+            text,
+            tokens: this.lexer.inlineTokens(text, [])
           };
         }
       }

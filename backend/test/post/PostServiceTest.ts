@@ -552,7 +552,7 @@ describe('PostService test', () => {
         },
       })))
         .thenResolve([{ _id: commonTestData.objectIdList[0], name: commonTestData.tag3.name } as TagDoc]);
-ㅋ
+
       await errorShouldBeThrown(
         new BlogError(BlogErrorCode.TAGS_NOT_FOUND, ['name', `${commonTestData.tag1.name}, ${commonTestData.tag2.name}`]),
         (_param) => postService.updatePostMetaData(_param),

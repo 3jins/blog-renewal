@@ -98,7 +98,7 @@ export default class PostService {
       isLatestVersion: true,
     };
     if (!_.isNil(paramDto.thumbnailImageId)) {
-      Object.assign(createPostRepoParamDto, { thumbnailImageId: Types.ObjectId(paramDto.thumbnailImageId) });
+      Object.assign(createPostRepoParamDto, { thumbnailImageId: new Types.ObjectId(paramDto.thumbnailImageId) });
     }
     return createPostRepoParamDto;
   }
@@ -119,7 +119,7 @@ export default class PostService {
       isLatestVersion: true,
     };
     if (!_.isNil(paramDto.thumbnailImageId)) {
-      Object.assign(createPostRepoParamDto, { thumbnailImageId: Types.ObjectId(paramDto.thumbnailImageId) });
+      Object.assign(createPostRepoParamDto, { thumbnailImageId: new Types.ObjectId(paramDto.thumbnailImageId) });
     }
     return createPostRepoParamDto;
   }

@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { ClientSession, FilterQuery, Types } from 'mongoose';
+import { ClientSession, FilterQuery, Types, UpdateQuery } from 'mongoose';
 import Category, { CategoryDoc } from '@src/category/Category';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 import {
@@ -13,7 +13,6 @@ import _ from 'lodash';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { TagDoc } from '@src/tag/Tag';
-import { UpdateQuery } from 'mongodb';
 
 @Service()
 export default class CategoryRepository {

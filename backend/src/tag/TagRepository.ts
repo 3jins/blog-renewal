@@ -102,11 +102,9 @@ export default class TagRepository {
     }
     const { nameList, isOnlyExactNameFound } = paramDto!;
     return {
-      name: {
-        $in: isOnlyExactNameFound
-          ? nameList
-          : paramDto!.nameList.map((name) => new RegExp(name, 'i')),
-      },
+      name: isOnlyExactNameFound
+        ? { $in: nameList }
+        : { $regex: nameList.join('|'), $options: 'i' }, // TODO: Check if there is no performance issue when nameList is large.
     };
   }
 
