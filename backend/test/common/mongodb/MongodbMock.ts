@@ -1,6 +1,5 @@
 /* eslint-disable no-empty-function */
-import { ClientSession } from 'mongodb';
-import { Connection, Document } from 'mongoose';
+import { ClientSession, Connection } from 'mongoose';
 
 // @ts-ignore
 export class ClientSessionForTest implements ClientSession {
@@ -9,9 +8,9 @@ export class ClientSessionForTest implements ClientSession {
    * If the implementation mock(ClientSessionForTest) should be modified for the change of the test scenario, refer `mongoose.ClientSession`.
    */
 
-  abortTransaction = (): Promise<Document> => Promise.resolve(new Document());
+  abortTransaction = (): Promise<any> => Promise.resolve({});
 
-  commitTransaction = (): Promise<Document> => Promise.resolve(new Document());
+  commitTransaction = (): Promise<any> => Promise.resolve({});
 
   // eslint-disable-next-line no-unused-vars
   endSession = async (options?: Object): Promise<void> => {};
@@ -28,6 +27,5 @@ export class ConnectionForTest extends Connection {
     this.clientSessionStub = clientSessionStub;
   }
 
-  // @ts-ignore
-  startSession = (): Promise<ClientSession> => new Promise((resolve) => resolve(this.clientSessionStub));
+  startSession = (): Promise<ClientSession> => new Promise((resolve) => resolve(this.clientSessionStub as ClientSession));
 }
