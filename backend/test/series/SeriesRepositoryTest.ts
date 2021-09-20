@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { ClientSession, Connection } from 'mongoose';
 import { should } from 'chai';
 import sinon from 'sinon';
@@ -142,7 +143,7 @@ describe('SeriesRepository test', () => {
       series!.postMetaList!.should.be.empty;
 
       const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
-      (postMeta1!.series! === null).should.be.true; // should not be updated
+      _.isEmpty(postMeta1!.series!).should.be.true; // should not be updated
 
       const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
       postMeta2!.series!.should.deep.equal(series2Id); // should not be updated

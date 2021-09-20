@@ -9,7 +9,7 @@ import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
 import { CreatePostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
-import { CreateNewPostParamDto, AddUpdatedVersionPostParamDto, UpdatePostMetaDataParamDto } from '@src/post/dto/PostParamDto';
+import { AddUpdatedVersionPostParamDto, CreateNewPostParamDto, UpdatePostMetaDataParamDto } from '@src/post/dto/PostParamDto';
 import { appPath, common as commonTestData } from '@test/data/testData';
 import { CreatePostMetaRepoParamDto, UpdatePostMetaRepoParamDto } from '@src/post/dto/PostMetaRepoParamDto';
 import { CategoryDoc } from '@src/category/Category';
@@ -145,7 +145,7 @@ describe('PostService test', () => {
       createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
       createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
       createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleText);
-      (createPostRepoParamDto.thumbnailImageId!.equals(gifImageId)).should.be.true;
+      createPostRepoParamDto.thumbnailImageId!.toString().should.equal(gifImageId);
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
       createPostRepoParamDto.updatedDate!.should.within(date1, date2);
@@ -399,7 +399,7 @@ describe('PostService test', () => {
       createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
       createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
       createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleText);
-      (createPostRepoParamDto.thumbnailImageId!.equals(gifImageId)).should.be.true;
+      (createPostRepoParamDto.thumbnailImageId!.toString() === gifImageId).should.be.true;
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
       createPostRepoParamDto.updatedDate!.should.within(date1, date2);
