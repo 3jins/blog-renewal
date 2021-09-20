@@ -1,8 +1,8 @@
-import { Document, model, PopulatedDoc, Schema } from 'mongoose';
+import { Document, model, PopulatedDoc, Schema, Types } from 'mongoose';
 import { PostDoc } from '@src/post/model/Post';
 import { MemberDoc } from '@src/member/Member';
 
-export interface CommentDoc extends Document {
+export type CommentDoc = {
   post: PopulatedDoc<PostDoc>;
   member: PopulatedDoc<MemberDoc>;
   refComment?: PopulatedDoc<CommentDoc>;
@@ -11,13 +11,13 @@ export interface CommentDoc extends Document {
   content: string;
   createdDate?: Date;
   isLatestVersion?: boolean;
-}
+} & Document;
 
 export const commentSchema = new Schema({
-  post: { type: 'ObjectId', ref: 'Post', required: true },
-  member: { type: 'ObjectId', ref: 'Member', required: true },
-  refComment: { type: 'ObjectId', ref: 'Comment', default: null },
-  lastVersionComment: { type: 'ObjectId', ref: 'Comment', default: null },
+  post: { type: Types.ObjectId, ref: 'Post', required: true },
+  member: { type: Types.ObjectId, ref: 'Member', required: true },
+  refComment: { type: Types.ObjectId, ref: 'Comment', default: null },
+  lastVersionComment: { type: Types.ObjectId, ref: 'Comment', default: null },
   isPostAuthor: { type: Boolean, required: true },
   content: { type: String, required: true },
   createdDate: { type: Date, required: true, default: Date.now },

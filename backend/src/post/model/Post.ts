@@ -1,4 +1,4 @@
-import { Document, model, PopulatedDoc, Schema } from 'mongoose';
+import { Document, model, PopulatedDoc, Schema, Types } from 'mongoose';
 import Language from '@src/common/constant/Language';
 import { ImageDoc } from '@src/image/Image';
 
@@ -7,7 +7,7 @@ export interface Heading {
   text: string;
 }
 
-export interface PostDoc extends Document {
+export type PostDoc = {
   postNo: number;
   title: string;
   rawContent: string;
@@ -19,7 +19,7 @@ export interface PostDoc extends Document {
   updatedDate: Date;
   isLatestVersion: boolean;
   lastVersionPost?: PopulatedDoc<PostDoc>;
-}
+} & Document;
 
 export const postSchema = new Schema({
   postNo: { type: Number, required: true },
@@ -29,10 +29,10 @@ export const postSchema = new Schema({
   toc: [{ depth: { type: Number }, text: { type: String } }],
   language: { type: String, required: true },
   thumbnailContent: { type: String, required: true },
-  thumbnailImage: { type: 'ObjectId', ref: 'Image', required: false, default: null },
+  thumbnailImage: { type: Types.ObjectId, ref: 'Image', required: false, default: null },
   updatedDate: { type: Date, required: true },
   isLatestVersion: { type: Boolean, required: true },
-  lastVersionPost: { type: 'ObjectId', ref: 'Post', required: false, default: null },
+  lastVersionPost: { type: Types.ObjectId, ref: 'Post', required: false, default: null },
 });
 
 export default model<PostDoc>('Post', postSchema, 'Posts');
