@@ -1,11 +1,11 @@
-import * as mongoose from 'mongoose';
+import { Document, model, Schema, Types } from 'mongoose';
 import { PopulatedDoc } from 'mongoose';
 import RoleLevel from '../common/constant/RoleLevel';
 import { CategoryDoc } from '@src/category/Category';
 import { TagDoc } from '@src/tag/Tag';
 import { SeriesDoc } from '@src/series/Series';
 
-export interface MemberDoc extends mongoose.Document {
+export interface MemberDoc extends Document {
   memberNo: number;
   authToken?: string;
   name: string;
@@ -19,18 +19,18 @@ export interface MemberDoc extends mongoose.Document {
   isBlocked?: boolean;
 }
 
-export const memberSchema = new mongoose.Schema({
+export const memberSchema = new Schema({
   memberNo: { type: Number, required: true },
   authToken: { type: String },
   name: { type: String, required: true },
   mailAddressList: [{ type: String, required: false }],
   mentionNoti: { type: Boolean, required: true, default: true },
   subscriptionNoti: { type: Boolean, required: true, default: false },
-  categoryNoti: [{ type: 'ObjectId', ref: 'Category' }],
-  tagNoti: [{ type: 'ObjectId', ref: 'Tag' }],
-  seriesNoti: [{ type: 'ObjectId', ref: 'Series' }],
+  categoryNoti: { type: [Types.ObjectId], ref: 'Category' },
+  tagNoti: { type: [Types.ObjectId], ref: 'Tag' },
+  seriesNoti: { type: [Types.ObjectId], ref: 'Series' },
   roleLevel: { type: Number, required: true, default: RoleLevel.ORDINARY },
   isBlocked: { type: Boolean, required: true, default: false },
 });
 
-export default mongoose.model<MemberDoc>('Member', memberSchema, 'Members');
+export default model<MemberDoc>('Member', memberSchema, 'Members');

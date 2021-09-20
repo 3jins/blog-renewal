@@ -1,9 +1,9 @@
-import { Document, model, PopulatedDoc, Schema } from 'mongoose';
+import { Document, model, PopulatedDoc, Schema, Types } from 'mongoose';
 import { SeriesDoc } from '@src/series/Series';
 import { TagDoc } from '@src/tag/Tag';
 import { CategoryDoc } from '@src/category/Category';
 
-export interface PostMetaDoc extends Document {
+export type PostMetaDoc = {
   postNo: number;
   category?: PopulatedDoc<CategoryDoc>;
   series?: PopulatedDoc<SeriesDoc>;
@@ -14,13 +14,13 @@ export interface PostMetaDoc extends Document {
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
-}
+} & Document;
 
 export const postMetaSchema = new Schema({
   postNo: { type: Number, required: true },
-  category: { type: 'ObjectId', ref: 'Category', default: null },
-  series: { type: 'ObjectId', ref: 'Series', default: null },
-  tagList: [{ type: 'ObjectId', ref: 'Tag', default: [] }],
+  category: { type: Types.ObjectId, ref: 'Category' },
+  series: { type: Types.ObjectId, ref: 'Series' },
+  tagList: { type: [Types.ObjectId], ref: 'Tag', required: false, default: [] },
   createdDate: { type: Date, required: true },
   isDeleted: { type: Boolean, required: false, default: false },
   commentCount: { type: Number, required: false, default: 0 },

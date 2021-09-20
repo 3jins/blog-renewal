@@ -1,14 +1,14 @@
-import { Document, model, PopulatedDoc, Schema } from 'mongoose';
+import { Document, model, PopulatedDoc, Schema, Types } from 'mongoose';
 
-export interface CategoryDoc extends Document {
+export type CategoryDoc = {
   name: string;
   parentCategory?: PopulatedDoc<CategoryDoc>;
   level?: number;
-}
+} & Document;
 
 export const categorySchema = new Schema({
   name: { type: String, required: true, unique: true },
-  parentCategory: { type: 'ObjectId', ref: 'Category', default: null },
+  parentCategory: { type: Types.ObjectId, ref: 'Category', default: null },
   level: { type: Number, default: 0 },
 });
 
