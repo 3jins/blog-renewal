@@ -247,6 +247,9 @@ describe('PostService test', () => {
     let renderedHtml: string;
 
     before(() => {
+      if (!fs.existsSync(appPath.renderedHtml)) {
+        fs.mkdirSync(appPath.renderedHtml, { recursive: true });
+      }
       fs.writeFileSync(
         `${appPath.renderedHtml}/md.css`,
         'table {border-collapse: collapse; width: 100%;} td,th {border: 1px solid black;}',
@@ -254,6 +257,9 @@ describe('PostService test', () => {
     });
 
     afterEach(() => {
+      if (!fs.existsSync(appPath.renderedHtml)) {
+        fs.mkdirSync(appPath.renderedHtml, { recursive: true });
+      }
       fs.writeFileSync(
         `${appPath.renderedHtml}/${fileName}.html`,
         `<html><head lang="ko"><meta charset="UTF-8"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css" integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn" crossorigin="anonymous"><link rel="stylesheet" type="text/css" href="md.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.1.0/styles/monokai.min.css"></head><body>${renderedHtml}</body></html>`, // eslint-disable-line
