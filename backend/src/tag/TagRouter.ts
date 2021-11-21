@@ -19,8 +19,9 @@ import TagService from './TagService';
 const tagRouter = new Router();
 const tagService: TagService = Container.get(TagService);
 
-tagRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`, (ctx: Context) => {
-  const requestDto: FindTagRequestDto = getValidatedRequestDtoOf(FindTagRequestSchema, ctx.query);
+tagRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}/:name*`, (ctx: Context) => {
+  const { name } = ctx.params;
+  const requestDto: FindTagRequestDto = getValidatedRequestDtoOf(FindTagRequestSchema, { ...ctx.query, name });
 
   tagService.findTag(requestDto)
     .then((tags) => {

@@ -35,15 +35,32 @@ describe('Tag router test', () => {
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
-  describe(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG}`, () => {
-    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - normal case`, async () => {
+  describe(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG}/:name`, () => {
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG}/:name - normal case`, async () => {
       const requestDto: FindTagRequestDto = {
-        name: tagName,
         isOnlyExactNameFound: true,
         postMetaIdList,
         isAndCondition: true,
       };
-      const paramDto: FindTagParamDto = { ...requestDto };
+      const paramDto: FindTagParamDto = { ...requestDto, name: tagName };
+
+      when(tagService.findTag(anything()))
+        .thenResolve([]);
+
+      await request
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}/${encodeURI(tagName)}`)
+        .query(requestDto)
+        .expect(http2.constants.HTTP_STATUS_OK);
+      verify(tagService.findTag(deepEqual(paramDto)));
+    });
+
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - normal case`, async () => {
+      const requestDto: FindTagRequestDto = {
+        isOnlyExactNameFound: true,
+        postMetaIdList,
+        isAndCondition: true,
+      };
+      const paramDto: FindTagParamDto = { ...requestDto, name: tagName };
 
       when(tagService.findTag(anything()))
         .thenResolve([]);
@@ -55,7 +72,8 @@ describe('Tag router test', () => {
       verify(tagService.findTag(deepEqual(paramDto)));
     });
 
-    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - parameter error(key)`, async () => {
+
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG}/:name - parameter error(key)`, async () => {
       const strangeRequestDto = {
         doWeLearnMathTo: 'add the dead\'s sum',
         subtractTheWeakOnes: 'count cash for great ones',
@@ -63,7 +81,7 @@ describe('Tag router test', () => {
       };
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}/${encodeURI(tagName)}`)
         .query(strangeRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
@@ -72,7 +90,7 @@ describe('Tag router test', () => {
         });
     });
 
-    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - parameter error(type of value)`, async () => {
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG}/:name - parameter error(type of value)`, async () => {
       const typeDistortedRequestDto = {
         name: tagName,
         isOnlyExactNameFound: 1,
@@ -81,7 +99,7 @@ describe('Tag router test', () => {
       };
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}/${encodeURI(tagName)}`)
         .query(typeDistortedRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
