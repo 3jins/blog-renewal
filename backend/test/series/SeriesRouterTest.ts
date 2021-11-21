@@ -35,10 +35,25 @@ describe('Series router test', () => {
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
-  describe(`GET ${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`, () => {
+  describe(`GET ${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/:name`, () => {
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/:name - normal case`, async () => {
+      const requestDto: FindSeriesRequestDto = {
+        isOnlyExactNameFound: true,
+      };
+      const paramDto: FindSeriesParamDto = { ...requestDto };
+
+      when(seriesService.findSeries(anything()))
+        .thenResolve([]);
+
+      await request
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/${encodeURI(seriesName)}`)
+        .query(requestDto)
+        .expect(http2.constants.HTTP_STATUS_OK);
+      verify(seriesService.findSeries(deepEqual(paramDto)));
+    });
+
     it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.SERIES} - normal case`, async () => {
       const requestDto: FindSeriesRequestDto = {
-        name: seriesName,
         isOnlyExactNameFound: true,
       };
       const paramDto: FindSeriesParamDto = { ...requestDto };
@@ -53,7 +68,7 @@ describe('Series router test', () => {
       verify(seriesService.findSeries(deepEqual(paramDto)));
     });
 
-    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.SERIES} - parameter error(key)`, async () => {
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/:name - parameter error(key)`, async () => {
       const strangeRequestDto = {
         doWeLearnMathTo: 'add the dead\'s sum',
         subtractTheWeakOnes: 'count cash for great ones',
@@ -61,7 +76,7 @@ describe('Series router test', () => {
       };
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/${encodeURI(seriesName)}`)
         .query(strangeRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
@@ -70,14 +85,13 @@ describe('Series router test', () => {
         });
     });
 
-    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.SERIES} - parameter error(type of value)`, async () => {
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/:name - parameter error(type of value)`, async () => {
       const typeDistortedRequestDto = {
-        name: seriesName,
         isOnlyExactNameFound: 'hello',
       };
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/${encodeURI(seriesName)}`)
         .query(typeDistortedRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {

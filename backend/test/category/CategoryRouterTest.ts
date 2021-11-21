@@ -43,11 +43,27 @@ describe('Category router test', () => {
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
-  describe(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, () => {
+  describe(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:name`, () => {
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:name - normal case`, async () => {
+      const requestDto: FindCategoryRequestDto = {
+        parentCategoryId: categoryId,
+        level: categoryLevel,
+      };
+      const paramDto: FindCategoryParamDto = { ...requestDto };
+
+      when(categoryService.findCategory(anything()))
+        .thenResolve([]);
+
+      await request
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/${encodeURI(categoryName)}`)
+        .query(requestDto)
+        .expect(http2.constants.HTTP_STATUS_OK);
+      verify(categoryService.findCategory(deepEqual(paramDto)));
+    });
+
     it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY} - normal case`, async () => {
       const requestDto: FindCategoryRequestDto = {
         parentCategoryId: categoryId,
-        name: categoryName,
         level: categoryLevel,
       };
       const paramDto: FindCategoryParamDto = { ...requestDto };
@@ -62,7 +78,7 @@ describe('Category router test', () => {
       verify(categoryService.findCategory(deepEqual(paramDto)));
     });
 
-    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY} - parameter error(key)`, async () => {
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:name - parameter error(key)`, async () => {
       const strangeRequestDto = {
         doWeLearnMathTo: 'add the dead\'s sum',
         subtractTheWeakOnes: 'count cash for great ones',
@@ -70,7 +86,7 @@ describe('Category router test', () => {
       };
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/${encodeURI(categoryName)}`)
         .query(strangeRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
@@ -79,15 +95,14 @@ describe('Category router test', () => {
         });
     });
 
-    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY} - parameter error(type of value)`, async () => {
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:name - parameter error(type of value)`, async () => {
       const typeDistortedRequestDto = {
         parentCategoryId: categoryId,
-        name: categoryName,
         level: false,
       };
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/${encodeURI(categoryName)}`)
         .query(typeDistortedRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {

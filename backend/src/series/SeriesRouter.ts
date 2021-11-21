@@ -19,8 +19,9 @@ import SeriesService from './SeriesService';
 const seriesRouter = new Router();
 const seriesService: SeriesService = Container.get(SeriesService);
 
-seriesRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`, (ctx: Context) => {
-  const requestDto: FindSeriesRequestDto = getValidatedRequestDtoOf(FindSeriesRequestSchema, ctx.query);
+seriesRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/:name*`, (ctx: Context) => {
+  const { name } = ctx.params;
+  const requestDto: FindSeriesRequestDto = getValidatedRequestDtoOf(FindSeriesRequestSchema, { ...ctx.query, name });
 
   seriesService.findSeries(requestDto)
     .then((series) => {

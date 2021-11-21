@@ -19,8 +19,9 @@ import CategoryService from './CategoryService';
 const categoryRouter = new Router();
 const categoryService: CategoryService = Container.get(CategoryService);
 
-categoryRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, (ctx: Context) => {
-  const requestDto: FindCategoryRequestDto = getValidatedRequestDtoOf(FindCategoryRequestSchema, ctx.query);
+categoryRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:name*`, (ctx: Context) => {
+  const { name } = ctx.params;
+  const requestDto: FindCategoryRequestDto = getValidatedRequestDtoOf(FindCategoryRequestSchema, { ...ctx.query, name });
 
   categoryService.findCategory(requestDto)
     .then((categories) => {
