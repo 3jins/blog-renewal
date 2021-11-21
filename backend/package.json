@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc --skipLibCheck -p tsconfig.json",
-    "test": "./node_modules/mocha/bin/mocha -p .mocharc.json ./test/**/*.ts",
+    "test": "./node_modules/mocha/bin/mocha -p .mocharc.js ./test/**/*.ts",
     "coverage": "nyc npm run test",
     "dev": "nodemon --watch 'src/**/*.ts' --exec ts-node -r tsconfig-paths/register src/index.ts",
     "start": "pm2 start",
