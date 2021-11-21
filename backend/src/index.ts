@@ -1,3 +1,7 @@
+/* eslint-disable import/first */
+
+process.env.NODE_ENV = process.env.NODE_ENV === undefined ? 'test' : process.env.NODE_ENV;
+
 import { connectToDb, startApp } from '@src/app';
 import CategoryRouter from '@src/category/CategoryRouter';
 import HomeRouter from '@src/home/HomeRouter';

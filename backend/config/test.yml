@@ -1,5 +1,6 @@
 server:
   port: 5913
+  retryCount: 7
 
 client:
   url: http://localhost
