@@ -24,7 +24,7 @@ const buildMessage = (blogError: BlogError): string => {
   return fullMessage;
 };
 
-export const leaveLog = (message: string, logLevel: LogLevel): void => {
+export const leaveLog = (message: any, logLevel: LogLevel): void => {
   switch (logLevel) {
     case LogLevel.MUTE:
       break;

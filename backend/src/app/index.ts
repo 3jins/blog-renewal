@@ -10,6 +10,7 @@ import * as DbConnection from '@src/common/mongodb/DbConnectionUtil';
 import { handleError } from '@src/common/error/BlogErrorHandlingUtil';
 import { leaveLog } from '@src/common/logging/LoggingUtil';
 import LogLevel from '@src/common/logging/LogLevel';
+import { randomInt } from 'crypto';
 
 const connectToDb = () => {
   DbConnection.setConnection();
@@ -43,17 +44,44 @@ const makeApp = (router: Router): Koa => {
       await next();
     })
     .use((ctx, next) => next()
-      .catch((err) => handleError(ctx, err)))
+      .catch((err: Error) => handleError(ctx, err)))
     .use(router.routes());
 
   return app;
 };
 
+const retryStartingApp = (server: Server, previousPort: number) => {
+  server.close();
+  let randomPort;
+  do {
+    randomPort = randomInt(1024, 65535);
+  } while (randomPort !== previousPort);
+
+  setTimeout(
+    () => server.listen(randomPort, () => leaveLog(`Server restarted to listening from port ${randomPort}.`, LogLevel.INFO)),
+    1000,
+  );
+};
+
 const startApp = (routerList: Router[]): Server => {
-  const { port } = config.get('server');
+  const { port, retryCount } = config.get('server');
   const router = makeRouter(routerList);
   const app = makeApp(router);
-  return app.listen(port, () => leaveLog(`Server started to listening from port ${port}.`, LogLevel.INFO));
+  let retryIdx = 0;
+  leaveLog(`process: ${process}`, LogLevel.DEBUG);
+
+  const server: Server = app.listen(
+    port,
+    () => leaveLog(`Server started to listening from port ${port}.`, LogLevel.INFO),
+  );
+  server.on('error', (err) => {
+    // @ts-ignore
+    if (['EADDRINUSE', 'ERR_SERVER_ALREADY_LISTEN'].includes(err.code) && retryIdx++ < retryCount) {
+      leaveLog(`Retrying to start server... (${retryIdx}/${retryCount})`, LogLevel.INFO);
+      retryStartingApp(server, port);
+    }
+  });
+  return server;
 };
 
 const endApp = (server: Server) => server.close();
