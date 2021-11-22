@@ -1,5 +1,5 @@
 import { should } from 'chai';
-import { capture, deepEqual, instance, mock, spy, verify } from 'ts-mockito';
+import { anything, capture, deepEqual, instance, mock, spy, verify, when } from 'ts-mockito';
 import { Types } from 'mongoose';
 import TagService from '@src/tag/TagService';
 import TagRepository from '@src/tag/TagRepository';
@@ -14,6 +14,7 @@ import { common as commonTestData } from '@test/data/testData';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { errorShouldBeThrown } from '@test/TestUtil';
+import { TagDoc } from '@src/tag/Tag';
 
 describe('TagService test', () => {
   let tagService: TagService;
@@ -94,23 +95,46 @@ describe('TagService test', () => {
         name: tagName,
         postMetaIdList,
       };
-      await tagService.createTag(paramDto);
+      when(tagRepository.findTag(anything()))
+        .thenResolve([{ name: tagName } as TagDoc]);
+
+      const result: string = await tagService.createTag(paramDto);
 
       const [repoParamDto] = capture<CreateTagRepoParamDto>(tagRepository.createTag).last();
       repoParamDto.name.should.equal(tagName);
       repoParamDto.postMetaList.should.deep.equal(postMetaList);
+      result.should.be.equal(tagName);
     });
 
     it('tag create test - without postMetaIdList', async () => {
       const paramDto: CreateTagParamDto = {
         name: tagName,
       };
-      await tagService.createTag(paramDto);
+      when(tagRepository.findTag(anything()))
+        .thenResolve([{ name: tagName } as TagDoc]);
+
+      const result: string = await tagService.createTag(paramDto);
 
       verify(tagRepository.createTag(deepEqual<CreateTagRepoParamDto>({
         name: tagName,
         postMetaList: [],
       })));
+      result.should.be.equal(tagName);
+    });
+
+    it('tag create test - when failed to create', async () => {
+      const paramDto: CreateTagParamDto = {
+        name: tagName,
+        postMetaIdList,
+      };
+      when(tagRepository.findTag(anything()))
+        .thenResolve([]);
+
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.TAG_NOT_CREATED, [tagName, 'name']),
+        (_paramDto) => tagService.createTag(_paramDto),
+        paramDto,
+      );
     });
   });
 

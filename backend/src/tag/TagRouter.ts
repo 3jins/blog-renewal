@@ -13,7 +13,8 @@ import {
 } from '@src/tag/dto/TagRequestDto';
 import * as http2 from 'http2';
 import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUtil';
-import * as URL from '../common/constant/URL';
+import * as URL from '@src/common/constant/URL';
+import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 import TagService from './TagService';
 
 const tagRouter = new Router();
@@ -34,7 +35,8 @@ tagRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`, (ctx: Context) => {
   const requestDto: CreateTagRequestDto = getValidatedRequestDtoOf(CreateTagRequestSchema, ctx.request.body);
 
   tagService.createTag(requestDto)
-    .then(() => {
+    .then((name) => {
+      ctx.set(HttpHeaderField.CONTENT_LOCATION, `${ctx.url}/${encodeURI(name)}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;
     });
 });

@@ -20,6 +20,7 @@ import {
 import { common as commonTestData } from '@test/data/testData';
 import * as http2 from 'http2';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 
 const categoryService: CategoryService = mock(CategoryService);
 Container.set(CategoryService, instance(categoryService));
@@ -115,6 +116,7 @@ describe('Category router test', () => {
   // eslint-disable-next-line mocha/no-setup-in-describe
   describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, () => {
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY} - normal case`, async () => {
+      const url = `${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`;
       const requestDto: CreateCategoryRequestDto = {
         name: categoryName,
         parentCategoryId: categoryId,
@@ -122,12 +124,13 @@ describe('Category router test', () => {
       const paramDto: CreateCategoryParamDto = { ...requestDto };
 
       when(categoryService.createCategory(anything()))
-        .thenResolve();
+        .thenResolve(categoryName);
 
       await request
         .post(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`)
         .send(requestDto)
-        .expect(201);
+        .expect(201)
+        .expect((res) => res.get(HttpHeaderField.CONTENT_LOCATION).should.equal(`${url}/${encodeURI(categoryName)}`));
       verify(categoryService.createCategory(deepEqual<CreateCategoryParamDto>(paramDto))).once();
     });
 
@@ -143,6 +146,7 @@ describe('Category router test', () => {
         .send(strangeRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
+          (res.get(HttpHeaderField.CONTENT_LOCATION) === undefined).should.be.true;
           (!!(res.body.message)).should.be.true;
           res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
         });

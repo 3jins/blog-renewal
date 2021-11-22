@@ -23,10 +23,16 @@ export default class CategoryService {
       .findCategory({ ...paramDto });
   }
 
-  public async createCategory(paramDto: CreateCategoryParamDto): Promise<void> {
+  public async createCategory(paramDto: CreateCategoryParamDto): Promise<string> {
     const repoParamDto: CreateCategoryRepoParamDto = this.makeCreateCategoryRepoParamDto(paramDto);
-    return this.categoryRepository
+    await this.categoryRepository
       .createCategory(repoParamDto);
+
+    const categoryList: CategoryDoc[] = await this.categoryRepository.findCategory({ name: paramDto.name });
+    if (_.isEmpty(categoryList)) {
+      throw new BlogError(BlogErrorCode.CATEGORY_NOT_CREATED, [paramDto.name, 'name']);
+    }
+    return categoryList[0].name;
   }
 
   public async updateCategory(paramDto: UpdateCategoryParamDto): Promise<void> {

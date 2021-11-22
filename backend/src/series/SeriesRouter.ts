@@ -15,6 +15,7 @@ import * as http2 from 'http2';
 import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUtil';
 import * as URL from '../common/constant/URL';
 import SeriesService from './SeriesService';
+import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 
 const seriesRouter = new Router();
 const seriesService: SeriesService = Container.get(SeriesService);
@@ -34,7 +35,8 @@ seriesRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`, (ctx: Context) => {
   const requestDto: CreateSeriesRequestDto = getValidatedRequestDtoOf(CreateSeriesRequestSchema, ctx.request.body);
 
   seriesService.createSeries(requestDto)
-    .then(() => {
+    .then((name) => {
+      ctx.set(HttpHeaderField.CONTENT_LOCATION, `${ctx.url}/${encodeURI(name)}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;
     });
 });

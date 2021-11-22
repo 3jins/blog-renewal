@@ -1,10 +1,10 @@
 import supertest from 'supertest';
 import { should } from 'chai';
 import { Server } from 'http';
+import * as http2 from 'http2';
 import { anything, deepEqual, instance, mock, reset, verify, when } from 'ts-mockito';
 import { Container } from 'typedi';
 import { endApp, startApp } from '@src/app';
-import * as URL from '@src/common/constant/URL';
 import TagService from '@src/tag/TagService';
 import {
   CreateTagRequestDto,
@@ -14,8 +14,9 @@ import {
 } from '@src/tag/dto/TagRequestDto';
 import { CreateTagParamDto, FindTagParamDto, UpdateTagParamDto } from '@src/tag/dto/TagParamDto';
 import { common as commonTestData } from '@test/data/testData';
-import * as http2 from 'http2';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import * as URL from '@src/common/constant/URL';
+import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 
 const tagService: TagService = mock(TagService);
 Container.set(TagService, instance(tagService));
@@ -112,16 +113,18 @@ describe('Tag router test', () => {
   // eslint-disable-next-line mocha/no-setup-in-describe
   describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.TAG}`, () => {
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.TAG} - normal case`, async () => {
+      const url = `${URL.PREFIX.API}${URL.ENDPOINT.TAG}`;
       const requestDto: CreateTagRequestDto = { name: tagName };
       const paramDto: CreateTagParamDto = { ...requestDto };
 
       when(tagService.createTag(anything()))
-        .thenResolve();
+        .thenResolve(tagName);
 
       await request
-        .post(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`)
+        .post(url)
         .send(requestDto)
-        .expect(201);
+        .expect(201)
+        .expect((res) => res.get(HttpHeaderField.CONTENT_LOCATION).should.equal(`${url}/${encodeURI(tagName)}`));
       verify(tagService.createTag(deepEqual<CreateTagParamDto>(paramDto))).once();
     });
 
@@ -137,6 +140,7 @@ describe('Tag router test', () => {
         .send(strangeRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
+          (res.get(HttpHeaderField.CONTENT_LOCATION) === undefined).should.be.true;
           (!!(res.body.message)).should.be.true;
           res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
         });
@@ -150,6 +154,7 @@ describe('Tag router test', () => {
         .send(typeDistortedRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
+          (res.get(HttpHeaderField.CONTENT_LOCATION) === undefined).should.be.true;
           (!!(res.body.message)).should.be.true;
           res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
         });

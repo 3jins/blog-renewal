@@ -1,5 +1,5 @@
 import { should } from 'chai';
-import { capture, deepEqual, instance, mock, spy, verify } from 'ts-mockito';
+import { anything, capture, deepEqual, instance, mock, spy, verify, when } from 'ts-mockito';
 import { Types } from 'mongoose';
 import CategoryService from '@src/category/CategoryService';
 import CategoryRepository from '@src/category/CategoryRepository';
@@ -19,6 +19,7 @@ import { common as commonTestData } from '@test/data/testData';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { errorShouldBeThrown } from '@test/TestUtil';
+import { CategoryDoc } from '@src/category/Category';
 
 describe('CategoryService test', () => {
   let categoryService: CategoryService;
@@ -60,21 +61,44 @@ describe('CategoryService test', () => {
         parentCategoryId: categoryId,
         name: categoryName,
       };
-      await categoryService.createCategory(paramDto);
+      when(categoryRepository.findCategory(anything()))
+        .thenResolve([{ name: categoryName } as CategoryDoc]);
+
+      const result: string = await categoryService.createCategory(paramDto);
 
       const [repoParamDto] = capture<CreateCategoryRepoParamDto>(categoryRepository.createCategory).last();
       repoParamDto.parentCategory!.should.deep.equal(new Types.ObjectId(categoryId));
       repoParamDto.name.should.equal(categoryName);
+      result.should.equal(categoryName);
     });
 
     it('createCategory - without parentCategoryId', async () => {
       const paramDto: CreateCategoryParamDto = {
         name: categoryName,
       };
-      await categoryService.createCategory(paramDto);
+      when(categoryRepository.findCategory(anything()))
+        .thenResolve([{ name: categoryName } as CategoryDoc]);
+
+      const result: string = await categoryService.createCategory(paramDto);
 
       const repoParamDto: CreateCategoryRepoParamDto = { ...paramDto };
       verify(categoryRepository.createCategory(deepEqual<CreateCategoryRepoParamDto>(repoParamDto))).once();
+      result.should.equal(categoryName);
+    });
+
+    it('createCategory - when failed to create', async () => {
+      const paramDto: CreateCategoryParamDto = {
+        parentCategoryId: categoryId,
+        name: categoryName,
+      };
+      when(categoryRepository.findCategory(anything()))
+        .thenResolve([]);
+
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.CATEGORY_NOT_CREATED, [categoryName, 'name']),
+        (_paramDto) => categoryService.createCategory(_paramDto),
+        paramDto,
+      );
     });
   });
 
