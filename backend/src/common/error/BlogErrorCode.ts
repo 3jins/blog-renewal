@@ -66,6 +66,13 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
     logLevel: LogLevel.WARN,
   },
+  TAG_NOT_CREATED: {
+    code: 'TAG_NOT_CREATED',
+    errorMessage: 'tag가 생성되지 않았습니다.',
+    loggingMessage: 'tag({1}:{0})가 생성되지 않았습니다.',
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.WARN,
+  },
   INVALID_REQUEST_PARAMETER: {
     code: 'INVALID_REQUEST_PARAMETER',
     errorMessage: '형식에 맞지 않는 요청 파라미터가 시스템에 인입되었습니다.',
@@ -78,6 +85,13 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     errorMessage: '존재하는 category가 아닙니다.',
     loggingMessage: '{1}:{0} 정보로는 category를 찾을 수 없습니다.',
     httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
+    logLevel: LogLevel.WARN,
+  },
+  CATEGORY_NOT_CREATED: {
+    code: 'CATEGORY_NOT_CREATED',
+    errorMessage: 'category가 생성되지 않았습니다.',
+    loggingMessage: 'category({1}:{0})가 생성되지 않았습니다.',
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
     logLevel: LogLevel.WARN,
   },
   CATEGORY_WITH_CHILDREN_CANNOT_BE_DELETED: {
@@ -101,11 +115,25 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
     logLevel: LogLevel.WARN,
   },
+  SERIES_NOT_CREATED: {
+    code: 'SERIES_NOT_CREATED',
+    errorMessage: 'series가 생성되지 않았습니다.',
+    loggingMessage: 'series({1}:{0})가 생성되지 않았습니다.',
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    logLevel: LogLevel.WARN,
+  },
   POST_NOT_FOUND: {
     code: 'POST_NOT_FOUND',
     errorMessage: 'post를 찾을 수 없습니다.',
     loggingMessage: '{1}:{0} 정보로는 post를 찾을 수 없습니다.',
     httpErrorCode: http2.constants.HTTP_STATUS_NOT_FOUND,
+    logLevel: LogLevel.WARN,
+  },
+  POST_NOT_CREATED: {
+    code: 'POST_NOT_CREATED',
+    errorMessage: 'post가 생성되지 않았습니다.',
+    loggingMessage: 'post({1}:{0})가 생성되지 않았습니다.',
+    httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
     logLevel: LogLevel.WARN,
   },
 };

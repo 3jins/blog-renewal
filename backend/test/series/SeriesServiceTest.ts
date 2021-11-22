@@ -1,5 +1,5 @@
 import { should } from 'chai';
-import { capture, deepEqual, instance, mock, spy, verify } from 'ts-mockito';
+import { anything, capture, deepEqual, instance, mock, spy, verify, when } from 'ts-mockito';
 import SeriesService from '@src/series/SeriesService';
 import SeriesRepository from '@src/series/SeriesRepository';
 import {
@@ -19,6 +19,7 @@ import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { errorShouldBeThrown } from '@test/TestUtil';
 import { Types } from 'mongoose';
+import { SeriesDoc } from '@src/series/Series';
 
 describe('SeriesService test', () => {
   let seriesService: SeriesService;
@@ -67,11 +68,15 @@ describe('SeriesService test', () => {
         thumbnailImage: gifImageId,
         postMetaIdList: postMetaList,
       };
-      await seriesService.createSeries(paramDto);
+      when(seriesRepository.findSeries(anything()))
+        .thenResolve([{ name: seriesName } as SeriesDoc]);
+
+      const result: string = await seriesService.createSeries(paramDto);
 
       const [repoParamDto] = capture<CreateSeriesRepoParamDto>(seriesRepository.createSeries).last();
       repoParamDto.name.should.equal(seriesName);
       repoParamDto.postMetaList.should.deep.equal(postMetaList.map((postMetaId) => new Types.ObjectId(postMetaId)));
+      result.should.equal(seriesName);
     });
 
     it('series create test - with minimal parameters', async () => {
@@ -79,11 +84,30 @@ describe('SeriesService test', () => {
         name: seriesName,
         thumbnailContent,
       };
-      await seriesService.createSeries(paramDto);
+      when(seriesRepository.findSeries(anything()))
+        .thenResolve([{ name: seriesName } as SeriesDoc]);
+
+      const result: string = await seriesService.createSeries(paramDto);
 
       const [repoParamDto] = capture<CreateSeriesRepoParamDto>(seriesRepository.createSeries).last();
       repoParamDto.name.should.equal(seriesName);
       repoParamDto.postMetaList.should.deep.equal([]);
+      result.should.equal(seriesName);
+    });
+
+    it('series create test - when failed to create', async () => {
+      const paramDto: CreateSeriesParamDto = {
+        name: seriesName,
+        thumbnailContent,
+      };
+      when(seriesRepository.findSeries(anything()))
+        .thenResolve([]);
+
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.CATEGORY_NOT_CREATED, [seriesName, 'name']),
+        (_paramDto) => seriesService.createSeries(_paramDto),
+        paramDto,
+      );
     });
   });
 

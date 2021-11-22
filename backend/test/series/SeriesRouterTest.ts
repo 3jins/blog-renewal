@@ -16,6 +16,7 @@ import { CreateSeriesParamDto, FindSeriesParamDto, UpdateSeriesParamDto } from '
 import { common as commonTestData } from '@test/data/testData';
 import * as http2 from 'http2';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 
 const seriesService: SeriesService = mock(SeriesService);
 Container.set(SeriesService, instance(seriesService));
@@ -104,16 +105,18 @@ describe('Series router test', () => {
   // eslint-disable-next-line mocha/no-setup-in-describe
   describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`, () => {
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.SERIES} - normal case`, async () => {
-      const requestDto: CreateSeriesRequestDto = { name: seriesName, thumbnailContent, postMetaIdList: postMetaIdList };
+      const url = `${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`;
+      const requestDto: CreateSeriesRequestDto = { name: seriesName, thumbnailContent, postMetaIdList };
       const paramDto: CreateSeriesParamDto = { ...requestDto };
 
       when(seriesService.createSeries(anything()))
-        .thenResolve();
+        .thenResolve(seriesName);
 
       await request
-        .post(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`)
+        .post(url)
         .send(requestDto)
-        .expect(201);
+        .expect(201)
+        .expect((res) => res.get(HttpHeaderField.CONTENT_LOCATION).should.equal(`${url}/${encodeURI(seriesName)}`));
       verify(seriesService.createSeries(deepEqual<CreateSeriesParamDto>(paramDto))).once();
     });
 
@@ -129,6 +132,7 @@ describe('Series router test', () => {
         .send(strangeRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
+          (res.get(HttpHeaderField.CONTENT_LOCATION) === undefined).should.be.true;
           (!!(res.body.message)).should.be.true;
           res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
         });
@@ -142,6 +146,7 @@ describe('Series router test', () => {
         .send(typeDistortedRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
+          (res.get(HttpHeaderField.CONTENT_LOCATION) === undefined).should.be.true;
           (!!(res.body.message)).should.be.true;
           res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
         });

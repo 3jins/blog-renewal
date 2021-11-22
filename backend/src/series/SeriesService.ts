@@ -22,15 +22,21 @@ export default class SeriesService {
     return this.seriesRepository.findSeries({ ...paramDto });
   }
 
-  public async createSeries(paramDto: CreateSeriesParamDto): Promise<void> {
+  public async createSeries(paramDto: CreateSeriesParamDto): Promise<string> {
     const { postMetaIdList } = paramDto;
     const postMetaList: Types.ObjectId[] = _.isNil(postMetaIdList)
       ? []
       : postMetaIdList!.map((postMetaId) => new Types.ObjectId(postMetaId));
-    return this.seriesRepository.createSeries({
+    await this.seriesRepository.createSeries({
       postMetaList,
       ...paramDto,
     });
+
+    const seriesList: SeriesDoc[] = await this.seriesRepository.findSeries({ name: paramDto.name });
+    if (_.isEmpty(seriesList)) {
+      throw new BlogError(BlogErrorCode.CATEGORY_NOT_CREATED, [paramDto.name, 'name']);
+    }
+    return seriesList[0].name;
   }
 
   public async updateSeries(paramDto: UpdateSeriesParamDto): Promise<void> {

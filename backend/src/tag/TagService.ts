@@ -25,15 +25,26 @@ export default class TagService {
     return this.tagRepository.findTag(repoParamDto);
   }
 
-  public async createTag(paramDto: CreateTagParamDto): Promise<void> {
+  public async createTag(paramDto: CreateTagParamDto): Promise<string> {
     const { postMetaIdList } = paramDto;
     const postMetaList: Types.ObjectId[] = _.isNil(postMetaIdList)
       ? []
       : postMetaIdList!.map((postMetaId) => new Types.ObjectId(postMetaId));
-    return this.tagRepository.createTag({
+    await this.tagRepository.createTag({
       postMetaList,
       ...paramDto,
     });
+
+    const tagList: TagDoc[] = await this.tagRepository.findTag({
+      findTagByNameDto: {
+        nameList: [paramDto.name],
+        isOnlyExactNameFound: true,
+      },
+    });
+    if (_.isEmpty(tagList)) {
+      throw new BlogError(BlogErrorCode.TAG_NOT_CREATED, [paramDto.name, 'name']);
+    }
+    return tagList[0].name;
   }
 
   public async updateTag(paramDto: UpdateTagParamDto): Promise<void> {
@@ -58,7 +69,10 @@ export default class TagService {
   private addPostMetaIdQueryToFindTagRepoParamDto(repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void {
     const { postMetaIdList, isAndCondition } = paramDto;
     if (!_.isNil(postMetaIdList) && !_.isNil(isAndCondition)) {
-      const findTagByPostMetaIdDto: FindTagByPostMetaIdDto = { postMetaIdList: postMetaIdList!, isAndCondition: isAndCondition! };
+      const findTagByPostMetaIdDto: FindTagByPostMetaIdDto = {
+        postMetaIdList: postMetaIdList!,
+        isAndCondition: isAndCondition!,
+      };
       Object.assign(repoParamDto, { findTagByPostMetaIdDto });
     }
   }

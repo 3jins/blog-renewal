@@ -15,6 +15,7 @@ import * as http2 from 'http2';
 import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUtil';
 import * as URL from '../common/constant/URL';
 import CategoryService from './CategoryService';
+import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 
 const categoryRouter = new Router();
 const categoryService: CategoryService = Container.get(CategoryService);
@@ -34,7 +35,8 @@ categoryRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, (ctx: Context) 
   const requestDto: CreateCategoryRequestDto = getValidatedRequestDtoOf(CreateCategoryRequestSchema, ctx.request.body);
 
   categoryService.createCategory(requestDto)
-    .then(() => {
+    .then((name) => {
+      ctx.set(HttpHeaderField.CONTENT_LOCATION, `${ctx.url}/${encodeURI(name)}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;
     });
 });
