@@ -13,6 +13,7 @@ db:
   connectionOptions:
     useNewUrlParser: true
     useUnifiedTopology: true
+  retryCount: 1
 
 path:
   appData: /home/blog

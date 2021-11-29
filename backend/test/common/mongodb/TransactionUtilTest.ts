@@ -1,4 +1,4 @@
-import sinon from 'sinon';
+import sinon, { SinonSandbox, SinonSpiedInstance, SinonSpy } from 'sinon';
 import { should } from 'chai';
 import * as DbConnectionUtil from '@src/common/mongodb/DbConnectionUtil';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
@@ -7,10 +7,15 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { ClientSessionForTest, ConnectionForTest } from '@test/common/mongodb/MongodbMock';
 import { errorShouldBeThrown } from '@test/TestUtil';
 import { blogErrorCode } from '@test/data/testData';
+import config from 'config';
 
 describe('TransactionUtil Test', () => {
-  let sandbox;
-  let clientSessionSpy;
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  const { retryCount } = config.get('db');
+  const testDelay = (retryCount + 1) * 1000;
+  const testTimeout = (retryCount + 2) * 1000;
+  let sandbox: SinonSandbox;
+  let clientSessionSpy: SinonSpiedInstance<ClientSessionForTest>;
 
   before(() => {
     should();
@@ -19,7 +24,8 @@ describe('TransactionUtil Test', () => {
 
   beforeEach(async () => {
     clientSessionSpy = sandbox.spy(new ClientSessionForTest());
-    const connectionSpy = sandbox.spy(new ConnectionForTest(clientSessionSpy));
+    const connectionSpy: SinonSpiedInstance<ConnectionForTest> = sandbox.spy(new ConnectionForTest(clientSessionSpy));
+    // @ts-ignore
     sandbox.stub(DbConnectionUtil, 'getConnection').returns(connectionSpy);
     sandbox.stub(DbConnectionUtil, 'setConnection');
   });
@@ -46,11 +52,10 @@ describe('TransactionUtil Test', () => {
         throw expectedError;
       }),
     );
-
     clientSessionSpy.startTransaction.calledOnce.should.be.true;
     clientSessionSpy.abortTransaction.calledOnce.should.be.true;
     clientSessionSpy.endSession.calledOnce.should.be.true;
-  });
+  }).timeout(testTimeout);
 
   it('Transaction rollback by an unexpected error', async () => {
     await errorShouldBeThrown(
@@ -59,9 +64,21 @@ describe('TransactionUtil Test', () => {
         throw new Error(blogErrorCode.TEST_ERROR.errorMessage);
       }),
     );
+    setTimeout(() => {
+      clientSessionSpy.startTransaction.calledOnce.should.be.true;
+      clientSessionSpy.abortTransaction.calledOnce.should.be.true;
+      clientSessionSpy.endSession.calledOnce.should.be.true;
+    }, testDelay);
+  }).timeout(testTimeout);
 
-    clientSessionSpy.startTransaction.calledOnce.should.be.true;
-    clientSessionSpy.abortTransaction.calledOnce.should.be.true;
-    clientSessionSpy.endSession.calledOnce.should.be.true;
-  });
+  it('Transaction failure test - retry maximum count', () => {
+    const expectedError = new BlogError(blogErrorCode.TEST_ERROR);
+    const spyJob: SinonSpy = sandbox.spy(async () => {
+      throw expectedError;
+    });
+    useTransaction(spyJob);
+    setTimeout(() => {
+      spyJob.callCount.should.equal(retryCount + 1);
+    }, testDelay);
+  }).timeout(testTimeout);
 });
