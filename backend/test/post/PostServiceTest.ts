@@ -387,7 +387,7 @@ describe('PostService test', () => {
 
     it('addUpdatedVersionPost test - thumbnailContent: O, thumbnailImage: O', async () => {
       const paramDto: AddUpdatedVersionPostParamDto = {
-        postNo: commonTestData.post2.postNo,
+        postNo: commonTestData.post2V1.postNo,
         post: file,
         language: Language.KO,
         thumbnailContent: commonTestData.simpleText,
@@ -398,7 +398,7 @@ describe('PostService test', () => {
       const date2 = new Date();
       verify(postRepository.createPost(anything())).once();
       const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).first();
-      createPostRepoParamDto.postNo.should.equal(commonTestData.post2.postNo);
+      createPostRepoParamDto.postNo.should.equal(commonTestData.post2V1.postNo);
       createPostRepoParamDto.title.should.equal(file.name);
       createPostRepoParamDto.rawContent.should.equal(fileContent);
       createPostRepoParamDto.renderedContent.should.not.be.empty;
@@ -413,7 +413,7 @@ describe('PostService test', () => {
 
     it('addUpdatedVersionPost test - thumbnailContent: X, thumbnailImage: X', async () => {
       const paramDto: AddUpdatedVersionPostParamDto = {
-        postNo: commonTestData.post2.postNo,
+        postNo: commonTestData.post2V1.postNo,
         post: file,
         language: Language.KO,
       };
@@ -422,7 +422,7 @@ describe('PostService test', () => {
       const date2 = new Date();
       verify(postRepository.createPost(anything())).once();
       const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).first();
-      createPostRepoParamDto.postNo.should.equal(commonTestData.post2.postNo);
+      createPostRepoParamDto.postNo.should.equal(commonTestData.post2V1.postNo);
       createPostRepoParamDto.title.should.equal(file.name);
       createPostRepoParamDto.rawContent.should.equal(fileContent);
       createPostRepoParamDto.renderedContent.should.not.be.empty;

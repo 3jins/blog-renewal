@@ -14,6 +14,7 @@ export default class PostMetaRepository {
       const queryToFindPostMeta: FilterQuery<PostMetaDoc> = this.makeQueryToFindPostMeta(paramDto);
       return PostMeta
         .find(queryToFindPostMeta)
+        .sort({ postNo: -1 })
         .populate('category')
         .populate('series')
         .populate('tagList')

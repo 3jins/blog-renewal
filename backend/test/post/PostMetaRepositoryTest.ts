@@ -126,7 +126,7 @@ describe('PostMetaRepository test', () => {
         postNo: postMetaList[0].postNo,
         categoryId: postMetaList[0].category.id,
         seriesId: postMetaList[0].series.id,
-        tagIdList: postMetaList[0].tagList.map((tag) => tag.id),
+        tagIdList: postMetaList[0].tagList!.map((tag) => tag.id),
         isPrivate: postMetaList[0].isPrivate,
         isDeprecated: postMetaList[0].isDeprecated,
         isDraft: postMetaList[0].isDraft,
@@ -146,12 +146,12 @@ describe('PostMetaRepository test', () => {
           .filter((series) => series.id === postMetaList[0].series.id)
           .map((series) => series.id),
       );
-      foundPostMetaList[0].tagList.map((tag) => tag.id).should.deep.equal(
-        postMetaList[0].tagList.map((tag) => tag.id),
+      foundPostMetaList[0].tagList!.map((tag) => tag.id).should.deep.equal(
+        postMetaList[0].tagList!.map((tag) => tag.id),
       );
-      foundPostMetaList[0].tagList.map((tag) => tag.id).should.deep.equal(
+      foundPostMetaList[0].tagList!.map((tag) => tag.id).should.deep.equal(
         tagList
-          .filter((foundPostTag) => postMetaList[0].tagList.map((tag) => tag.id).includes(foundPostTag.id))
+          .filter((foundPostTag) => postMetaList[0].tagList!.map((tag) => tag.id).includes(foundPostTag.id))
           .map((foundPostTag) => foundPostTag.id),
       );
       foundPostMetaList[0].createdDate.should.deep.equal(postMetaList[0].createdDate);
@@ -165,33 +165,35 @@ describe('PostMetaRepository test', () => {
     it('findPostMeta - with empty parameter', async () => {
       const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta({});
       foundPostMetaList.should.have.lengthOf(postMetaList.length);
-      foundPostMetaList[0].postNo.should.equal(postMetaList[0].postNo);
-      foundPostMetaList[0].category.id.should.equal(postMetaList[0].category.id);
-      [foundPostMetaList[0].category.id].should.deep.equal(
+      foundPostMetaList[0].postNo.should.equal(postMetaList[2].postNo);
+      foundPostMetaList[1].postNo.should.equal(postMetaList[1].postNo);
+      foundPostMetaList[2].postNo.should.equal(postMetaList[0].postNo);
+      foundPostMetaList[2].category.id.should.equal(postMetaList[0].category.id);
+      [foundPostMetaList[2].category.id].should.deep.equal(
         categoryList
           .filter((category) => category.id === postMetaList[0].category.id)
           .map((category) => category.id),
       );
-      foundPostMetaList[0].series.id.should.equal(postMetaList[0].series.id);
-      [foundPostMetaList[0].series.id].should.deep.equal(
+      foundPostMetaList[2].series.id.should.equal(postMetaList[0].series.id);
+      [foundPostMetaList[2].series.id].should.deep.equal(
         seriesList
           .filter((series) => series.id === postMetaList[0].series.id)
           .map((series) => series.id),
       );
-      foundPostMetaList[0].tagList.map((tag) => tag.id).should.deep.equal(
-        postMetaList[0].tagList.map((tag) => tag.id),
+      foundPostMetaList[2].tagList!.map((tag) => tag.id).should.deep.equal(
+        postMetaList[0].tagList!.map((tag) => tag.id),
       );
-      foundPostMetaList[0].tagList.map((tag) => tag.id).should.deep.equal(
+      foundPostMetaList[2].tagList!.map((tag) => tag.id).should.deep.equal(
         tagList
-          .filter((foundPostTag) => postMetaList[0].tagList.map((tag) => tag.id).includes(foundPostTag.id))
+          .filter((foundPostTag) => postMetaList[0].tagList!.map((tag) => tag.id).includes(foundPostTag.id))
           .map((foundPostTag) => foundPostTag.id),
       );
-      foundPostMetaList[0].createdDate.should.deep.equal(postMetaList[0].createdDate);
-      foundPostMetaList[0].isDeleted!.should.equal(postMetaList[0].isDeleted);
-      foundPostMetaList[0].commentCount!.should.equal(postMetaList[0].commentCount);
-      foundPostMetaList[0].isPrivate!.should.equal(postMetaList[0].isPrivate);
-      foundPostMetaList[0].isDeprecated!.should.equal(postMetaList[0].isDeprecated);
-      foundPostMetaList[0].isDraft!.should.equal(postMetaList[0].isDraft);
+      foundPostMetaList[2].createdDate.should.deep.equal(postMetaList[0].createdDate);
+      foundPostMetaList[2].isDeleted!.should.equal(postMetaList[0].isDeleted);
+      foundPostMetaList[2].commentCount!.should.equal(postMetaList[0].commentCount);
+      foundPostMetaList[2].isPrivate!.should.equal(postMetaList[0].isPrivate);
+      foundPostMetaList[2].isDeprecated!.should.equal(postMetaList[0].isDeprecated);
+      foundPostMetaList[2].isDraft!.should.equal(postMetaList[0].isDraft);
     });
 
     it('findPostMeta - with inexistent postNo', async () => {
@@ -204,15 +206,10 @@ describe('PostMetaRepository test', () => {
 
     it('findPostMeta - with inexistent categoryId', async () => {
       const paramDto: FindPostMetaRepoParamDto = {
-        postNo: postMetaList[0].postNo,
-        categoryId: postMetaList[0].category,
-        seriesId: postMetaList[0].series,
-        tagIdList: postMetaList[0].tagList,
-        isPrivate: postMetaList[0].isPrivate,
-        isDeprecated: postMetaList[0].isDeprecated,
-        isDraft: postMetaList[0].isDraft,
+        categoryId: commonTestData.objectIdList[3],
       };
       const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta(paramDto);
+      foundPostMetaList.should.be.empty;
     });
   });
 
