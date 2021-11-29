@@ -106,7 +106,7 @@ describe('Post router test', () => {
   describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION}`, () => {
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION} - normal case`, async () => {
       const requestDto: AddUpdatedVersionPostRequestDto = {
-        postNo: commonTestData.post2.postNo,
+        postNo: commonTestData.post2V1.postNo,
         language: Language.KO,
       };
 
@@ -126,7 +126,7 @@ describe('Post router test', () => {
 
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION} - parameter error(file is absent)`, async () => {
       const requestDto: AddUpdatedVersionPostRequestDto = {
-        postNo: commonTestData.post2.postNo,
+        postNo: commonTestData.post2V1.postNo,
         language: Language.KO,
       };
 
@@ -160,7 +160,7 @@ describe('Post router test', () => {
 
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION} - parameter error(type of value)`, async () => {
       const requestDto: AddUpdatedVersionPostRequestDto = {
-        postNo: commonTestData.post2.postNo,
+        postNo: commonTestData.post2V1.postNo,
         language: Language.KO,
       };
 
@@ -180,7 +180,7 @@ describe('Post router test', () => {
   describe(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST}`, () => {
     it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST} - normal case`, async () => {
       const requestDto: UpdatePostMetaDataRequestDto = {
-        postNo: commonTestData.post2.postNo,
+        postNo: commonTestData.post2V1.postNo,
         seriesName: commonTestData.series1.name,
       };
 

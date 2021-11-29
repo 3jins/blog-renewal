@@ -6,7 +6,7 @@ export type SeriesDoc = {
   name: string;
   thumbnailContent: string;
   thumbnailImage?: PopulatedDoc<ImageDoc>;
-  postMetaList: PopulatedDoc<PostMetaDoc>[],
+  postMetaList: PopulatedDoc<PostMetaDoc>[];
 } & Document;
 
 export const seriesSchema = new Schema({

@@ -7,7 +7,7 @@ export type PostMetaDoc = {
   postNo: number;
   category?: PopulatedDoc<CategoryDoc>;
   series?: PopulatedDoc<SeriesDoc>;
-  tagList: PopulatedDoc<TagDoc>[];
+  tagList?: PopulatedDoc<TagDoc>[];
   createdDate: Date;
   isDeleted?: boolean;
   commentCount?: number;
@@ -18,9 +18,9 @@ export type PostMetaDoc = {
 
 export const postMetaSchema = new Schema({
   postNo: { type: Number, required: true },
-  category: { type: Types.ObjectId, ref: 'Category' },
-  series: { type: Types.ObjectId, ref: 'Series' },
-  tagList: { type: [Types.ObjectId], ref: 'Tag', required: false, default: [] },
+  category: { type: Types.ObjectId, ref: 'Category', required: false, default: null },
+  series: { type: Types.ObjectId, ref: 'Series', drequired: false, efault: null },
+  tagList: { type: [Types.ObjectId], ref: 'Tag', rrequired: false, equired: false, default: [] },
   createdDate: { type: Date, required: true },
   isDeleted: { type: Boolean, required: false, default: false },
   commentCount: { type: Number, required: false, default: 0 },

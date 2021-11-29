@@ -180,7 +180,7 @@ describe('TagRepository test', () => {
       const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
       postMeta1!.tagList!.should.have.length(1); // should not be updated
 
-      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
+      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2V1.postNo }).session(session).lean();
       postMeta2!.tagList!.should.have.length(0); // should not be updated
     });
 
@@ -201,7 +201,7 @@ describe('TagRepository test', () => {
       postMeta1!.tagList!.should.have.length(2);
       postMeta1!.tagList![1].should.deep.equal(tag!._id); // should be updated (added)
 
-      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
+      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2V1.postNo }).session(session).lean();
       postMeta2!.tagList!.should.have.length(0); // should not be updated
     });
   });
@@ -273,7 +273,7 @@ describe('TagRepository test', () => {
       const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
       postMeta1!.tagList!.should.be.empty;
 
-      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
+      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2V1.postNo }).session(session).lean();
       postMeta2!.tagList!.should.deep.equal([tagIdList[0]]);
 
       const postMeta3: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post3.postNo }).session(session).lean();
@@ -299,7 +299,7 @@ describe('TagRepository test', () => {
       const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
       postMeta1!.tagList!.should.be.empty;
 
-      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2.postNo }).session(session).lean();
+      const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2V1.postNo }).session(session).lean();
       postMeta2!.tagList!.should.deep.equal([tagIdList[0]]);
 
       const postMeta3: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post3.postNo }).session(session).lean();
