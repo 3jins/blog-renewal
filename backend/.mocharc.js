@@ -10,4 +10,5 @@ module.exports = {
   ui: 'bdd',
   require: ['ts-node/register', 'node_modules/tsconfig-paths/register'],
   parallel: false,
+  spec: ['test', 'test/common/*/*.ts'],
 };

@@ -1,5 +1,5 @@
 import { should } from 'chai';
-import sinon, { SinonMock, SinonSandbox, SinonSpiedInstance, SinonSpy, SinonStub } from 'sinon';
+import sinon, { SinonSandbox, SinonStub } from 'sinon';
 import { Server } from 'http';
 import { AddressInfo } from 'net';
 import { startApp } from '@src/app';
@@ -8,6 +8,11 @@ import config from 'config';
 import crypto, { randomInt } from 'crypto';
 
 describe('app test', () => {
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  const { retryCount } = config.get('server');
+  const testDelay = (retryCount + 1) * 1000;
+  const testTimeout = (retryCount + 2) * 1000;
+
   before(() => {
     should();
   });
@@ -15,7 +20,7 @@ describe('app test', () => {
   it('startApp test - retry maximum count', async () => {
     let server1: Server | null = null;
     let server2: Server | null = null;
-    const { port, retryCount } = config.get('server');
+    const { port } = config.get('server');
 
     const sandbox: SinonSandbox = sinon.createSandbox();
     const randomIntStub: SinonStub = sandbox.stub(crypto, 'randomInt').returns(port);
@@ -40,6 +45,6 @@ describe('app test', () => {
       }
       sinon.restore();
       resolve(null);
-    }, 9000));
-  }).timeout(10000);
+    }, testDelay));
+  }).timeout(testTimeout);
 });
