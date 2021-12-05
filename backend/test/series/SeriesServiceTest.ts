@@ -152,7 +152,7 @@ describe('SeriesService test', () => {
       const paramDto: UpdateSeriesParamDto = {
         originalName: seriesName,
         seriesToBe: {
-          name: commonTestData.simpleText,
+          name: commonTestData.simpleTexts[0],
         },
       };
 
@@ -160,7 +160,7 @@ describe('SeriesService test', () => {
       verify(seriesRepository.updateSeries(deepEqual({
         originalName: seriesName,
         seriesToBe: {
-          name: commonTestData.simpleText,
+          name: commonTestData.simpleTexts[0],
           postMetaIdToBeAddedList: [],
           postMetaIdToBeRemovedList: [],
         },

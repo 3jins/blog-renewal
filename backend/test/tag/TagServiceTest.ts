@@ -177,7 +177,7 @@ describe('TagService test', () => {
       const paramDto: UpdateTagParamDto = {
         originalName: tagName,
         tagToBe: {
-          name: commonTestData.simpleText,
+          name: commonTestData.simpleTexts[0],
         },
       };
 
@@ -185,7 +185,7 @@ describe('TagService test', () => {
       verify(tagRepository.updateTag(deepEqual({
         originalName: tagName,
         tagToBe: {
-          name: commonTestData.simpleText,
+          name: commonTestData.simpleTexts[0],
           postMetaIdToBeAddedList: [],
           postMetaIdToBeRemovedList: [],
         },

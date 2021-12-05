@@ -46,5 +46,7 @@ describe('app test', () => {
       sinon.restore();
       resolve(null);
     }, testDelay));
+
+    sandbox.restore();
   }).timeout(testTimeout);
 });

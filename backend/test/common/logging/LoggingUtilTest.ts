@@ -41,7 +41,7 @@ export default (loggerStub, dummyBlogErrorCode) => ({
     loggerStub.warn.args[0].should.have.lengthOf(1);
     loggerStub.warn.args[0][0].should.contain('다음 메시지에 대한 log level이 지정되지 않았습니다:\n');
     loggerStub.warn.args[0][0].should.contain(`- error code: ${dummyBlogErrorCode.TEST_DEFAULT.code}\n`);
-    loggerStub.warn.args[0][0].should.contain(`- message: ${commonTestData.simpleText}\n`);
+    loggerStub.warn.args[0][0].should.contain(`- message: ${commonTestData.simpleTexts[0]}\n`);
     loggerStub.warn.args[0][0].should.contain('- raw error message:');
     loggerStub.warn.args[0][0].should.contain('- stack:');
     _.keys(loggerStub)

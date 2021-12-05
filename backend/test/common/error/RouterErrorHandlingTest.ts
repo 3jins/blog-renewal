@@ -34,7 +34,7 @@ describe('Router error handling test', () => {
       .query(() => ({ name: tagName, postId: postMetaIdList[0] }))
       .expect(blogErrorCode.TEST_ERROR.httpErrorCode)
       .expect((res) => {
-        res.body.message.should.equal(commonTestData.simpleText);
+        res.body.message.should.equal(commonTestData.simpleTexts[0]);
       });
   });
 

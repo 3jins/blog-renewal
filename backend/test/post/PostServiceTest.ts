@@ -8,6 +8,7 @@ import PostRepository from '@src/post/repository/PostRepository';
 import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
+import * as MarkedContentRenderingUtil from '@src/common/marked/MarkedContentRenderingUtil';
 import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
 import {
   AddUpdatedVersionPostParamDto,
@@ -31,6 +32,7 @@ import Language from '@src/common/constant/Language';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
 import { FindPostResponseDto } from '@src/post/dto/PostResponseDto';
 import { PostDoc } from '@src/post/model/Post';
+import sinon, { SinonSandbox } from 'sinon';
 
 describe('PostService test', () => {
   let postService: PostService;
@@ -314,14 +316,21 @@ describe('PostService test', () => {
       ({ file, fileContent } = extractFileInfoFromRawFile('gfm+.md'));
     });
 
-    it('createNewPost test - categoryName: X, seriesName: X, tagNameList: X, isPrivate: X, thumbnailImageId: X, thumbnailContent: O', async () => {
+    it('createNewPost test - without optional parameters', async () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
-        ...commonTestData.post1,
-        thumbnailContent: commonTestData.simpleText, // Absence of thumbnailContent will be tested in marked rendering section
+        language: Language.KO,
       };
+
       when(postMetaRepository.createPostMeta(anything()))
         .thenResolve(commonTestData.post1.postNo);
+      const sandbox: SinonSandbox = sinon.createSandbox();
+      sandbox.stub(MarkedContentRenderingUtil, 'renderContent')
+        .returns({
+          renderedContent: commonTestData.simpleTexts[0],
+          toc: [{ depth: 0, text: commonTestData.simpleTexts[1] }],
+          defaultThumbnailContent: commonTestData.simpleTexts[2],
+        });
 
       const date1 = new Date();
       await postService.createNewPost(serviceParamDto);
@@ -340,21 +349,26 @@ describe('PostService test', () => {
       createPostRepoParamDto.postNo.should.equal(1);
       createPostRepoParamDto.title.should.equal(file.name);
       createPostRepoParamDto.rawContent.should.equal(fileContent);
-      createPostRepoParamDto.renderedContent.should.not.be.empty;
+      createPostRepoParamDto.renderedContent.should.equal(commonTestData.simpleTexts[0]);
       createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
+      createPostRepoParamDto.toc.length.should.equal(1);
+      createPostRepoParamDto.toc[0].depth.should.equal(0);
+      createPostRepoParamDto.toc[0].text.should.equal(commonTestData.simpleTexts[1]);
       createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
-      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleText);
+      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleTexts[2]);
       (createPostRepoParamDto.thumbnailImageId === undefined).should.be.true;
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
       createPostRepoParamDto.updatedDate!.should.within(date1, date2);
+
+      sandbox.restore();
     });
 
-    it('createNewPost test - categoryName: O, seriesName: O, tagNameList: O, isPrivate: O, isDraft: O, thumbnailImageId: O, thumbnailContent: O', async () => {
+    it('createNewPost test - with full parameters', async () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
         ...commonTestData.post1,
-        thumbnailContent: commonTestData.simpleText,
+        thumbnailContent: commonTestData.simpleTexts[0],
         thumbnailImageId: gifImageId,
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
@@ -400,7 +414,7 @@ describe('PostService test', () => {
       createPostRepoParamDto.renderedContent.should.not.be.empty;
       createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
       createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
-      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleText);
+      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleTexts[0]);
       createPostRepoParamDto.thumbnailImageId!.toString().should.equal(gifImageId);
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
@@ -411,7 +425,7 @@ describe('PostService test', () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
         ...commonTestData.post1,
-        thumbnailContent: commonTestData.simpleText,
+        thumbnailContent: commonTestData.simpleTexts[0],
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
@@ -442,7 +456,7 @@ describe('PostService test', () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
         ...commonTestData.post1,
-        thumbnailContent: commonTestData.simpleText,
+        thumbnailContent: commonTestData.simpleTexts[0],
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
@@ -473,7 +487,7 @@ describe('PostService test', () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
         ...commonTestData.post1,
-        thumbnailContent: commonTestData.simpleText,
+        thumbnailContent: commonTestData.simpleTexts[0],
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
@@ -646,7 +660,7 @@ describe('PostService test', () => {
         postNo: commonTestData.post2V1.postNo,
         post: file,
         language: Language.KO,
-        thumbnailContent: commonTestData.simpleText,
+        thumbnailContent: commonTestData.simpleTexts[0],
         thumbnailImageId: gifImageId,
       };
       const date1 = new Date();
@@ -660,7 +674,7 @@ describe('PostService test', () => {
       createPostRepoParamDto.renderedContent.should.not.be.empty;
       createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
       createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
-      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleText);
+      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleTexts[0]);
       (createPostRepoParamDto.thumbnailImageId!.toString() === gifImageId).should.be.true;
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
