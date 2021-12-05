@@ -8,15 +8,26 @@ import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
 import { renderContent } from '@src/common/marked/MarkedContentRenderingUtil';
-import { CreatePostMetaRepoParamDto, UpdatePostMetaRepoParamDto } from '@src/post/dto/PostMetaRepoParamDto';
-import { AddUpdatedVersionPostParamDto, CreateNewPostParamDto, UpdatePostMetaDataParamDto } from '@src/post/dto/PostParamDto';
-import { CreatePostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
+import {
+  CreatePostMetaRepoParamDto,
+  FindPostMetaRepoParamDto,
+  UpdatePostMetaRepoParamDto,
+} from '@src/post/dto/PostMetaRepoParamDto';
+import {
+  AddUpdatedVersionPostParamDto,
+  CreateNewPostParamDto,
+  FindPostParamDto,
+  UpdatePostMetaDataParamDto,
+} from '@src/post/dto/PostParamDto';
+import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
 import { CategoryDoc } from '@src/category/Category';
 import { SeriesDoc } from '@src/series/Series';
 import { TagDoc } from '@src/tag/Tag';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
+import { FindPostResponseDto, PostDto, PostVersionDataDto } from '@src/post/dto/PostResponseDto';
+import { PostDoc } from '@src/post/model/Post';
 
 @Service()
 export default class PostService {
@@ -28,12 +39,21 @@ export default class PostService {
     private readonly tagRepository: TagRepository,
   ) {}
 
-  public async createNewPost(paramDto: CreateNewPostParamDto): Promise<void> {
+  public async findPost(paramDto: FindPostParamDto): Promise<FindPostResponseDto> {
+    const findPostMetaRepoParamDto: FindPostMetaRepoParamDto = await this.makeFindPostMetaRepoParamDto(paramDto);
+    const postMetaList: PostMetaDoc[] = await this.postMetaRepository.findPostMeta(findPostMetaRepoParamDto);
+    const findPostRepoParamDto: FindPostRepoParamDto = await this.makeFindPostRepoParamDto(paramDto);
+    const postList: PostDoc[] = await this.postRepository.findPost(findPostRepoParamDto);
+    return this.combineFindPostResponse(postMetaList, postList);
+  }
+
+  public async createNewPost(paramDto: CreateNewPostParamDto): Promise<number> {
     const currentDate = new Date();
     const createPostMetaRepoParamDto: CreatePostMetaRepoParamDto = await this.makeCreatePostMetaRepoParamDto(paramDto, currentDate);
     const postNo = await this.postMetaRepository.createPostMeta(createPostMetaRepoParamDto);
     const createPostRepoParamDto: CreatePostRepoParamDto = this.makeCreatePostRepoParamDtoForFirstVersionPost(postNo, paramDto, currentDate);
     await this.postRepository.createPost(createPostRepoParamDto);
+    return postNo;
   }
 
   public async addUpdatedVersionPost(paramDto: AddUpdatedVersionPostParamDto): Promise<void> {
@@ -44,6 +64,36 @@ export default class PostService {
   public async updatePostMetaData(paramDto: UpdatePostMetaDataParamDto): Promise<void> {
     const repoParamDto: UpdatePostMetaRepoParamDto = await this.makeUpdatePostMetaRepoParamDto(paramDto);
     await this.postMetaRepository.updatePostMeta(repoParamDto);
+  }
+
+  private makeFindPostMetaRepoParamDto(paramDto: FindPostParamDto): FindPostMetaRepoParamDto {
+    return { ...paramDto };
+  }
+
+  private makeFindPostRepoParamDto(paramDto: FindPostParamDto): FindPostRepoParamDto {
+    const { updateDateFrom, updateDateTo } = paramDto;
+
+    if (_.isNil(updateDateFrom) && _.isNil(updateDateTo)) {
+      return { ...paramDto };
+    }
+    return {
+      ...paramDto,
+      findPostByUpdatedDateDto: {
+        from: updateDateFrom,
+        to: updateDateTo,
+      },
+    };
+  }
+
+  private combineFindPostResponse(postMetaList: PostMetaDoc[], postList: PostDoc[]): FindPostResponseDto {
+    const postDtoList: PostDto[] = postMetaList
+      .map((postMeta) => {
+        const postVersionDataDtoList: PostVersionDataDto[] = postList
+          .filter((post) => post.postNo === postMeta.postNo)
+          .map((post) => post as PostVersionDataDto);
+        return { ...postMeta, postVersionDataList: postVersionDataDtoList } as PostDto;
+      });
+    return { postList: postDtoList };
   }
 
   private async makeCreatePostMetaRepoParamDto(paramDto: CreateNewPostParamDto, currentDate: Date): Promise<CreatePostMetaRepoParamDto> {

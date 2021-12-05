@@ -8,10 +8,19 @@ import PostRepository from '@src/post/repository/PostRepository';
 import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
-import { CreatePostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
-import { AddUpdatedVersionPostParamDto, CreateNewPostParamDto, UpdatePostMetaDataParamDto } from '@src/post/dto/PostParamDto';
+import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
+import {
+  AddUpdatedVersionPostParamDto,
+  CreateNewPostParamDto,
+  FindPostParamDto,
+  UpdatePostMetaDataParamDto,
+} from '@src/post/dto/PostParamDto';
 import { appPath, common as commonTestData } from '@test/data/testData';
-import { CreatePostMetaRepoParamDto, UpdatePostMetaRepoParamDto } from '@src/post/dto/PostMetaRepoParamDto';
+import {
+  CreatePostMetaRepoParamDto,
+  FindPostMetaRepoParamDto,
+  UpdatePostMetaRepoParamDto,
+} from '@src/post/dto/PostMetaRepoParamDto';
 import { CategoryDoc } from '@src/category/Category';
 import { SeriesDoc } from '@src/series/Series';
 import { TagDoc } from '@src/tag/Tag';
@@ -20,6 +29,8 @@ import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import Language from '@src/common/constant/Language';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
+import { FindPostResponseDto } from '@src/post/dto/PostResponseDto';
+import { PostDoc } from '@src/post/model/Post';
 
 describe('PostService test', () => {
   let postService: PostService;
@@ -46,6 +57,251 @@ describe('PostService test', () => {
       instance(seriesRepository),
       instance(tagRepository),
     );
+  });
+
+  describe('findPost test', () => {
+    let postMeta1: PostMetaDoc;
+    let postMeta2: PostMetaDoc;
+    let postMeta3: PostMetaDoc;
+    let post1: PostDoc;
+    let post2V1: PostDoc;
+    let post2V2: PostDoc;
+    let post3: PostDoc;
+
+    before(() => {
+      postMeta1 = {
+        postNo: commonTestData.post1.postNo,
+        category: commonTestData.category1.name,
+        series: commonTestData.series1.name,
+        tagList: [commonTestData.tag1.name, commonTestData.tag2.name],
+        createdDate: commonTestData.dateList[0],
+        isDeleted: false,
+        commentCount: 0,
+        isPrivate: false,
+        isDeprecated: false,
+        isDraft: false,
+      } as PostMetaDoc;
+      postMeta2 = {
+        postNo: commonTestData.post2V1.postNo,
+        category: commonTestData.category2.name,
+        series: commonTestData.series2.name,
+        tagList: [commonTestData.tag2.name, commonTestData.tag2.name],
+        createdDate: commonTestData.dateList[1],
+        isDeleted: false,
+        commentCount: 0,
+        isPrivate: false,
+        isDeprecated: false,
+        isDraft: false,
+      } as PostMetaDoc;
+      postMeta3 = {
+        postNo: commonTestData.post3.postNo,
+        category: commonTestData.category3.name,
+        series: commonTestData.series3.name,
+        tagList: [commonTestData.tag3.name, commonTestData.tag3.name],
+        createdDate: commonTestData.dateList[2],
+        isDeleted: false,
+        commentCount: 0,
+        isPrivate: false,
+        isDeprecated: false,
+        isDraft: false,
+      } as PostMetaDoc;
+      post1 = {
+        postNo: commonTestData.post1.postNo,
+        title: commonTestData.post1.title,
+        rawContent: commonTestData.post1.rawContent,
+        renderedContent: commonTestData.post1.renderedContent,
+        toc: commonTestData.post1.toc,
+        language: commonTestData.post1.language,
+        thumbnailContent: commonTestData.post1.thumbnailContent,
+        thumbnailImage: commonTestData.objectIdList[0],
+        updatedDate: commonTestData.dateList[3],
+        isLatestVersion: commonTestData.post1.isLatestVersion,
+      } as PostDoc;
+      post2V1 = {
+        postNo: commonTestData.post2V1.postNo,
+        title: commonTestData.post2V1.title,
+        rawContent: commonTestData.post2V1.rawContent,
+        renderedContent: commonTestData.post2V1.renderedContent,
+        toc: commonTestData.post2V1.toc,
+        language: commonTestData.post2V1.language,
+        thumbnailContent: commonTestData.post2V1.thumbnailContent,
+        thumbnailImage: commonTestData.objectIdList[1],
+        updatedDate: commonTestData.dateList[4],
+        isLatestVersion: commonTestData.post2V1.isLatestVersion,
+      } as PostDoc;
+      post2V2 = {
+        postNo: commonTestData.post2V2.postNo,
+        title: commonTestData.post2V2.title,
+        rawContent: commonTestData.post2V2.rawContent,
+        renderedContent: commonTestData.post2V2.renderedContent,
+        toc: commonTestData.post2V2.toc,
+        language: commonTestData.post2V2.language,
+        thumbnailContent: commonTestData.post2V2.thumbnailContent,
+        thumbnailImage: commonTestData.objectIdList[1],
+        updatedDate: commonTestData.dateList[4],
+        isLatestVersion: commonTestData.post2V2.isLatestVersion,
+        lastVersionPost: commonTestData.objectIdList[0],
+      } as PostDoc;
+      post3 = {
+        postNo: commonTestData.post3.postNo,
+        title: commonTestData.post3.title,
+        rawContent: commonTestData.post3.rawContent,
+        renderedContent: commonTestData.post3.renderedContent,
+        toc: commonTestData.post3.toc,
+        language: commonTestData.post3.language,
+        thumbnailContent: commonTestData.post3.thumbnailContent,
+        thumbnailImage: commonTestData.objectIdList[1],
+        updatedDate: commonTestData.dateList[4],
+        isLatestVersion: commonTestData.post3.isLatestVersion,
+      } as PostDoc;
+    });
+
+    it('findPost test - empty parameter, full response', async () => {
+      const paramDto: FindPostParamDto = {};
+
+      when(postMetaRepository.findPostMeta(anything()))
+        .thenResolve([postMeta3, postMeta2, postMeta1]);
+      when(postRepository.findPost(anything()))
+        .thenResolve([post3, post2V2, post2V1, post1]);
+
+      const responseDto: FindPostResponseDto = await postService.findPost(paramDto);
+      responseDto.postList.length.should.equal(3);
+      responseDto.postList[0].postNo.should.equal(postMeta3.postNo);
+      responseDto.postList[0].category.should.equal(postMeta3.category);
+      responseDto.postList[0].series.should.equal(postMeta3.series);
+      responseDto.postList[0].tagList.should.deep.equal(postMeta3.tagList);
+      responseDto.postList[0].createdDate.should.equal(postMeta3.createdDate);
+      responseDto.postList[0].isDeleted.should.equal(postMeta3.isDeleted);
+      responseDto.postList[0].commentCount.should.equal(postMeta3.commentCount);
+      responseDto.postList[0].isPrivate.should.equal(postMeta3.isPrivate);
+      responseDto.postList[0].isDeprecated.should.equal(postMeta3.isDeprecated);
+      responseDto.postList[0].isDraft.should.equal(postMeta3.isDraft);
+      responseDto.postList[0].postVersionDataList.length.should.equal(1);
+      responseDto.postList[0].postVersionDataList[0].title.should.equal(post3.title);
+      responseDto.postList[0].postVersionDataList[0].rawContent.should.equal(post3.rawContent);
+      responseDto.postList[0].postVersionDataList[0].renderedContent.should.equal(post3.renderedContent);
+      responseDto.postList[0].postVersionDataList[0].toc.should.deep.equal(post3.toc);
+      responseDto.postList[0].postVersionDataList[0].language.should.equal(post3.language);
+      responseDto.postList[0].postVersionDataList[0].thumbnailContent.should.equal(post3.thumbnailContent);
+      responseDto.postList[0].postVersionDataList[0].thumbnailImage.should.equal(post3.thumbnailImage);
+      responseDto.postList[0].postVersionDataList[0].updatedDate.should.equal(post3.updatedDate);
+      responseDto.postList[0].postVersionDataList[0].isLatestVersion.should.equal(post3.isLatestVersion);
+      (responseDto.postList[0].postVersionDataList[0].lastVersionPost === undefined).should.be.true;
+      responseDto.postList[1].postNo.should.equal(postMeta2.postNo);
+      responseDto.postList[1].category.should.equal(postMeta2.category);
+      responseDto.postList[1].series.should.equal(postMeta2.series);
+      responseDto.postList[1].tagList.should.deep.equal(postMeta2.tagList);
+      responseDto.postList[1].createdDate.should.equal(postMeta2.createdDate);
+      responseDto.postList[1].isDeleted.should.equal(postMeta2.isDeleted);
+      responseDto.postList[1].commentCount.should.equal(postMeta2.commentCount);
+      responseDto.postList[1].isPrivate.should.equal(postMeta2.isPrivate);
+      responseDto.postList[1].isDeprecated.should.equal(postMeta2.isDeprecated);
+      responseDto.postList[1].isDraft.should.equal(postMeta2.isDraft);
+      responseDto.postList[1].postVersionDataList.length.should.equal(2);
+      responseDto.postList[1].postVersionDataList[0].title.should.equal(post2V2.title);
+      responseDto.postList[1].postVersionDataList[0].rawContent.should.equal(post2V2.rawContent);
+      responseDto.postList[1].postVersionDataList[0].renderedContent.should.equal(post2V2.renderedContent);
+      responseDto.postList[1].postVersionDataList[0].toc.should.deep.equal(post2V2.toc);
+      responseDto.postList[1].postVersionDataList[0].language.should.equal(post2V2.language);
+      responseDto.postList[1].postVersionDataList[0].thumbnailContent.should.equal(post2V2.thumbnailContent);
+      responseDto.postList[1].postVersionDataList[0].thumbnailImage.should.equal(post2V2.thumbnailImage);
+      responseDto.postList[1].postVersionDataList[0].updatedDate.should.equal(post2V2.updatedDate);
+      responseDto.postList[1].postVersionDataList[0].isLatestVersion.should.equal(post2V2.isLatestVersion);
+      responseDto.postList[1].postVersionDataList[0].lastVersionPost.should.equal(post2V2.lastVersionPost);
+      responseDto.postList[1].postVersionDataList[1].title.should.equal(post2V1.title);
+      responseDto.postList[1].postVersionDataList[1].rawContent.should.equal(post2V1.rawContent);
+      responseDto.postList[1].postVersionDataList[1].renderedContent.should.equal(post2V1.renderedContent);
+      responseDto.postList[1].postVersionDataList[1].toc.should.deep.equal(post2V1.toc);
+      responseDto.postList[1].postVersionDataList[1].language.should.equal(post2V1.language);
+      responseDto.postList[1].postVersionDataList[1].thumbnailContent.should.equal(post2V1.thumbnailContent);
+      responseDto.postList[1].postVersionDataList[1].thumbnailImage.should.equal(post2V1.thumbnailImage);
+      responseDto.postList[1].postVersionDataList[1].updatedDate.should.equal(post2V1.updatedDate);
+      responseDto.postList[1].postVersionDataList[1].isLatestVersion.should.equal(post2V1.isLatestVersion);
+      (responseDto.postList[1].postVersionDataList[1].lastVersionPost === undefined).should.be.true;
+      responseDto.postList[2].postNo.should.equal(postMeta1.postNo);
+      responseDto.postList[2].category.should.equal(postMeta1.category);
+      responseDto.postList[2].series.should.equal(postMeta1.series);
+      responseDto.postList[2].tagList.should.deep.equal(postMeta1.tagList);
+      responseDto.postList[2].createdDate.should.equal(postMeta1.createdDate);
+      responseDto.postList[2].isDeleted.should.equal(postMeta1.isDeleted);
+      responseDto.postList[2].commentCount.should.equal(postMeta1.commentCount);
+      responseDto.postList[2].isPrivate.should.equal(postMeta1.isPrivate);
+      responseDto.postList[2].isDeprecated.should.equal(postMeta1.isDeprecated);
+      responseDto.postList[2].isDraft.should.equal(postMeta1.isDraft);
+      responseDto.postList[2].postVersionDataList.length.should.equal(1);
+      responseDto.postList[2].postVersionDataList[0].title.should.equal(post1.title);
+      responseDto.postList[2].postVersionDataList[0].rawContent.should.equal(post1.rawContent);
+      responseDto.postList[2].postVersionDataList[0].renderedContent.should.equal(post1.renderedContent);
+      responseDto.postList[2].postVersionDataList[0].toc.should.deep.equal(post1.toc);
+      responseDto.postList[2].postVersionDataList[0].language.should.equal(post1.language);
+      responseDto.postList[2].postVersionDataList[0].thumbnailContent.should.equal(post1.thumbnailContent);
+      responseDto.postList[2].postVersionDataList[0].thumbnailImage.should.equal(post1.thumbnailImage);
+      responseDto.postList[2].postVersionDataList[0].updatedDate.should.equal(post1.updatedDate);
+      responseDto.postList[2].postVersionDataList[0].isLatestVersion.should.equal(post1.isLatestVersion);
+      (responseDto.postList[2].postVersionDataList[0].lastVersionPost === undefined).should.be.true;
+
+      verify(postMetaRepository.findPostMeta(anything())).once();
+      const [findPostMetaRepoParamDto] = capture<FindPostMetaRepoParamDto>(postMetaRepository.findPostMeta).first();
+      findPostMetaRepoParamDto.should.be.empty;
+
+      verify(postRepository.findPost(anything())).once();
+      const [findPostRepoParamDto] = capture<FindPostRepoParamDto>(postRepository.findPost).first();
+      findPostRepoParamDto.should.be.empty;
+    });
+
+    it('findPost test - full parameter, empty response', async () => {
+      const paramDto: FindPostParamDto = {
+        postNo: commonTestData.post1.postNo,
+        categoryId: commonTestData.objectIdList[0],
+        seriesId: commonTestData.objectIdList[1],
+        tagIdList: [commonTestData.objectIdList[2], commonTestData.objectIdList[3]],
+        isPrivate: false,
+        isDeprecated: false,
+        isDraft: false,
+        title: commonTestData.post1.title,
+        rawContent: commonTestData.post1.rawContent,
+        renderedContent: commonTestData.post1.renderedContent,
+        language: commonTestData.post1.language,
+        thumbnailContent: commonTestData.post1.thumbnailContent,
+        thumbnailImageId: commonTestData.objectIdList[4],
+        updateDateFrom: commonTestData.dateList[0],
+        updateDateTo: commonTestData.dateList[1],
+        isLatestVersion: commonTestData.post1.isLatestVersion,
+        isOnlyExactSameFieldFound: true,
+      };
+
+      when(postMetaRepository.findPostMeta(anything()))
+        .thenResolve([]);
+      when(postRepository.findPost(anything()))
+        .thenResolve([]);
+
+      const responseDto: FindPostResponseDto = await postService.findPost(paramDto);
+      responseDto.postList.should.be.empty;
+
+      verify(postMetaRepository.findPostMeta(anything())).once();
+      const [findPostMetaRepoParamDto] = capture<FindPostMetaRepoParamDto>(postMetaRepository.findPostMeta).first();
+      findPostMetaRepoParamDto.postNo!.should.equal(commonTestData.post1.postNo);
+      findPostMetaRepoParamDto.categoryId!.should.equal(commonTestData.objectIdList[0]);
+      findPostMetaRepoParamDto.seriesId!.should.equal(commonTestData.objectIdList[1]);
+      findPostMetaRepoParamDto.tagIdList!.should.deep.equal([commonTestData.objectIdList[2], commonTestData.objectIdList[3]]);
+      findPostMetaRepoParamDto.isPrivate!.should.equal(false);
+      findPostMetaRepoParamDto.isDeprecated!.should.equal(false);
+      findPostMetaRepoParamDto.isDraft!.should.equal(false);
+
+      verify(postRepository.findPost(anything())).once();
+      const [findPostRepoParamDto] = capture<FindPostRepoParamDto>(postRepository.findPost).first();
+      findPostRepoParamDto.postNo!.should.equal(commonTestData.post1.postNo);
+      findPostRepoParamDto.title!.should.equal(commonTestData.post1.title);
+      findPostRepoParamDto.rawContent!.should.equal(commonTestData.post1.rawContent);
+      findPostRepoParamDto.renderedContent!.should.equal(commonTestData.post1.renderedContent);
+      findPostRepoParamDto.language!.should.equal(commonTestData.post1.language);
+      findPostRepoParamDto.thumbnailContent!.should.equal(commonTestData.post1.thumbnailContent);
+      findPostRepoParamDto.thumbnailImageId!.should.equal(commonTestData.objectIdList[4]);
+      findPostRepoParamDto.findPostByUpdatedDateDto!.from!.should.equal(commonTestData.dateList[0]);
+      findPostRepoParamDto.findPostByUpdatedDateDto!.to!.should.equal(commonTestData.dateList[1]);
+      findPostRepoParamDto.isLatestVersion!.should.equal(commonTestData.post1.isLatestVersion);
+      findPostRepoParamDto.isOnlyExactSameFieldFound!.should.equal(true);
+    });
   });
 
   describe('createNewPost test', () => {

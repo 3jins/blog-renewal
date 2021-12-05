@@ -1,6 +1,26 @@
 import { File } from 'formidable';
 import Language from '@src/common/constant/Language';
 
+export interface FindPostParamDto {
+  postNo?: number;
+  categoryId?: string;
+  seriesId?: string;
+  tagIdList?: string[];
+  isPrivate?: boolean;
+  isDeprecated?: boolean;
+  isDraft?: boolean;
+  title?: string;
+  rawContent?: string;
+  renderedContent?: string;
+  language?: Language;
+  thumbnailContent?: string;
+  thumbnailImageId?: string;
+  updateDateFrom?: Date;
+  updateDateTo?: Date;
+  isLatestVersion?: boolean;
+  isOnlyExactSameFieldFound?: boolean;
+}
+
 export interface CreateNewPostParamDto {
   // post meta
   categoryName?: string;
