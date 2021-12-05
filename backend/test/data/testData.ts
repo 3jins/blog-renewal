@@ -1,6 +1,7 @@
 import Language from '@src/common/constant/Language';
 import http2 from 'http2';
 import LogLevel from '@src/common/logging/LogLevel';
+import { Heading } from '@src/post/model/Post';
 
 const root = process.env.PWD;
 export const appPath = {
@@ -109,7 +110,7 @@ export const common = {
     title: '스프링필드',
     rawContent: '심슨가족 시리즈의 무대가 되는 도시다. Pivotal의 Spring과는 별 관계가 없다.',
     renderedContent: '<p>심슨가족 시리즈의 무대가 되는 도시다. Pivotal의 Spring과는 별 관계가 없다.</p>',
-    toc: [],
+    toc: [] as Heading[],
     thumbnailContent: '심슨의 정리',
     language: Language.KO,
     isLatestVersion: false,
@@ -119,7 +120,7 @@ export const common = {
     title: '스프링필드',
     rawContent: '심슨가족 시리즈의 무대가 되는 도시다. Pivotal의 Spring과는 별 관계가 없다.',
     renderedContent: '<p>심슨가족 시리즈의 무대가 되는 도시다. Pivotal의 Spring과는 별 관계가 없다.</p>',
-    toc: [],
+    toc: [] as Heading[],
     thumbnailContent: '원에 관한 심슨의 정리',
     language: Language.KO,
     isLatestVersion: true,
@@ -149,12 +150,13 @@ export const common = {
     title: '릴러말즈에 관하여',
     rawContent: '걔가 누군지는 잘 모르겠는데 우시앞무선은 장난 아니게 좋더라',
     renderedContent: '<p>걔가 누군지는 잘 모르겠는데 우시앞무선은 장난 아니게 좋더라</p>',
-    toc: [],
+    toc: [] as Heading[],
     thumbnailContent: '너무 빨리 지나가',
     language: Language.KO,
     isLatestVersion: true,
   },
   postMetaIdList: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439022', '507f1f77bcf86cd799439033'],
+
   comment1: {
     isCommentAuthor: false,
     content: '오늘 저녁 메뉴 추천해줘요!',
@@ -173,8 +175,22 @@ export const common = {
   },
 
   simpleText: 'Just quit, 채워진 바둑판처럼 그만 둬',
-  objectIdList: ['c0ffee0f0ff1cecafe15900d', 'c0ffee0f0ff1cecafe50900d', 'c0ffee0f0ff1cecafe15baad', '7a57e0f0ff1cec0ffee50bad'],
-  dateList: [new Date('1993-07-13T09:12:34.567+0900'), new Date('2019-10-24T19:03:12.345+0900'), new Date('2021-07-11T15:25:23.456+0900')],
+  objectIdList: [
+    'c0ffee0f0ff1cecafe15900d',
+    'c0ffee0f0ff1cecafe50900d',
+    'c0ffee0f0ff1cecafe15baad',
+    '7a57e0f0ff1cec0ffee50bad',
+    '900dc0ffec1ea7e5900dc0de',
+  ],
+  dateList: [
+    new Date('1993-07-13T09:12:34.567+0900'),
+    new Date('2019-10-24T19:03:12.345+0900'),
+    new Date('2021-07-11T15:25:23.456+0900'),
+    new Date('2021-12-02T13:04:12.345+0900'),
+    new Date('2021-12-03T06:01:23.456+0900'),
+    new Date('2021-12-03T06:02:34.567+0900'),
+    new Date('2021-12-03T06:02:45.678+0900'),
+  ],
 };
 
 export const blogErrorCode = {
