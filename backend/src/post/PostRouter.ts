@@ -53,7 +53,8 @@ postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW}`, koaB
   const post: File = getValidatedRequestDtoOf(fileTypeSchema, ctx.request.files!.post) as File;
 
   postService.createNewPost({ ...requestDto, post })
-    .then(() => {
+    .then((postNo: number) => {
+      ctx.set(HttpHeaderField.CONTENT_LOCATION, `${URL.PREFIX.API}${URL.ENDPOINT.POST}/${postNo}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;
     });
 });
@@ -67,7 +68,8 @@ postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION
   const post: File = getValidatedRequestDtoOf(fileTypeSchema, ctx.request.files!.post) as File;
 
   postService.addUpdatedVersionPost({ ...requestDto, post })
-    .then(() => {
+    .then((postVersionId: string) => {
+      ctx.set(HttpHeaderField.CONTENT_LOCATION, `${URL.PREFIX.API}${URL.ENDPOINT.POST}/${requestDto.postNo}?postVersionId=${postVersionId}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;
     });
 });

@@ -8,6 +8,7 @@ import PostRepository from '@src/post/repository/PostRepository';
 import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
 import Post, { PostDoc } from '@src/post/model/Post';
 import Image from '@src/image/Image';
+import { OBJECT_ID_PATTERN } from '@src/common/constant/RegexPattern';
 
 describe('PostRepository test', () => {
   let sandbox;
@@ -152,6 +153,7 @@ describe('PostRepository test', () => {
   });
 
   describe('createPost test', () => {
+    const objectIdRegex: RegExp = new RegExp(OBJECT_ID_PATTERN);
     let gifImage;
 
     beforeEach(async () => {
@@ -173,8 +175,12 @@ describe('PostRepository test', () => {
         updatedDate: commonTestData.dateList[1],
       };
 
-      await postRepository.createPost(paramDto1);
-      await postRepository.createPost(paramDto2);
+      const result1 = await postRepository.createPost(paramDto1);
+      const result2 = await postRepository.createPost(paramDto2);
+
+      objectIdRegex.test(result1).should.be.true;
+      objectIdRegex.test(result2).should.be.true;
+
       const posts: PostDoc[] = await Post.find().session(session);
       posts.should.have.lengthOf(2);
       const [post1, post2]: PostDoc[] = posts;
@@ -217,8 +223,12 @@ describe('PostRepository test', () => {
         renderedContent: commonTestData.post1DataToBeUpdated.renderedContent,
       };
 
-      await postRepository.createPost(paramDto1);
-      await postRepository.createPost(paramDto2);
+      const result1 = await postRepository.createPost(paramDto1);
+      const result2 = await postRepository.createPost(paramDto2);
+
+      objectIdRegex.test(result1).should.be.true;
+      objectIdRegex.test(result2).should.be.true;
+
       const posts: PostDoc[] = await Post.find().session(session);
       posts.should.have.lengthOf(2);
       const [post1, post2]: PostDoc[] = posts;

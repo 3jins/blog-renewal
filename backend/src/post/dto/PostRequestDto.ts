@@ -1,5 +1,6 @@
 import { JSONSchemaType } from 'ajv';
 import Language from '@src/common/constant/Language';
+import { OBJECT_ID_PATTERN } from '@src/common/constant/RegexPattern';
 
 export interface FindPostRequestDto {
   postNo?: number;
@@ -9,6 +10,7 @@ export interface FindPostRequestDto {
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
+  postVersionId?: string;
   title?: string;
   rawContent?: string;
   renderedContent?: string;
@@ -63,6 +65,7 @@ export const FindPostRequestSchema: JSONSchemaType<FindPostRequestDto> = {
     isPrivate: { type: 'boolean', nullable: true },
     isDeprecated: { type: 'boolean', nullable: true },
     isDraft: { type: 'boolean', nullable: true },
+    postVersionId: { type: 'string', pattern: OBJECT_ID_PATTERN, nullable: true },
     title: { type: 'string', nullable: true },
     rawContent: { type: 'string', nullable: true },
     renderedContent: { type: 'string', nullable: true },
