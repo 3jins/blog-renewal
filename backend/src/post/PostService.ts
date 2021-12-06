@@ -56,9 +56,9 @@ export default class PostService {
     return postNo;
   }
 
-  public async addUpdatedVersionPost(paramDto: AddUpdatedVersionPostParamDto): Promise<void> {
+  public async addUpdatedVersionPost(paramDto: AddUpdatedVersionPostParamDto): Promise<string> {
     const repoParamDto: CreatePostRepoParamDto = await this.makeCreatePostRepoParamDto(paramDto);
-    await this.postRepository.createPost(repoParamDto);
+    return this.postRepository.createPost(repoParamDto);
   }
 
   public async updatePostMetaData(paramDto: UpdatePostMetaDataParamDto): Promise<void> {

@@ -45,6 +45,7 @@ describe('Post router test', () => {
         isPrivate: false,
         isDeprecated: false,
         isDraft: false,
+        postVersionId: commonTestData.objectIdList[4],
         title: encodeURI(commonTestData.post1.title),
         rawContent: encodeURI(commonTestData.post1.rawContent),
         renderedContent: encodeURI(commonTestData.post1.renderedContent),
@@ -82,6 +83,7 @@ describe('Post router test', () => {
         isPrivate: false,
         isDeprecated: false,
         isDraft: false,
+        postVersionId: commonTestData.objectIdList[4],
         title: commonTestData.post1.title,
         rawContent: commonTestData.post1.rawContent,
         renderedContent: commonTestData.post1.renderedContent,
@@ -108,6 +110,21 @@ describe('Post router test', () => {
         .query(requestDto)
         .expect(http2.constants.HTTP_STATUS_OK);
       verify(postService.findPost(deepEqual(paramDto)));
+    });
+
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - parameter error(postVersionId is not objectId format)`, async () => {
+      const strangeRequestDto = {
+        postVersionId: encodeURI(commonTestData.simpleTexts[1]),
+      };
+
+      await request
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1.postNo}`)
+        .query(strangeRequestDto)
+        .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
+        .expect((res) => {
+          (!!(res.body.message)).should.be.true;
+          res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
+        });
     });
 
     it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - parameter error(key)`, async () => {
@@ -164,19 +181,22 @@ describe('Post router test', () => {
   // eslint-disable-next-line mocha/no-setup-in-describe
   describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW}`, () => {
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW} - normal case`, async () => {
+      const baseUrl = `${URL.PREFIX.API}${URL.ENDPOINT.POST}`;
       const requestDto: CreateNewPostRequestDto = {
         seriesName: commonTestData.series1.name,
         language: Language.KO,
       };
 
       when(postService.createNewPost(anything()))
-        .thenResolve();
+        .thenResolve(commonTestData.post1.postNo);
 
       await request
-        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW}`)
+        .post(`${baseUrl}${URL.BEHAVIOR.NEW}`)
         .field(requestDto)
         .attach('post', `${appPath.testData}/${FILE_NAME}`, { contentType: 'application/octet-stream' })
-        .expect(http2.constants.HTTP_STATUS_CREATED);
+        .expect(http2.constants.HTTP_STATUS_CREATED)
+        .expect((res) => res.get(HttpHeaderField.CONTENT_LOCATION).should.equal(`${baseUrl}/${commonTestData.post1.postNo}`));
+
       verify(postService.createNewPost(objectContaining({
         post: anything(),
         ...requestDto,
@@ -238,19 +258,23 @@ describe('Post router test', () => {
   // eslint-disable-next-line mocha/no-setup-in-describe
   describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION}`, () => {
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION} - normal case`, async () => {
+      const baseUrl = `${URL.PREFIX.API}${URL.ENDPOINT.POST}`;
       const requestDto: AddUpdatedVersionPostRequestDto = {
         postNo: commonTestData.post2V1.postNo,
         language: Language.KO,
       };
 
       when(postService.addUpdatedVersionPost(anything()))
-        .thenResolve();
+        .thenResolve(commonTestData.objectIdList[0]);
 
       await request
         .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION}`)
         .field(requestDto)
         .attach('post', `${appPath.testData}/${FILE_NAME}`, { contentType: 'application/octet-stream' })
-        .expect(http2.constants.HTTP_STATUS_CREATED);
+        .expect(http2.constants.HTTP_STATUS_CREATED)
+        .expect((res) => res.get(HttpHeaderField.CONTENT_LOCATION)
+          .should.equal(`${baseUrl}/${commonTestData.post2V1.postNo}?postVersionId=${commonTestData.objectIdList[0]}`));
+
       verify(postService.addUpdatedVersionPost(objectContaining({
         post: anything(),
         ...requestDto,

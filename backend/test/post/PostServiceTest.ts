@@ -394,7 +394,7 @@ describe('PostService test', () => {
         .thenResolve(commonTestData.post1.postNo);
 
       const date1 = new Date();
-      await postService.createNewPost(serviceParamDto);
+      const result = await postService.createNewPost(serviceParamDto);
       const date2 = new Date();
 
       verify(postMetaRepository.createPostMeta(anything())).once();
@@ -419,6 +419,8 @@ describe('PostService test', () => {
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
       createPostRepoParamDto.updatedDate!.should.within(date1, date2);
+
+      result.should.equal(commonTestData.post1.postNo);
     });
 
     it('createNewPost test - with inexistent categoryName', async () => {
@@ -663,9 +665,14 @@ describe('PostService test', () => {
         thumbnailContent: commonTestData.simpleTexts[0],
         thumbnailImageId: gifImageId,
       };
+      when(postRepository.createPost(anything()))
+        .thenResolve(commonTestData.objectIdList[1]);
+
       const date1 = new Date();
-      await postService.addUpdatedVersionPost(paramDto);
+      const result = await postService.addUpdatedVersionPost(paramDto);
       const date2 = new Date();
+
+      result.should.equal(commonTestData.objectIdList[1]);
       verify(postRepository.createPost(anything())).once();
       const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).first();
       createPostRepoParamDto.postNo.should.equal(commonTestData.post2V1.postNo);
@@ -687,9 +694,14 @@ describe('PostService test', () => {
         post: file,
         language: Language.KO,
       };
+      when(postRepository.createPost(anything()))
+        .thenResolve(commonTestData.objectIdList[1]);
+
       const date1 = new Date();
-      await postService.addUpdatedVersionPost(paramDto);
+      const result = await postService.addUpdatedVersionPost(paramDto);
       const date2 = new Date();
+
+      result.should.equal(commonTestData.objectIdList[1]);
       verify(postRepository.createPost(anything())).once();
       const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).first();
       createPostRepoParamDto.postNo.should.equal(commonTestData.post2V1.postNo);

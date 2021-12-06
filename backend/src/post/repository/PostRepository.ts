@@ -70,16 +70,18 @@ export default class PostRepository {
     return dateQuery;
   }
 
-  public createPost(paramDto: CreatePostRepoParamDto) {
+  public createPost(paramDto: CreatePostRepoParamDto): Promise<string> {
     return useTransaction(async (session: ClientSession) => {
       const { postNo } = paramDto;
       const lastVersionPost: PostDoc | null = await this.getLastVersionPost(session, postNo);
-      await Post
+      const insertedPostList: PostDoc[] = await Post
         .insertMany([{
           ...paramDto,
           thumbnailImage: paramDto.thumbnailImageId,
           lastVersionPost: lastVersionPost === null ? null : lastVersionPost!._id,
         }], { session });
+      const [insertedPost] = insertedPostList;
+      return insertedPost._id;
     });
   }
 
