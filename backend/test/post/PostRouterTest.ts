@@ -1,7 +1,7 @@
 import supertest from 'supertest';
 import { should } from 'chai';
 import { Server } from 'http';
-import { anything, instance, mock, objectContaining, verify, when } from 'ts-mockito';
+import { anything, deepEqual, instance, mock, objectContaining, verify, when } from 'ts-mockito';
 import { Container } from 'typedi';
 import PostService from '@src/post/PostService';
 import { endApp, startApp } from '@src/app';
@@ -10,7 +10,14 @@ import Language from '@src/common/constant/Language';
 import { appPath, common as commonTestData } from '@test/data/testData';
 import * as http2 from 'http2';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
-import { AddUpdatedVersionPostRequestDto, CreateNewPostRequestDto, UpdatePostMetaDataRequestDto } from '@src/post/dto/PostRequestDto';
+import {
+  AddUpdatedVersionPostRequestDto,
+  CreateNewPostRequestDto,
+  FindPostRequestDto,
+  UpdatePostMetaDataRequestDto,
+} from '@src/post/dto/PostRequestDto';
+import HttpHeaderField from '@src/common/constant/HttpHeaderField';
+import { FindPostParamDto } from '@src/post/dto/PostParamDto';
 
 const postService: PostService = mock(PostService);
 Container.set(PostService, instance(postService));
@@ -26,6 +33,132 @@ describe('Post router test', () => {
     should();
     server = startApp([PostRouter.default]);
     request = supertest(server);
+  });
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  describe(`GET ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo`, () => {
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - normal case`, async () => {
+      const requestDto: FindPostRequestDto = {
+        categoryId: commonTestData.objectIdList[0],
+        seriesId: commonTestData.objectIdList[1],
+        tagIdList: [commonTestData.objectIdList[2], commonTestData.objectIdList[3]],
+        isPrivate: false,
+        isDeprecated: false,
+        isDraft: false,
+        title: encodeURI(commonTestData.post1.title),
+        rawContent: encodeURI(commonTestData.post1.rawContent),
+        renderedContent: encodeURI(commonTestData.post1.renderedContent),
+        language: commonTestData.post1.language.toLocaleLowerCase(),
+        thumbnailContent: encodeURI(commonTestData.post1.thumbnailContent),
+        thumbnailImageId: commonTestData.objectIdList[4],
+        updateDateFrom: commonTestData.dateList[0].toISOString(),
+        updateDateTo: commonTestData.dateList[1].toISOString(),
+        isLatestVersion: commonTestData.post1.isLatestVersion,
+        isOnlyExactSameFieldFound: true,
+      };
+      const paramDto: FindPostParamDto = {
+        ...requestDto,
+        language: commonTestData.post1.language,
+        updateDateFrom: commonTestData.dateList[0],
+        updateDateTo: commonTestData.dateList[1],
+      };
+
+      when(postService.findPost(anything()))
+        .thenResolve({ postList: [] });
+
+      await request
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1.postNo}`)
+        .query(requestDto)
+        .expect(http2.constants.HTTP_STATUS_OK);
+      verify(postService.findPost(deepEqual(paramDto)));
+    });
+
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.POST} - normal case`, async () => {
+      const requestDto: FindPostRequestDto = {
+        postNo: commonTestData.post1.postNo,
+        categoryId: commonTestData.objectIdList[0],
+        seriesId: commonTestData.objectIdList[1],
+        tagIdList: [commonTestData.objectIdList[2], commonTestData.objectIdList[3]],
+        isPrivate: false,
+        isDeprecated: false,
+        isDraft: false,
+        title: commonTestData.post1.title,
+        rawContent: commonTestData.post1.rawContent,
+        renderedContent: commonTestData.post1.renderedContent,
+        language: commonTestData.post1.language.toLocaleLowerCase(),
+        thumbnailContent: commonTestData.post1.thumbnailContent,
+        thumbnailImageId: commonTestData.objectIdList[4],
+        updateDateFrom: commonTestData.dateList[0].toISOString(),
+        updateDateTo: commonTestData.dateList[1].toISOString(),
+        isLatestVersion: commonTestData.post1.isLatestVersion,
+        isOnlyExactSameFieldFound: true,
+      };
+      const paramDto: FindPostParamDto = {
+        ...requestDto,
+        language: commonTestData.post1.language,
+        updateDateFrom: commonTestData.dateList[0],
+        updateDateTo: commonTestData.dateList[1],
+      };
+
+      when(postService.findPost(anything()))
+        .thenResolve({ postList: [] });
+
+      await request
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1.postNo}`)
+        .query(requestDto)
+        .expect(http2.constants.HTTP_STATUS_OK);
+      verify(postService.findPost(deepEqual(paramDto)));
+    });
+
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - parameter error(key)`, async () => {
+      const strangeRequestDto = {
+        doWeLearnMathTo: 'add the dead\'s sum',
+        subtractTheWeakOnes: 'count cash for great ones',
+        weDoMultiply: 'but divide the nation',
+      };
+
+      await request
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1.postNo}`)
+        .query(strangeRequestDto)
+        .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
+        .expect((res) => {
+          (!!(res.body.message)).should.be.true;
+          res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
+        });
+    });
+
+    it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - parameter error(ctx.params)`, async () => {
+      await request
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${encodeURI(commonTestData.simpleTexts[0])}`)
+        .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
+        .expect((res) => {
+          (!!(res.body.message)).should.be.true;
+          res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
+        });
+    });
+
+    const typeDistortedRequestDtoList: Object[] = [
+      { updateDateFrom: 12 },
+      { language: 'Java' },
+      { isOnlyExactSameFieldFound: 'ambiguous' },
+    ];
+
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    typeDistortedRequestDtoList.forEach((typeDistortedRequestDto, testIdx) => {
+      // eslint-disable-next-line mocha/no-setup-in-describe
+      describe(`GET ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - parameter error(type of value)`, () => {
+        it(`case ${testIdx}: ${typeDistortedRequestDto}`, async () => {
+          await request
+            .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1.postNo}`)
+            .query(typeDistortedRequestDto)
+            .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
+            .expect((res) => {
+              (!!(res.body.message)).should.be.true;
+              res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
+            });
+        });
+      });
+    });
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
