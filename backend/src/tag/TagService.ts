@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Service } from 'typedi';
-import { Types } from 'mongoose';
+import { ClientSession, Types } from 'mongoose';
 import { CreateTagParamDto, DeleteTagParamDto, FindTagParamDto, UpdateTagParamDto } from '@src/tag/dto/TagParamDto';
 import {
   FindTagByNameDto,
@@ -12,6 +12,7 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
 import TagRepository from '@src/tag/TagRepository';
 import { TagDoc } from '@src/tag/Tag';
+import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 
 @Service()
 export default class TagService {
@@ -19,43 +20,50 @@ export default class TagService {
   }
 
   public async findTag(paramDto: FindTagParamDto): Promise<TagDoc[]> {
-    const repoParamDto: FindTagRepoParamDto = {};
-    this.addNameQueryToFindTagRepoParamDto(repoParamDto, paramDto);
-    this.addPostMetaIdQueryToFindTagRepoParamDto(repoParamDto, paramDto);
-    return this.tagRepository.findTag(repoParamDto);
+    return useTransaction(async (session: ClientSession) => {
+      const repoParamDto: FindTagRepoParamDto = {};
+      this.addNameQueryToFindTagRepoParamDto(repoParamDto, paramDto);
+      this.addPostMetaIdQueryToFindTagRepoParamDto(repoParamDto, paramDto);
+      return this.tagRepository.findTag(repoParamDto, session);
+    });
   }
 
   public async createTag(paramDto: CreateTagParamDto): Promise<string> {
-    const { postMetaIdList } = paramDto;
-    const postMetaList: Types.ObjectId[] = _.isNil(postMetaIdList)
-      ? []
-      : postMetaIdList!.map((postMetaId) => new Types.ObjectId(postMetaId));
-    await this.tagRepository.createTag({
-      postMetaList,
-      ...paramDto,
-    });
+    return useTransaction(async (session: ClientSession) => {
+      const { postMetaIdList } = paramDto;
+      const postMetaList: Types.ObjectId[] = _.isNil(postMetaIdList)
+        ? []
+        : postMetaIdList!.map((postMetaId) => new Types.ObjectId(postMetaId));
+      await this.tagRepository.createTag({
+        postMetaList,
+        ...paramDto,
+      }, session);
 
-    const tagList: TagDoc[] = await this.tagRepository.findTag({
-      findTagByNameDto: {
-        nameList: [paramDto.name],
-        isOnlyExactNameFound: true,
-      },
+      const tagList: TagDoc[] = await this.tagRepository.findTag({
+        findTagByNameDto: {
+          nameList: [paramDto.name],
+          isOnlyExactNameFound: true,
+        },
+      }, session);
+      if (_.isEmpty(tagList)) {
+        throw new BlogError(BlogErrorCode.TAG_NOT_CREATED, [paramDto.name, 'name']);
+      }
+      return tagList[0].name;
     });
-    if (_.isEmpty(tagList)) {
-      throw new BlogError(BlogErrorCode.TAG_NOT_CREATED, [paramDto.name, 'name']);
-    }
-    return tagList[0].name;
   }
 
   public async updateTag(paramDto: UpdateTagParamDto): Promise<void> {
-    if (_.isNil(paramDto.tagToBe) || _.isEmpty(_.values(paramDto.tagToBe))) {
-      throw new BlogError(BlogErrorCode.PARAMETER_EMPTY);
-    }
-    return this.tagRepository.updateTag(this.makeUpdateTagRepoParamDto(paramDto));
+    return useTransaction(async (session: ClientSession) => {
+      if (_.isNil(paramDto.tagToBe) || _.isEmpty(_.values(paramDto.tagToBe))) {
+        throw new BlogError(BlogErrorCode.PARAMETER_EMPTY);
+      }
+      return this.tagRepository.updateTag(this.makeUpdateTagRepoParamDto(paramDto), session);
+    });
   }
 
   public async deleteTag(paramDto: DeleteTagParamDto): Promise<void> {
-    return this.tagRepository.deleteTag({ ...paramDto });
+    return useTransaction(async (session: ClientSession) => this.tagRepository
+      .deleteTag({ ...paramDto }, session));
   }
 
   private addNameQueryToFindTagRepoParamDto(repoParamDto: FindTagRepoParamDto, paramDto: FindTagParamDto): void {

@@ -17,11 +17,16 @@ import {
 import { common as commonTestData } from '@test/data/testData';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
-import { errorShouldBeThrown } from '@test/TestUtil';
-import { Types } from 'mongoose';
+import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
+import { ClientSession, Connection, Types } from 'mongoose';
 import { SeriesDoc } from '@src/series/Series';
+import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import sinon from 'sinon';
 
 describe('SeriesService test', () => {
+  let sandbox;
+  let conn: Connection;
+  let session: ClientSession;
   let seriesService: SeriesService;
   let seriesRepository: SeriesRepository;
   let postMetaList: string[];
@@ -38,13 +43,30 @@ describe('SeriesService test', () => {
     postMetaList = objectIdList.slice(0, 2);
     [, , gifImageId] = objectIdList;
     should();
+    setConnection();
+    conn = getConnection();
+    sandbox = sinon.createSandbox();
+  });
+
+  beforeEach(async () => {
+    session = await conn.startSession();
+    session.startTransaction();
+    await replaceUseTransactionForTest(sandbox, session);
+  });
+
+  afterEach(async () => {
+    await abortTestTransaction(sandbox, session);
+  });
+
+  after(async () => {
+    await conn.close();
   });
 
   describe('findSeries test', () => {
     it('findSeries - with empty parameter', () => {
       const emptyParamDto: FindSeriesParamDto = {};
       seriesService.findSeries(emptyParamDto);
-      verify(seriesRepository.findSeries(deepEqual<FindSeriesRepoParamDto>({}))).once();
+      verify(seriesRepository.findSeries(deepEqual<FindSeriesRepoParamDto>({}), anything())).once();
     });
 
     it('findSeries - by name', () => {
@@ -56,7 +78,7 @@ describe('SeriesService test', () => {
       verify(seriesRepository.findSeries(deepEqual<FindSeriesRepoParamDto>({
         name: seriesName,
         isOnlyExactNameFound: true,
-      }))).once();
+      }), anything())).once();
     });
   });
 
@@ -68,12 +90,12 @@ describe('SeriesService test', () => {
         thumbnailImage: gifImageId,
         postMetaIdList: postMetaList,
       };
-      when(seriesRepository.findSeries(anything()))
+      when(seriesRepository.findSeries(anything(), anything()))
         .thenResolve([{ name: seriesName } as SeriesDoc]);
 
       const result: string = await seriesService.createSeries(paramDto);
 
-      const [repoParamDto] = capture<CreateSeriesRepoParamDto>(seriesRepository.createSeries).last();
+      const [repoParamDto] = capture<CreateSeriesRepoParamDto, ClientSession>(seriesRepository.createSeries).last();
       repoParamDto.name.should.equal(seriesName);
       repoParamDto.postMetaList.should.deep.equal(postMetaList.map((postMetaId) => new Types.ObjectId(postMetaId)));
       result.should.equal(seriesName);
@@ -84,12 +106,12 @@ describe('SeriesService test', () => {
         name: seriesName,
         thumbnailContent,
       };
-      when(seriesRepository.findSeries(anything()))
+      when(seriesRepository.findSeries(anything(), anything()))
         .thenResolve([{ name: seriesName } as SeriesDoc]);
 
       const result: string = await seriesService.createSeries(paramDto);
 
-      const [repoParamDto] = capture<CreateSeriesRepoParamDto>(seriesRepository.createSeries).last();
+      const [repoParamDto] = capture<CreateSeriesRepoParamDto, ClientSession>(seriesRepository.createSeries).last();
       repoParamDto.name.should.equal(seriesName);
       repoParamDto.postMetaList.should.deep.equal([]);
       result.should.equal(seriesName);
@@ -100,7 +122,7 @@ describe('SeriesService test', () => {
         name: seriesName,
         thumbnailContent,
       };
-      when(seriesRepository.findSeries(anything()))
+      when(seriesRepository.findSeries(anything(), anything()))
         .thenResolve([]);
 
       await errorShouldBeThrown(
@@ -133,7 +155,7 @@ describe('SeriesService test', () => {
           postMetaIdToBeRemovedList: paramDto.seriesToBe.postMetaIdToBeRemovedList!,
         },
       };
-      verify(seriesRepository.updateSeries(deepEqual(repoParamDto))).once();
+      verify(seriesRepository.updateSeries(deepEqual(repoParamDto), anything())).once();
     });
 
     it('series update test - minimal seriesToBe', async () => {
@@ -164,7 +186,7 @@ describe('SeriesService test', () => {
           postMetaIdToBeAddedList: [],
           postMetaIdToBeRemovedList: [],
         },
-      })));
+      }), anything()));
     });
   });
 
@@ -176,7 +198,7 @@ describe('SeriesService test', () => {
       await seriesService.deleteSeries(paramDto);
 
       const repoParamDto: DeleteSeriesRepoParamDto = { ...paramDto };
-      verify(seriesRepository.deleteSeries(deepEqual(repoParamDto))).once();
+      verify(seriesRepository.deleteSeries(deepEqual(repoParamDto), anything())).once();
     });
   });
 });

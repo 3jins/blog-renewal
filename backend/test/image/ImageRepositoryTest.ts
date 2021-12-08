@@ -4,7 +4,7 @@ import { common as commonTestData } from '@test/data/testData';
 import { ClientSession, Connection, DocumentDefinition } from 'mongoose';
 import ImageRepository from '@src/image/ImageRepository';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
-import { abortTestTransaction, replaceUseTransactionForTest } from '@test/TestUtil';
+import { abortTestTransaction } from '@test/TestUtil';
 import sinon from 'sinon';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
@@ -26,7 +26,6 @@ describe('ImageRepository test', () => {
   beforeEach(async () => {
     session = await conn.startSession();
     session.startTransaction();
-    await replaceUseTransactionForTest(sandbox, session);
   });
 
   afterEach(async () => {
@@ -39,7 +38,7 @@ describe('ImageRepository test', () => {
 
   it('createImages', async () => {
     const imageDocumentDefinitionList: DocumentDefinition<ImageDoc>[] = [commonTestData.gifImage, commonTestData.pngImage];
-    await imageRepository.createImages(imageDocumentDefinitionList);
+    await imageRepository.createImages(imageDocumentDefinitionList, session);
     const results = await Image.find().session(session).exec();
     results.should.have.lengthOf(2);
   });
@@ -47,7 +46,7 @@ describe('ImageRepository test', () => {
   it('createImages - duplicated image file name', async () => {
     const imageDocumentDefinitionList: DocumentDefinition<ImageDoc>[] = [commonTestData.gifImage, commonTestData.gifImage];
     try {
-      await imageRepository.createImages(imageDocumentDefinitionList);
+      await imageRepository.createImages(imageDocumentDefinitionList, session);
     } catch (err) {
       (err instanceof BlogError).should.be.true;
       (err as BlogError).blogErrorCode.should.equal(BlogErrorCode.DUPLICATED_FILE_NAME);

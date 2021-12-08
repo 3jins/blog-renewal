@@ -4,12 +4,13 @@ import _ from 'lodash';
 import { File, Files } from 'formidable';
 import config from 'config';
 import { Service } from 'typedi';
-import { DocumentDefinition } from 'mongoose';
+import { ClientSession, DocumentDefinition } from 'mongoose';
 import BlogError from '@src/common/error/BlogError';
 import ImageRepository from '@src/image/ImageRepository';
 import { ImageDoc } from '@src/image/Image';
 import { UploadImageParamDto } from '@src/image/ImageDto';
 import { BlogErrorCode } from '../common/error/BlogErrorCode';
+import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 
 @Service()
 export default class ImageService {
@@ -17,9 +18,11 @@ export default class ImageService {
   }
 
   public async uploadImage(paramDto: UploadImageParamDto): Promise<void> {
-    const { files } = paramDto;
-    this.moveImage(files);
-    await this.saveImage(files);
+    await useTransaction(async (session: ClientSession) => {
+      const { files } = paramDto;
+      this.moveImage(files);
+      await this.saveImage(files, session);
+    });
   }
 
   private moveImage(files: Files): void {
@@ -35,11 +38,11 @@ export default class ImageService {
     });
   }
 
-  private async saveImage(files: Files): Promise<void> {
+  private async saveImage(files: Files, session: ClientSession): Promise<void> {
     const imageList: DocumentDefinition<ImageDoc>[] = _.keys(files).map((fileName) => {
       const file: File = files[fileName] as File;
       return ({ title: file.name as string, createdDate: new Date(), size: file.size });
     });
-    await this.imageRepository.createImages(imageList);
+    await this.imageRepository.createImages(imageList, session);
   }
 }

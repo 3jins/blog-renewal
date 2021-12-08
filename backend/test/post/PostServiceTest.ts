@@ -25,16 +25,26 @@ import {
 import { CategoryDoc } from '@src/category/Category';
 import { SeriesDoc } from '@src/series/Series';
 import { TagDoc } from '@src/tag/Tag';
-import { errorShouldBeThrown, extractFileInfoFromRawFile } from '@test/TestUtil';
+import {
+  abortTestTransaction,
+  errorShouldBeThrown,
+  extractFileInfoFromRawFile,
+  replaceUseTransactionForTest,
+} from '@test/TestUtil';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import Language from '@src/common/constant/Language';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
 import { FindPostResponseDto } from '@src/post/dto/PostResponseDto';
 import { PostDoc } from '@src/post/model/Post';
-import sinon, { SinonSandbox } from 'sinon';
+import sinon from 'sinon';
+import { ClientSession, Connection } from 'mongoose';
+import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 
 describe('PostService test', () => {
+  let sandbox;
+  let conn: Connection;
+  let session: ClientSession;
   let postService: PostService;
   let postMetaRepository: PostMetaRepository;
   let postRepository: PostRepository;
@@ -44,9 +54,12 @@ describe('PostService test', () => {
 
   before(() => {
     should();
+    setConnection();
+    conn = getConnection();
+    sandbox = sinon.createSandbox();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     postMetaRepository = spy(mock(PostMetaRepository));
     postRepository = spy(mock(PostRepository));
     categoryRepository = mock(CategoryRepository);
@@ -59,6 +72,17 @@ describe('PostService test', () => {
       instance(seriesRepository),
       instance(tagRepository),
     );
+    session = await conn.startSession();
+    session.startTransaction();
+    await replaceUseTransactionForTest(sandbox, session);
+  });
+
+  afterEach(async () => {
+    await abortTestTransaction(sandbox, session);
+  });
+
+  after(async () => {
+    await conn.close();
   });
 
   describe('findPost test', () => {
@@ -161,9 +185,9 @@ describe('PostService test', () => {
     it('findPost test - empty parameter, full response', async () => {
       const paramDto: FindPostParamDto = {};
 
-      when(postMetaRepository.findPostMeta(anything()))
+      when(postMetaRepository.findPostMeta(anything(), anything()))
         .thenResolve([postMeta3, postMeta2, postMeta1]);
-      when(postRepository.findPost(anything()))
+      when(postRepository.findPost(anything(), anything()))
         .thenResolve([post3, post2V2, post2V1, post1]);
 
       const responseDto: FindPostResponseDto = await postService.findPost(paramDto);
@@ -242,12 +266,12 @@ describe('PostService test', () => {
       responseDto.postList[2].postVersionDataList[0].isLatestVersion.should.equal(post1.isLatestVersion);
       (responseDto.postList[2].postVersionDataList[0].lastVersionPost === undefined).should.be.true;
 
-      verify(postMetaRepository.findPostMeta(anything())).once();
-      const [findPostMetaRepoParamDto] = capture<FindPostMetaRepoParamDto>(postMetaRepository.findPostMeta).first();
+      verify(postMetaRepository.findPostMeta(anything(), anything())).once();
+      const [findPostMetaRepoParamDto] = capture<FindPostMetaRepoParamDto, ClientSession>(postMetaRepository.findPostMeta).first();
       findPostMetaRepoParamDto.should.be.empty;
 
-      verify(postRepository.findPost(anything())).once();
-      const [findPostRepoParamDto] = capture<FindPostRepoParamDto>(postRepository.findPost).first();
+      verify(postRepository.findPost(anything(), anything())).once();
+      const [findPostRepoParamDto] = capture<FindPostRepoParamDto, ClientSession>(postRepository.findPost).first();
       findPostRepoParamDto.should.be.empty;
     });
 
@@ -272,16 +296,16 @@ describe('PostService test', () => {
         isOnlyExactSameFieldFound: true,
       };
 
-      when(postMetaRepository.findPostMeta(anything()))
+      when(postMetaRepository.findPostMeta(anything(), anything()))
         .thenResolve([]);
-      when(postRepository.findPost(anything()))
+      when(postRepository.findPost(anything(), anything()))
         .thenResolve([]);
 
       const responseDto: FindPostResponseDto = await postService.findPost(paramDto);
       responseDto.postList.should.be.empty;
 
-      verify(postMetaRepository.findPostMeta(anything())).once();
-      const [findPostMetaRepoParamDto] = capture<FindPostMetaRepoParamDto>(postMetaRepository.findPostMeta).first();
+      verify(postMetaRepository.findPostMeta(anything(), anything())).once();
+      const [findPostMetaRepoParamDto] = capture<FindPostMetaRepoParamDto, ClientSession>(postMetaRepository.findPostMeta).first();
       findPostMetaRepoParamDto.postNo!.should.equal(commonTestData.post1.postNo);
       findPostMetaRepoParamDto.categoryId!.should.equal(commonTestData.objectIdList[0]);
       findPostMetaRepoParamDto.seriesId!.should.equal(commonTestData.objectIdList[1]);
@@ -290,8 +314,8 @@ describe('PostService test', () => {
       findPostMetaRepoParamDto.isDeprecated!.should.equal(false);
       findPostMetaRepoParamDto.isDraft!.should.equal(false);
 
-      verify(postRepository.findPost(anything())).once();
-      const [findPostRepoParamDto] = capture<FindPostRepoParamDto>(postRepository.findPost).first();
+      verify(postRepository.findPost(anything(), anything())).once();
+      const [findPostRepoParamDto] = capture<FindPostRepoParamDto, ClientSession>(postRepository.findPost).first();
       findPostRepoParamDto.postNo!.should.equal(commonTestData.post1.postNo);
       findPostRepoParamDto.title!.should.equal(commonTestData.post1.title);
       findPostRepoParamDto.rawContent!.should.equal(commonTestData.post1.rawContent);
@@ -322,9 +346,8 @@ describe('PostService test', () => {
         language: Language.KO,
       };
 
-      when(postMetaRepository.createPostMeta(anything()))
+      when(postMetaRepository.createPostMeta(anything(), anything()))
         .thenResolve(commonTestData.post1.postNo);
-      const sandbox: SinonSandbox = sinon.createSandbox();
       sandbox.stub(MarkedContentRenderingUtil, 'renderContent')
         .returns({
           renderedContent: commonTestData.simpleTexts[0],
@@ -336,16 +359,16 @@ describe('PostService test', () => {
       await postService.createNewPost(serviceParamDto);
       const date2 = new Date();
 
-      verify(postMetaRepository.createPostMeta(anything())).once();
-      const [createPostMetaRepoParamDto] = capture<CreatePostMetaRepoParamDto>(postMetaRepository.createPostMeta).first();
+      verify(postMetaRepository.createPostMeta(anything(), anything())).once();
+      const [createPostMetaRepoParamDto] = capture<CreatePostMetaRepoParamDto, ClientSession>(postMetaRepository.createPostMeta).first();
       (createPostMetaRepoParamDto.categoryId === undefined).should.be.true;
       (createPostMetaRepoParamDto.seriesId === undefined).should.be.true;
       (createPostMetaRepoParamDto.tagIdList === undefined).should.be.true;
       createPostMetaRepoParamDto.createdDate.should.within(date1, date2);
       createPostMetaRepoParamDto.isPrivate!.should.be.false;
 
-      verify(postRepository.createPost(anything())).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).last();
+      verify(postRepository.createPost(anything(), anything())).once();
+      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).last();
       createPostRepoParamDto.postNo.should.equal(1);
       createPostRepoParamDto.title.should.equal(file.name);
       createPostRepoParamDto.rawContent.should.equal(fileContent);
@@ -360,8 +383,6 @@ describe('PostService test', () => {
       createPostRepoParamDto.isLatestVersion.should.be.true;
       (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
       createPostRepoParamDto.updatedDate!.should.within(date1, date2);
-
-      sandbox.restore();
     });
 
     it('createNewPost test - with full parameters', async () => {
@@ -376,29 +397,29 @@ describe('PostService test', () => {
         isPrivate: true,
         isDraft: true,
       };
-      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name })))
+      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name }), session))
         .thenResolve([{ _id: commonTestData.objectIdList[0] } as CategoryDoc]);
-      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name })))
+      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name }), session))
         .thenResolve([{ _id: commonTestData.objectIdList[1] } as SeriesDoc]);
       when(tagRepository.findTag(deepEqual({
         findTagByNameDto: {
           nameList: [commonTestData.tag1.name, commonTestData.tag2.name],
           isOnlyExactNameFound: true,
         },
-      })))
+      }), session))
         .thenResolve([
           { _id: commonTestData.objectIdList[2], name: commonTestData.tag1.name } as TagDoc,
           { _id: commonTestData.objectIdList[3], name: commonTestData.tag2.name } as TagDoc,
         ]);
-      when(postMetaRepository.createPostMeta(anything()))
+      when(postMetaRepository.createPostMeta(anything(), session))
         .thenResolve(commonTestData.post1.postNo);
 
       const date1 = new Date();
       const result = await postService.createNewPost(serviceParamDto);
       const date2 = new Date();
 
-      verify(postMetaRepository.createPostMeta(anything())).once();
-      const [createPostMetaRepoParamDto] = capture<CreatePostMetaRepoParamDto>(postMetaRepository.createPostMeta).first();
+      verify(postMetaRepository.createPostMeta(anything(), session)).once();
+      const [createPostMetaRepoParamDto] = capture<CreatePostMetaRepoParamDto, ClientSession>(postMetaRepository.createPostMeta).first();
       createPostMetaRepoParamDto.categoryId!.should.equal(commonTestData.objectIdList[0]);
       createPostMetaRepoParamDto.seriesId!.should.equal(commonTestData.objectIdList[1]);
       createPostMetaRepoParamDto.tagIdList!.should.deep.equal([commonTestData.objectIdList[2], commonTestData.objectIdList[3]]);
@@ -406,8 +427,8 @@ describe('PostService test', () => {
       createPostMetaRepoParamDto.isPrivate!.should.be.true;
       createPostMetaRepoParamDto.isDraft!.should.be.true;
 
-      verify(postRepository.createPost(anything())).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).last();
+      verify(postRepository.createPost(anything(), session)).once();
+      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).last();
       createPostRepoParamDto.postNo.should.equal(1);
       createPostRepoParamDto.title.should.equal(file.name);
       createPostRepoParamDto.rawContent.should.equal(fileContent);
@@ -432,16 +453,16 @@ describe('PostService test', () => {
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
       };
-      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name })))
+      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name }), session))
         .thenResolve([]);
-      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name })))
+      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name }), session))
         .thenResolve([{ _id: commonTestData.objectIdList[1] } as SeriesDoc]);
       when(tagRepository.findTag(deepEqual({
         findTagByNameDto: {
           nameList: [commonTestData.tag1.name, commonTestData.tag2.name],
           isOnlyExactNameFound: true,
         },
-      })))
+      }), session))
         .thenResolve([
           { _id: commonTestData.objectIdList[2], name: commonTestData.tag1.name } as TagDoc,
           { _id: commonTestData.objectIdList[3], name: commonTestData.tag2.name } as TagDoc,
@@ -463,16 +484,16 @@ describe('PostService test', () => {
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
       };
-      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name })))
+      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name }), session))
         .thenResolve([{ _id: commonTestData.objectIdList[0] } as CategoryDoc]);
-      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name })))
+      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name }), session))
         .thenResolve([]);
       when(tagRepository.findTag(deepEqual({
         findTagByNameDto: {
           nameList: [commonTestData.tag1.name, commonTestData.tag2.name],
           isOnlyExactNameFound: true,
         },
-      })))
+      }), session))
         .thenResolve([
           { _id: commonTestData.objectIdList[2], name: commonTestData.tag1.name } as TagDoc,
           { _id: commonTestData.objectIdList[3], name: commonTestData.tag2.name } as TagDoc,
@@ -494,16 +515,16 @@ describe('PostService test', () => {
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
       };
-      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name })))
+      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name }), session))
         .thenResolve([{ _id: commonTestData.objectIdList[0] } as CategoryDoc]);
-      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name })))
+      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name }), session))
         .thenResolve([{ _id: commonTestData.objectIdList[1] } as SeriesDoc]);
       when(tagRepository.findTag(deepEqual({
         findTagByNameDto: {
           nameList: [commonTestData.tag1.name, commonTestData.tag2.name],
           isOnlyExactNameFound: true,
         },
-      })))
+      }), session))
         .thenResolve([{ _id: commonTestData.objectIdList[3], name: commonTestData.tag2.name } as TagDoc]);
 
       await errorShouldBeThrown(
@@ -545,13 +566,13 @@ describe('PostService test', () => {
         post: file,
         ...commonTestData.post1,
       };
-      when(postMetaRepository.createPostMeta(anything()))
+      when(postMetaRepository.createPostMeta(anything(), session))
         .thenResolve(commonTestData.post1.postNo);
 
       await postService.createNewPost(serviceParamDto);
 
-      verify(postRepository.createPost(anything())).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).last();
+      verify(postRepository.createPost(anything(), session)).once();
+      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).last();
       createPostRepoParamDto.toc.should.deep.equal([
         { depth: 2, text: 'ul/li' },
         { depth: 3, text: 'only plain text' },
@@ -585,13 +606,13 @@ describe('PostService test', () => {
         post: file,
         ...commonTestData.post1,
       };
-      when(postMetaRepository.createPostMeta(anything()))
+      when(postMetaRepository.createPostMeta(anything(), session))
         .thenResolve(commonTestData.post1.postNo);
 
       await postService.createNewPost(serviceParamDto);
 
-      verify(postRepository.createPost(anything())).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).last();
+      verify(postRepository.createPost(anything(), session)).once();
+      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).last();
       createPostRepoParamDto.toc.should.deep.equal([
         { depth: 2, text: '코드' },
         { depth: 3, text: 'list indentation 없음' },
@@ -615,13 +636,13 @@ describe('PostService test', () => {
         post: file,
         ...commonTestData.post1,
       };
-      when(postMetaRepository.createPostMeta(anything()))
+      when(postMetaRepository.createPostMeta(anything(), session))
         .thenResolve(commonTestData.post1.postNo);
 
       await postService.createNewPost(serviceParamDto);
 
-      verify(postRepository.createPost(anything())).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).last();
+      verify(postRepository.createPost(anything(), session)).once();
+      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).last();
       renderedHtml = createPostRepoParamDto.renderedContent;
       createPostRepoParamDto.toc.should.deep.equal([
         { depth: 2, text: '수식 (block)' },
@@ -665,7 +686,7 @@ describe('PostService test', () => {
         thumbnailContent: commonTestData.simpleTexts[0],
         thumbnailImageId: gifImageId,
       };
-      when(postRepository.createPost(anything()))
+      when(postRepository.createPost(anything(), session))
         .thenResolve(commonTestData.objectIdList[1]);
 
       const date1 = new Date();
@@ -673,8 +694,8 @@ describe('PostService test', () => {
       const date2 = new Date();
 
       result.should.equal(commonTestData.objectIdList[1]);
-      verify(postRepository.createPost(anything())).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).first();
+      verify(postRepository.createPost(anything(), session)).once();
+      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).first();
       createPostRepoParamDto.postNo.should.equal(commonTestData.post2V1.postNo);
       createPostRepoParamDto.title.should.equal(file.name);
       createPostRepoParamDto.rawContent.should.equal(fileContent);
@@ -694,7 +715,7 @@ describe('PostService test', () => {
         post: file,
         language: Language.KO,
       };
-      when(postRepository.createPost(anything()))
+      when(postRepository.createPost(anything(), session))
         .thenResolve(commonTestData.objectIdList[1]);
 
       const date1 = new Date();
@@ -702,8 +723,8 @@ describe('PostService test', () => {
       const date2 = new Date();
 
       result.should.equal(commonTestData.objectIdList[1]);
-      verify(postRepository.createPost(anything())).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto>(postRepository.createPost).first();
+      verify(postRepository.createPost(anything(), session)).once();
+      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).first();
       createPostRepoParamDto.postNo.should.equal(commonTestData.post2V1.postNo);
       createPostRepoParamDto.title.should.equal(file.name);
       createPostRepoParamDto.rawContent.should.equal(fileContent);
@@ -730,30 +751,30 @@ describe('PostService test', () => {
         isDraft: true,
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
         .thenResolve([{
           isPrivate: false,
           isDeprecated: false,
           isDraft: false,
         } as PostMetaDoc]);
-      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name })))
+      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name }), session))
         .thenResolve([{ _id: commonTestData.objectIdList[0] } as CategoryDoc]);
-      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name })))
+      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name }), session))
         .thenResolve([{ _id: commonTestData.objectIdList[1] } as SeriesDoc]);
       when(tagRepository.findTag(deepEqual({
         findTagByNameDto: {
           nameList: [commonTestData.tag1.name, commonTestData.tag2.name],
           isOnlyExactNameFound: true,
         },
-      })))
+      }), session))
         .thenResolve([
           { _id: commonTestData.objectIdList[2], name: commonTestData.tag1.name } as TagDoc,
           { _id: commonTestData.objectIdList[3], name: commonTestData.tag2.name } as TagDoc,
         ]);
 
       await postService.updatePostMetaData(paramDto);
-      verify(postMetaRepository.updatePostMeta(anything())).once();
-      const [updatePostMetaRepoParamDto] = capture<UpdatePostMetaRepoParamDto>(postMetaRepository.updatePostMeta).first();
+      verify(postMetaRepository.updatePostMeta(anything(), session)).once();
+      const [updatePostMetaRepoParamDto] = capture<UpdatePostMetaRepoParamDto, ClientSession>(postMetaRepository.updatePostMeta).first();
       updatePostMetaRepoParamDto.categoryId!.should.equal(commonTestData.objectIdList[0]);
       updatePostMetaRepoParamDto.seriesId!.should.equal(commonTestData.objectIdList[1]);
       updatePostMetaRepoParamDto.tagIdList!.should.deep.equal([commonTestData.objectIdList[2], commonTestData.objectIdList[3]]);
@@ -767,7 +788,7 @@ describe('PostService test', () => {
         postNo: commonTestData.post1.postNo,
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
         .thenResolve([]);
 
       await errorShouldBeThrown(
@@ -783,13 +804,13 @@ describe('PostService test', () => {
         categoryName: commonTestData.category1.name,
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
         .thenResolve([{
           isPrivate: false,
           isDeprecated: false,
           isDraft: false,
         } as PostMetaDoc]);
-      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name })))
+      when(categoryRepository.findCategory(deepEqual({ name: commonTestData.category1.name }), session))
         .thenResolve([]);
 
       await errorShouldBeThrown(
@@ -805,13 +826,13 @@ describe('PostService test', () => {
         seriesName: commonTestData.series1.name,
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
         .thenResolve([{
           isPrivate: false,
           isDeprecated: false,
           isDraft: false,
         } as PostMetaDoc]);
-      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name })))
+      when(seriesRepository.findSeries(deepEqual({ name: commonTestData.series1.name }), session))
         .thenResolve([]);
 
       await errorShouldBeThrown(
@@ -827,7 +848,7 @@ describe('PostService test', () => {
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name, commonTestData.tag3.name],
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
         .thenResolve([{
           isPrivate: false,
           isDeprecated: false,
@@ -838,7 +859,7 @@ describe('PostService test', () => {
           nameList: [commonTestData.tag1.name, commonTestData.tag2.name, commonTestData.tag3.name],
           isOnlyExactNameFound: true,
         },
-      })))
+      }), session))
         .thenResolve([{ _id: commonTestData.objectIdList[0], name: commonTestData.tag3.name } as TagDoc]);
 
       await errorShouldBeThrown(
@@ -853,7 +874,7 @@ describe('PostService test', () => {
         postNo: commonTestData.post1.postNo,
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo })))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
         .thenResolve([{
           isPrivate: false,
           isDeprecated: false,
@@ -864,8 +885,8 @@ describe('PostService test', () => {
         } as PostMetaDoc]);
 
       await postService.updatePostMetaData(paramDto);
-      verify(postMetaRepository.updatePostMeta(anything())).once();
-      const [updatePostMetaRepoParamDto] = capture<UpdatePostMetaRepoParamDto>(postMetaRepository.updatePostMeta).first();
+      verify(postMetaRepository.updatePostMeta(anything(), session)).once();
+      const [updatePostMetaRepoParamDto] = capture<UpdatePostMetaRepoParamDto, ClientSession>(postMetaRepository.updatePostMeta).first();
       updatePostMetaRepoParamDto.categoryId!.should.equal(commonTestData.objectIdList[1]);
       updatePostMetaRepoParamDto.seriesId!.should.equal(commonTestData.objectIdList[2]);
       updatePostMetaRepoParamDto.tagIdList!.should.deep.equal([commonTestData.objectIdList[3], commonTestData.objectIdList[0]]);

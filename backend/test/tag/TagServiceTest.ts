@@ -1,6 +1,6 @@
 import { should } from 'chai';
 import { anything, capture, deepEqual, instance, mock, spy, verify, when } from 'ts-mockito';
-import { Types } from 'mongoose';
+import { ClientSession, Connection, Types } from 'mongoose';
 import TagService from '@src/tag/TagService';
 import TagRepository from '@src/tag/TagRepository';
 import { CreateTagParamDto, DeleteTagParamDto, FindTagParamDto, UpdateTagParamDto } from '@src/tag/dto/TagParamDto';
@@ -13,10 +13,15 @@ import {
 import { common as commonTestData } from '@test/data/testData';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
-import { errorShouldBeThrown } from '@test/TestUtil';
+import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
 import { TagDoc } from '@src/tag/Tag';
+import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import sinon from 'sinon';
 
 describe('TagService test', () => {
+  let sandbox;
+  let conn: Connection;
+  let session: ClientSession;
   let tagService: TagService;
   let tagRepository: TagRepository;
   let postMetaList: Types.ObjectId[];
@@ -31,13 +36,30 @@ describe('TagService test', () => {
     tagService = new TagService(instance(tagRepository));
     postMetaList = postMetaIdList.map((postMetaId) => new Types.ObjectId(postMetaId));
     should();
+    setConnection();
+    conn = getConnection();
+    sandbox = sinon.createSandbox();
+  });
+
+  beforeEach(async () => {
+    session = await conn.startSession();
+    session.startTransaction();
+    await replaceUseTransactionForTest(sandbox, session);
+  });
+
+  afterEach(async () => {
+    await abortTestTransaction(sandbox, session);
+  });
+
+  after(async () => {
+    await conn.close();
   });
 
   describe('findTag test', () => {
     it('findTag - with empty parameter', () => {
       const emptyParamDto: FindTagParamDto = {};
       tagService.findTag(emptyParamDto);
-      verify(tagRepository.findTag(deepEqual<FindTagRepoParamDto>({}))).once();
+      verify(tagRepository.findTag(deepEqual<FindTagRepoParamDto>({}), anything())).once();
     });
 
     it('findTag - by name only', () => {
@@ -51,7 +73,7 @@ describe('TagService test', () => {
           nameList: [tagName],
           isOnlyExactNameFound: true,
         },
-      }))).once();
+      }), anything())).once();
     });
 
     it('findTag - by postMetaIdList only', () => {
@@ -65,7 +87,7 @@ describe('TagService test', () => {
           postMetaIdList,
           isAndCondition: true,
         },
-      }))).once();
+      }), anything())).once();
     });
 
     it('findTag - with full parameter', () => {
@@ -85,7 +107,7 @@ describe('TagService test', () => {
           postMetaIdList,
           isAndCondition: true,
         },
-      }))).once();
+      }), anything())).once();
     });
   });
 
@@ -95,12 +117,12 @@ describe('TagService test', () => {
         name: tagName,
         postMetaIdList,
       };
-      when(tagRepository.findTag(anything()))
+      when(tagRepository.findTag(anything(), anything()))
         .thenResolve([{ name: tagName } as TagDoc]);
 
       const result: string = await tagService.createTag(paramDto);
 
-      const [repoParamDto] = capture<CreateTagRepoParamDto>(tagRepository.createTag).last();
+      const [repoParamDto] = capture<CreateTagRepoParamDto, ClientSession>(tagRepository.createTag).last();
       repoParamDto.name.should.equal(tagName);
       repoParamDto.postMetaList.should.deep.equal(postMetaList);
       result.should.be.equal(tagName);
@@ -110,7 +132,7 @@ describe('TagService test', () => {
       const paramDto: CreateTagParamDto = {
         name: tagName,
       };
-      when(tagRepository.findTag(anything()))
+      when(tagRepository.findTag(anything(), anything()))
         .thenResolve([{ name: tagName } as TagDoc]);
 
       const result: string = await tagService.createTag(paramDto);
@@ -118,7 +140,7 @@ describe('TagService test', () => {
       verify(tagRepository.createTag(deepEqual<CreateTagRepoParamDto>({
         name: tagName,
         postMetaList: [],
-      })));
+      }), anything()));
       result.should.be.equal(tagName);
     });
 
@@ -127,7 +149,7 @@ describe('TagService test', () => {
         name: tagName,
         postMetaIdList,
       };
-      when(tagRepository.findTag(anything()))
+      when(tagRepository.findTag(anything(), anything()))
         .thenResolve([]);
 
       await errorShouldBeThrown(
@@ -158,7 +180,7 @@ describe('TagService test', () => {
           postMetaIdToBeRemovedList: paramDto.tagToBe.postMetaIdToBeRemovedList!,
         },
       };
-      verify(tagRepository.updateTag(deepEqual(repoParamDto))).once();
+      verify(tagRepository.updateTag(deepEqual(repoParamDto), anything())).once();
     });
 
     it('tag update test - empty tagToBe', async () => {
@@ -189,7 +211,7 @@ describe('TagService test', () => {
           postMetaIdToBeAddedList: [],
           postMetaIdToBeRemovedList: [],
         },
-      })));
+      }), anything()));
     });
   });
 
@@ -201,7 +223,7 @@ describe('TagService test', () => {
       await tagService.deleteTag(paramDto);
 
       const repoParamDto: DeleteTagRepoParamDto = { ...paramDto };
-      verify(tagRepository.deleteTag(deepEqual(repoParamDto))).once();
+      verify(tagRepository.deleteTag(deepEqual(repoParamDto), anything())).once();
     });
   });
 });

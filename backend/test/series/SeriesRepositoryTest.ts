@@ -4,7 +4,7 @@ import { should } from 'chai';
 import sinon from 'sinon';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
-import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
+import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import SeriesRepository from '@src/series/SeriesRepository';
 import {
   CreateSeriesRepoParamDto,
@@ -35,7 +35,6 @@ describe('SeriesRepository test', () => {
   beforeEach(async () => {
     session = await conn.startSession();
     session.startTransaction();
-    await replaceUseTransactionForTest(sandbox, session);
   });
 
   afterEach(async () => {
@@ -79,7 +78,7 @@ describe('SeriesRepository test', () => {
         name: commonTestData.series2.name,
         isOnlyExactNameFound: true,
       };
-      const series: SeriesDoc[] = await seriesRepository.findSeries(paramDto);
+      const series: SeriesDoc[] = await seriesRepository.findSeries(paramDto, session);
       series.should.have.lengthOf(1);
       series[0].name.should.equal(commonTestData.series2.name);
     });
@@ -89,20 +88,20 @@ describe('SeriesRepository test', () => {
         name: '이',
         isOnlyExactNameFound: false,
       };
-      const series1: SeriesDoc[] = await seriesRepository.findSeries(paramDto1);
+      const series1: SeriesDoc[] = await seriesRepository.findSeries(paramDto1, session);
       series1.should.have.lengthOf(2);
 
       const paramDto2: FindSeriesRepoParamDto = {
         name: '네이버',
         isOnlyExactNameFound: false,
       };
-      const series2: SeriesDoc[] = await seriesRepository.findSeries(paramDto2);
+      const series2: SeriesDoc[] = await seriesRepository.findSeries(paramDto2, session);
       series2.should.have.lengthOf(1);
       series2[0].name.should.equal(commonTestData.series2.name);
     });
 
     it('findSeries - with empty parameter', async () => {
-      const series: SeriesDoc[] = await seriesRepository.findSeries({});
+      const series: SeriesDoc[] = await seriesRepository.findSeries({}, session);
       series.should.have.lengthOf(2);
     });
   });
@@ -135,7 +134,7 @@ describe('SeriesRepository test', () => {
         ...commonTestData.series2,
       };
 
-      await seriesRepository.createSeries(paramDto);
+      await seriesRepository.createSeries(paramDto, session);
 
       const series: (SeriesDoc | null) = await Series.findOne({ name: commonTestData.series2.name }).session(session).lean();
       series!.should.not.be.empty;
@@ -156,7 +155,7 @@ describe('SeriesRepository test', () => {
         postMetaList: [postMetaList[0]],
       };
 
-      await seriesRepository.createSeries(paramDto);
+      await seriesRepository.createSeries(paramDto, session);
 
       const series: (SeriesDoc | null) = await Series.findOne({ name: commonTestData.series2.name }).session(session).lean();
       series!.should.not.be.empty;
@@ -180,8 +179,9 @@ describe('SeriesRepository test', () => {
 
       await errorShouldBeThrown(
         new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postMetaList[1].postNo.toString(), commonTestData.series1.name]),
-        async (_paramDto) => seriesRepository.createSeries(_paramDto),
+        async (_paramDto, _session) => seriesRepository.createSeries(_paramDto, _session),
         paramDto,
+        session,
       );
     });
   });
@@ -238,7 +238,7 @@ describe('SeriesRepository test', () => {
         },
       };
 
-      await seriesRepository.updateSeries(paramDto);
+      await seriesRepository.updateSeries(paramDto, session);
 
       const series1: (SeriesDoc | null) = await Series.findOne({ name: commonTestData.series1.name }).session(session).lean();
       (series1 === null).should.be.true;
@@ -266,8 +266,9 @@ describe('SeriesRepository test', () => {
 
       await errorShouldBeThrown(
         new BlogError(BlogErrorCode.ALREADY_BELONG_TO_ANOTHER_SERIES, [postMetaList[2].postNo.toString(), commonTestData.series2.name]),
-        async (_paramDto) => seriesRepository.updateSeries(_paramDto),
+        async (_paramDto, _session) => seriesRepository.updateSeries(_paramDto, _session),
         paramDto,
+        session,
       );
     });
 
@@ -280,7 +281,7 @@ describe('SeriesRepository test', () => {
         },
       };
 
-      await seriesRepository.updateSeries(paramDto);
+      await seriesRepository.updateSeries(paramDto, session);
       const series: (SeriesDoc | null) = await Series.findOne({ name: commonTestData.series1.name }).session(session).lean();
       series!.postMetaList.should.deep.equal([postMetaList[0]._id]);
     });
@@ -294,7 +295,7 @@ describe('SeriesRepository test', () => {
         },
       };
 
-      await seriesRepository.updateSeries(paramDto);
+      await seriesRepository.updateSeries(paramDto, session);
       const series1: (SeriesDoc | null) = await Series.findOne({ name: commonTestData.series1.name }).session(session).lean();
       (series1 !== null).should.be.true;
       series1!.thumbnailContent.should.deep.equal(commonTestData.series1.thumbnailContent);
@@ -317,8 +318,9 @@ describe('SeriesRepository test', () => {
 
       await errorShouldBeThrown(
         new BlogError(BlogErrorCode.SERIES_NOT_FOUND, [inexistentName, 'name']),
-        async (_paramDto) => seriesRepository.updateSeries(_paramDto),
+        async (_paramDto, _session) => seriesRepository.updateSeries(_paramDto, _session),
         paramDto,
+        session,
       );
     });
   });
@@ -344,7 +346,7 @@ describe('SeriesRepository test', () => {
         name: commonTestData.series1.name,
       };
 
-      await seriesRepository.deleteSeries(paramDto);
+      await seriesRepository.deleteSeries(paramDto, session);
 
       const series: (SeriesDoc | null) = await Series.findOne({ name: commonTestData.series1.name }).session(session).lean();
       (series === null).should.be.true;

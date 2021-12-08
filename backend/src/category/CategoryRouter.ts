@@ -1,6 +1,7 @@
 import Router from '@koa/router';
 import { Context } from 'koa';
 import Container from 'typedi';
+import * as http2 from 'http2';
 import {
   CreateCategoryRequestDto,
   CreateCategoryRequestSchema,
@@ -11,11 +12,10 @@ import {
   UpdateCategoryRequestDto,
   UpdateCategoryRequestSchema,
 } from '@src/category/dto/CategoryRequestDto';
-import * as http2 from 'http2';
 import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUtil';
+import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 import * as URL from '../common/constant/URL';
 import CategoryService from './CategoryService';
-import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 
 const categoryRouter = new Router();
 const categoryService: CategoryService = Container.get(CategoryService);

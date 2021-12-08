@@ -1,7 +1,6 @@
 import { Service } from 'typedi';
 import { ClientSession, FilterQuery, Types, UpdateQuery } from 'mongoose';
 import Category, { CategoryDoc } from '@src/category/Category';
-import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 import {
   CategoryToBeRepoParamDto,
   CreateCategoryRepoParamDto,
@@ -12,51 +11,42 @@ import {
 import _ from 'lodash';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
-import { TagDoc } from '@src/tag/Tag';
 
 @Service()
 export default class CategoryRepository {
-  public findCategory(paramDto: FindCategoryRepoParamDto): Promise<CategoryDoc[]> {
-    return useTransaction(async (session: ClientSession) => {
-      const queryToFindCategoryByLevel: FilterQuery<CategoryDoc> = this.makeQueryToFindCategory(paramDto);
-      const categoryList = await Category
-        .find(queryToFindCategoryByLevel)
-        .populate('parentCategory')
-        .session(session)
-        .lean();
-      return this.filterCategoryByParentCategoryId(categoryList, paramDto.parentCategoryId);
-    });
+  public async findCategory(paramDto: FindCategoryRepoParamDto, session: ClientSession): Promise<CategoryDoc[]> {
+    const queryToFindCategoryByLevel: FilterQuery<CategoryDoc> = this.makeQueryToFindCategory(paramDto);
+    const categoryList = await Category
+      .find(queryToFindCategoryByLevel)
+      .populate('parentCategory')
+      .session(session)
+      .lean();
+    return this.filterCategoryByParentCategoryId(categoryList, paramDto.parentCategoryId);
   }
 
-  public createCategory(paramDto: CreateCategoryRepoParamDto) {
-    return useTransaction(async (session: ClientSession) => {
-      const parentCategoryLevel: number = await this.findParentCategoryLevel(session, paramDto.parentCategory);
-      await Category
-        .insertMany({ level: parentCategoryLevel + 1, ...paramDto }, { session });
-    });
+  public async createCategory(paramDto: CreateCategoryRepoParamDto, session: ClientSession) {
+    const parentCategoryLevel: number = await this.findParentCategoryLevel(session, paramDto.parentCategory);
+    await Category
+      .insertMany({ level: parentCategoryLevel + 1, ...paramDto }, { session });
   }
 
-  public updateCategory(paramDto: UpdateCategoryRepoParamDto) {
-    return useTransaction(async (session: ClientSession) => {
-      const { name, categoryToBe } = paramDto;
-      const queryToUpdateCategory: UpdateQuery<CategoryDoc> = await this.makeQueryToUpdateCategory(session, categoryToBe);
-      await Category
-        .updateOne({ name }, queryToUpdateCategory).session(session);
-    });
+  public async updateCategory(paramDto: UpdateCategoryRepoParamDto, session: ClientSession) {
+    const { name, categoryToBe } = paramDto;
+    const queryToUpdateCategory: UpdateQuery<CategoryDoc> = await this.makeQueryToUpdateCategory(session, categoryToBe);
+    await Category
+      .updateOne({ name }, queryToUpdateCategory).session(session);
   }
 
-  public deleteCategory(paramDto: DeleteCategoryRepoParamDto) {
-    return useTransaction(async (session: ClientSession) => {
-      const childCategoryList: CategoryDoc[] = await this.findChildCategoryList(session, paramDto.name);
-      if (!_.isEmpty(childCategoryList)) {
-        throw new BlogError(
-          BlogErrorCode.CATEGORY_WITH_CHILDREN_CANNOT_BE_DELETED,
-          [childCategoryList.map((childCategory) => childCategory.name).join(', ')],
-        );
-      }
-      await Category
-        .deleteOne(paramDto, { session });
-    });
+  public async deleteCategory(paramDto: DeleteCategoryRepoParamDto, session: ClientSession) {
+    const childCategoryList: CategoryDoc[] = await this.findChildCategoryList(session, paramDto.name);
+    if (!_.isEmpty(childCategoryList)) {
+      throw new BlogError(
+        BlogErrorCode.CATEGORY_WITH_CHILDREN_CANNOT_BE_DELETED,
+        [childCategoryList.map((childCategory) => childCategory.name).join(', ')],
+      );
+    }
+    await Category
+      .deleteOne(paramDto, { session });
   }
 
   private makeQueryToFindCategory(paramDto: FindCategoryRepoParamDto): FilterQuery<CategoryDoc> {
@@ -84,7 +74,7 @@ export default class CategoryRepository {
     return queryToUpdateCategory;
   }
 
-  private filterCategoryByParentCategoryId(categoryList: FilterQuery<CategoryDoc>, parentCategoryId): TagDoc[] {
+  private filterCategoryByParentCategoryId(categoryList: FilterQuery<CategoryDoc>, parentCategoryId): CategoryDoc[] {
     return _.isNil(parentCategoryId)
       ? categoryList
       : categoryList.filter((category) => !_.isNil(category.parentCategory) && category.parentCategory._id.toString() === parentCategoryId);

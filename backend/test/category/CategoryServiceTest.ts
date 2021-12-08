@@ -1,6 +1,6 @@
 import { should } from 'chai';
 import { anything, capture, deepEqual, instance, mock, spy, verify, when } from 'ts-mockito';
-import { Types } from 'mongoose';
+import { ClientSession, Connection, Types } from 'mongoose';
 import CategoryService from '@src/category/CategoryService';
 import CategoryRepository from '@src/category/CategoryRepository';
 import {
@@ -18,10 +18,15 @@ import {
 import { common as commonTestData } from '@test/data/testData';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
-import { errorShouldBeThrown } from '@test/TestUtil';
+import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
 import { CategoryDoc } from '@src/category/Category';
+import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import sinon from 'sinon';
 
 describe('CategoryService test', () => {
+  let sandbox;
+  let conn: Connection;
+  let session: ClientSession;
   let categoryService: CategoryService;
   let categoryRepository: CategoryRepository;
 
@@ -34,6 +39,23 @@ describe('CategoryService test', () => {
     categoryRepository = spy(mock(CategoryRepository));
     categoryService = new CategoryService(instance(categoryRepository));
     should();
+    setConnection();
+    conn = getConnection();
+    sandbox = sinon.createSandbox();
+  });
+
+  beforeEach(async () => {
+    session = await conn.startSession();
+    session.startTransaction();
+    await replaceUseTransactionForTest(sandbox, session);
+  });
+
+  afterEach(async () => {
+    await abortTestTransaction(sandbox, session);
+  });
+
+  after(async () => {
+    await conn.close();
   });
 
   describe('findCategory test', () => {
@@ -45,13 +67,13 @@ describe('CategoryService test', () => {
       };
       categoryService.findCategory(nameOnlyParamDto);
       const repoParamDto: FindCategoryRepoParamDto = { ...nameOnlyParamDto };
-      verify(categoryRepository.findCategory(deepEqual<FindCategoryRepoParamDto>(repoParamDto))).once();
+      verify(categoryRepository.findCategory(deepEqual<FindCategoryRepoParamDto>(repoParamDto), anything())).once();
     });
 
     it('findCategory - empty parameter', () => {
       const emptyParamDto: FindCategoryParamDto = {};
       categoryService.findCategory(emptyParamDto);
-      verify(categoryRepository.findCategory(deepEqual<FindCategoryRepoParamDto>({}))).once();
+      verify(categoryRepository.findCategory(deepEqual<FindCategoryRepoParamDto>({}), anything())).once();
     });
   });
 
@@ -61,12 +83,12 @@ describe('CategoryService test', () => {
         parentCategoryId: categoryId,
         name: categoryName,
       };
-      when(categoryRepository.findCategory(anything()))
+      when(categoryRepository.findCategory(anything(), anything()))
         .thenResolve([{ name: categoryName } as CategoryDoc]);
 
       const result: string = await categoryService.createCategory(paramDto);
 
-      const [repoParamDto] = capture<CreateCategoryRepoParamDto>(categoryRepository.createCategory).last();
+      const [repoParamDto] = capture<CreateCategoryRepoParamDto, ClientSession>(categoryRepository.createCategory).last();
       repoParamDto.parentCategory!.should.deep.equal(new Types.ObjectId(categoryId));
       repoParamDto.name.should.equal(categoryName);
       result.should.equal(categoryName);
@@ -76,13 +98,13 @@ describe('CategoryService test', () => {
       const paramDto: CreateCategoryParamDto = {
         name: categoryName,
       };
-      when(categoryRepository.findCategory(anything()))
+      when(categoryRepository.findCategory(anything(), anything()))
         .thenResolve([{ name: categoryName } as CategoryDoc]);
 
       const result: string = await categoryService.createCategory(paramDto);
 
       const repoParamDto: CreateCategoryRepoParamDto = { ...paramDto };
-      verify(categoryRepository.createCategory(deepEqual<CreateCategoryRepoParamDto>(repoParamDto))).once();
+      verify(categoryRepository.createCategory(deepEqual<CreateCategoryRepoParamDto>(repoParamDto), anything())).once();
       result.should.equal(categoryName);
     });
 
@@ -91,7 +113,7 @@ describe('CategoryService test', () => {
         parentCategoryId: categoryId,
         name: categoryName,
       };
-      when(categoryRepository.findCategory(anything()))
+      when(categoryRepository.findCategory(anything(), anything()))
         .thenResolve([]);
 
       await errorShouldBeThrown(
@@ -114,7 +136,7 @@ describe('CategoryService test', () => {
       await categoryService.updateCategory(paramDto);
 
       const repoParamDto: UpdateCategoryRepoParamDto = { ...paramDto };
-      verify(categoryRepository.updateCategory(deepEqual(repoParamDto))).once();
+      verify(categoryRepository.updateCategory(deepEqual(repoParamDto), anything())).once();
     });
 
     it('updateCategory - with empty categoryToBe', async () => {
@@ -138,7 +160,7 @@ describe('CategoryService test', () => {
       await categoryService.deleteCategory(paramDto);
 
       const repoParamDto: DeleteCategoryRepoParamDto = { ...paramDto };
-      verify(categoryRepository.deleteCategory(deepEqual(repoParamDto))).once();
+      verify(categoryRepository.deleteCategory(deepEqual(repoParamDto), anything())).once();
     });
   });
 });
