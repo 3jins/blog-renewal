@@ -3,7 +3,7 @@ import { should } from 'chai';
 import sinon from 'sinon';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
-import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
+import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import CategoryRepository from '@src/category/CategoryRepository';
 import {
   CreateCategoryRepoParamDto,
@@ -32,7 +32,6 @@ describe('CategoryRepository test', () => {
   beforeEach(async () => {
     session = await conn.startSession();
     session.startTransaction();
-    await replaceUseTransactionForTest(sandbox, session);
   });
 
   afterEach(async () => {
@@ -68,7 +67,7 @@ describe('CategoryRepository test', () => {
       const paramDto: FindCategoryRepoParamDto = {
         parentCategoryId: catSwDev.id,
       };
-      const categories: CategoryDoc[] = await categoryRepository.findCategory(paramDto);
+      const categories: CategoryDoc[] = await categoryRepository.findCategory(paramDto, session);
       categories.should.have.lengthOf(2);
       categories[0]._id.should.deep.equal(catWeb._id);
       categories[1]._id.should.deep.equal(catMobile._id);
@@ -78,7 +77,7 @@ describe('CategoryRepository test', () => {
       const paramDto: FindCategoryRepoParamDto = {
         name: catBe.name,
       };
-      const categories: CategoryDoc[] = await categoryRepository.findCategory(paramDto);
+      const categories: CategoryDoc[] = await categoryRepository.findCategory(paramDto, session);
       categories.should.have.lengthOf(1);
       categories[0]._id.should.deep.equal(catBe._id);
     });
@@ -87,7 +86,7 @@ describe('CategoryRepository test', () => {
       const paramDto: FindCategoryRepoParamDto = {
         level: 0,
       };
-      const categories: CategoryDoc[] = await categoryRepository.findCategory(paramDto);
+      const categories: CategoryDoc[] = await categoryRepository.findCategory(paramDto, session);
       categories.should.have.lengthOf(3);
       categories[0]._id.should.deep.equal(catSwDev._id);
       categories[1]._id.should.deep.equal(catLife._id);
@@ -95,7 +94,7 @@ describe('CategoryRepository test', () => {
     });
 
     it('findCategory - with empty parameter', async () => {
-      const categories: CategoryDoc[] = await categoryRepository.findCategory({});
+      const categories: CategoryDoc[] = await categoryRepository.findCategory({}, session);
       categories.should.have.lengthOf(categoryTestDataList.length);
     });
   });
@@ -112,7 +111,7 @@ describe('CategoryRepository test', () => {
         parentCategory: catSwDev.id,
       };
 
-      await categoryRepository.createCategory(paramDto);
+      await categoryRepository.createCategory(paramDto, session);
 
       const category: (CategoryDoc | null) = await Category
         .findOne({ name: commonTestData.category3.name })
@@ -132,8 +131,9 @@ describe('CategoryRepository test', () => {
 
       await errorShouldBeThrown(
         new BlogError(BlogErrorCode.CATEGORY_NOT_FOUND, [commonTestData.objectIdList[0], 'id']),
-        async (_paramDto) => categoryRepository.createCategory(_paramDto),
+        async (_paramDto, _session) => categoryRepository.createCategory(_paramDto, _session),
         paramDto,
+        session,
       );
     });
 
@@ -142,7 +142,7 @@ describe('CategoryRepository test', () => {
         name: commonTestData.category3.name,
       };
 
-      await categoryRepository.createCategory(paramDto);
+      await categoryRepository.createCategory(paramDto, session);
 
       const category: (CategoryDoc | null) = await Category
         .findOne({ name: commonTestData.category3.name })
@@ -177,7 +177,7 @@ describe('CategoryRepository test', () => {
         },
       };
 
-      await categoryRepository.updateCategory(paramDto);
+      await categoryRepository.updateCategory(paramDto, session);
 
       const categoryExpectedNotToBeFound: (CategoryDoc | null) = await Category
         .findOne({ name: commonTestData.category2.name }).session(session).lean();
@@ -196,7 +196,7 @@ describe('CategoryRepository test', () => {
         },
       };
 
-      await categoryRepository.updateCategory(paramDto);
+      await categoryRepository.updateCategory(paramDto, session);
 
       const category: (CategoryDoc | null) = await Category
         .findOne({ name: catFe.name }).session(session).lean();
@@ -224,7 +224,7 @@ describe('CategoryRepository test', () => {
         name: catBe.name,
       };
 
-      await categoryRepository.deleteCategory(paramDto);
+      await categoryRepository.deleteCategory(paramDto, session);
       const category: (CategoryDoc | null) = await Category.findOne({ name: catBe.name }).session(session).lean();
       (category === null).should.be.true;
     });
@@ -236,8 +236,9 @@ describe('CategoryRepository test', () => {
 
       await errorShouldBeThrown(
         new BlogError(BlogErrorCode.CATEGORY_WITH_CHILDREN_CANNOT_BE_DELETED, [`${catBe.name}, ${catFe.name}`]),
-        async (_paramDto) => categoryRepository.deleteCategory(_paramDto),
+        async (_paramDto, _session) => categoryRepository.deleteCategory(_paramDto, _session),
         paramDto,
+        session,
       );
     });
 
@@ -248,8 +249,9 @@ describe('CategoryRepository test', () => {
 
       await errorShouldBeThrown(
         new BlogError(BlogErrorCode.CATEGORY_NOT_FOUND, [String(paramDto.name), 'name']),
-        async (_paramDto) => categoryRepository.deleteCategory(_paramDto),
+        async (_paramDto, _session) => categoryRepository.deleteCategory(_paramDto, _session),
         paramDto,
+        session,
       );
     });
   });

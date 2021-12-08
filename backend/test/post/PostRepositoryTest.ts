@@ -3,7 +3,7 @@ import { should } from 'chai';
 import sinon from 'sinon';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
-import { abortTestTransaction, replaceUseTransactionForTest } from '@test/TestUtil';
+import { abortTestTransaction } from '@test/TestUtil';
 import PostRepository from '@src/post/repository/PostRepository';
 import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
 import Post, { PostDoc } from '@src/post/model/Post';
@@ -27,7 +27,6 @@ describe('PostRepository test', () => {
   beforeEach(async () => {
     session = await conn.startSession();
     session.startTransaction();
-    await replaceUseTransactionForTest(sandbox, session);
   });
 
   afterEach(async () => {
@@ -87,7 +86,7 @@ describe('PostRepository test', () => {
         isLatestVersion: commonTestData.post2EnV2.isLatestVersion,
         isOnlyExactSameFieldFound: true,
       };
-      const posts: PostDoc[] = await postRepository.findPost(paramDto);
+      const posts: PostDoc[] = await postRepository.findPost(paramDto, session);
       posts.should.have.lengthOf(1);
       posts[0].postNo.should.equal(commonTestData.post2EnV2.postNo);
     });
@@ -99,7 +98,7 @@ describe('PostRepository test', () => {
         findPostByUpdatedDateDto: { from: commonTestData.dateList[0], to: commonTestData.dateList[5] },
         isOnlyExactSameFieldFound: false,
       };
-      const posts: PostDoc[] = await postRepository.findPost(paramDto);
+      const posts: PostDoc[] = await postRepository.findPost(paramDto, session);
       posts.should.have.lengthOf(3);
       posts[0].postNo.should.equal(commonTestData.post1.postNo);
       posts[1].postNo.should.equal(commonTestData.post2V1.postNo);
@@ -110,7 +109,7 @@ describe('PostRepository test', () => {
 
     it('findPost - with empty parameter', async () => {
       const paramDto: FindPostRepoParamDto = {};
-      const posts: PostDoc[] = await postRepository.findPost(paramDto);
+      const posts: PostDoc[] = await postRepository.findPost(paramDto, session);
       posts.should.have.lengthOf(6);
       posts[0].postNo.should.equal(commonTestData.post1.postNo);
       posts[1].postNo.should.equal(commonTestData.post2V1.postNo);
@@ -126,7 +125,7 @@ describe('PostRepository test', () => {
           from: commonTestData.dateList[3],
         },
       };
-      const posts: PostDoc[] = await postRepository.findPost(paramDto);
+      const posts: PostDoc[] = await postRepository.findPost(paramDto, session);
       posts.should.have.lengthOf(3);
       posts.map((post) => post.postNo).should.deep.equal([
         commonTestData.post2V2.postNo,
@@ -141,7 +140,7 @@ describe('PostRepository test', () => {
           to: commonTestData.dateList[3],
         },
       };
-      const posts: PostDoc[] = await postRepository.findPost(paramDto);
+      const posts: PostDoc[] = await postRepository.findPost(paramDto, session);
       posts.should.have.lengthOf(4);
       posts.map((post) => post.postNo).should.deep.equal([
         commonTestData.post1.postNo,
@@ -175,8 +174,8 @@ describe('PostRepository test', () => {
         updatedDate: commonTestData.dateList[1],
       };
 
-      const result1 = await postRepository.createPost(paramDto1);
-      const result2 = await postRepository.createPost(paramDto2);
+      const result1 = await postRepository.createPost(paramDto1, session);
+      const result2 = await postRepository.createPost(paramDto2, session);
 
       objectIdRegex.test(result1).should.be.true;
       objectIdRegex.test(result2).should.be.true;
@@ -223,8 +222,8 @@ describe('PostRepository test', () => {
         renderedContent: commonTestData.post1DataToBeUpdated.renderedContent,
       };
 
-      const result1 = await postRepository.createPost(paramDto1);
-      const result2 = await postRepository.createPost(paramDto2);
+      const result1 = await postRepository.createPost(paramDto1, session);
+      const result2 = await postRepository.createPost(paramDto2, session);
 
       objectIdRegex.test(result1).should.be.true;
       objectIdRegex.test(result2).should.be.true;

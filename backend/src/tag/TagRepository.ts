@@ -2,7 +2,6 @@ import { Service } from 'typedi';
 import { ClientSession, FilterQuery } from 'mongoose';
 import _ from 'lodash';
 import Tag, { TagDoc } from '@src/tag/Tag';
-import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 import {
   CreateTagRepoParamDto,
   DeleteTagRepoParamDto,
@@ -17,83 +16,75 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
 @Service()
 export default class TagRepository {
-  public findTag(paramDto: FindTagRepoParamDto): Promise<TagDoc[]> {
-    return useTransaction(async (session: ClientSession) => {
-      const {
-        findTagByNameDto,
-        findTagByPostMetaIdDto,
-      }: FindTagRepoParamDto = paramDto;
-      const queryToFindTagByName: FilterQuery<TagDoc> = this.makeQueryToFindTagByName(findTagByNameDto);
+  public async findTag(paramDto: FindTagRepoParamDto, session: ClientSession): Promise<TagDoc[]> {
+    const {
+      findTagByNameDto,
+      findTagByPostMetaIdDto,
+    }: FindTagRepoParamDto = paramDto;
+    const queryToFindTagByName: FilterQuery<TagDoc> = this.makeQueryToFindTagByName(findTagByNameDto);
 
-      const tagList = await Tag
-        .find({ ...queryToFindTagByName })
-        .populate('postMetaList')
-        .session(session)
-        .lean();
+    const tagList = await Tag
+      .find({ ...queryToFindTagByName })
+      .populate('postMetaList')
+      .session(session)
+      .lean();
 
-      return this.filterTagByPostMetaId(tagList, findTagByPostMetaIdDto);
-    });
+    return this.filterTagByPostMetaId(tagList, findTagByPostMetaIdDto);
   }
 
-  public createTag(paramDto: CreateTagRepoParamDto) {
-    return useTransaction(async (session: ClientSession) => {
-      // Create tag list
-      const tagList: TagDoc[] = await Tag
-        .insertMany([paramDto], { session });
+  public async createTag(paramDto: CreateTagRepoParamDto, session: ClientSession) {
+    // Create tag list
+    const tagList: TagDoc[] = await Tag
+      .insertMany([paramDto], { session });
 
-      // Update post list
-      await PostMeta
-        .updateMany({
-          _id: { $in: paramDto.postMetaList },
-        }, {
-          $addToSet: {
-            tagList:
-              { $each: tagList.map((tag) => tag._id) },
-          },
-        }, { session });
-    });
+    // Update post list
+    await PostMeta
+      .updateMany({
+        _id: { $in: paramDto.postMetaList },
+      }, {
+        $addToSet: {
+          tagList:
+            { $each: tagList.map((tag) => tag._id) },
+        },
+      }, { session });
   }
 
-  public updateTag(paramDto: UpdateTagRepoParamDto) {
-    return useTransaction(async (session: ClientSession) => {
-      const { originalName, tagToBe } = paramDto;
-      const { postMetaIdToBeAddedList, postMetaIdToBeRemovedList } = tagToBe;
-      const { _id: tagId }: TagDoc = await this.getTagByName(session, originalName);
+  public async updateTag(paramDto: UpdateTagRepoParamDto, session: ClientSession) {
+    const { originalName, tagToBe } = paramDto;
+    const { postMetaIdToBeAddedList, postMetaIdToBeRemovedList } = tagToBe;
+    const { _id: tagId }: TagDoc = await this.getTagByName(session, originalName);
 
-      // Update tag
-      await Tag
-        .bulkWrite([{
-          updateOne: {
-            filter: { _id: tagId },
-            update: { ...tagToBe, $push: { postMetaList: { $each: postMetaIdToBeAddedList } } },
-          },
-        }, {
-          updateOne: {
-            filter: { _id: tagId },
-            update: { $pullAll: { postMetaList: postMetaIdToBeRemovedList } },
-          },
-        }], { session });
+    // Update tag
+    await Tag
+      .bulkWrite([{
+        updateOne: {
+          filter: { _id: tagId },
+          update: { ...tagToBe, $push: { postMetaList: { $each: postMetaIdToBeAddedList } } },
+        },
+      }, {
+        updateOne: {
+          filter: { _id: tagId },
+          update: { $pullAll: { postMetaList: postMetaIdToBeRemovedList } },
+        },
+      }], { session });
 
-      // Update the tag field from posts
-      await PostMeta
-        .updateMany({ _id: { $in: postMetaIdToBeRemovedList } }, { $pull: { tagList: tagId } }, { session });
-      await PostMeta
-        .updateMany({ _id: { $in: postMetaIdToBeAddedList } }, { $push: { tagList: tagId } }, { session });
-    });
+    // Update the tag field from posts
+    await PostMeta
+      .updateMany({ _id: { $in: postMetaIdToBeRemovedList } }, { $pull: { tagList: tagId } }, { session });
+    await PostMeta
+      .updateMany({ _id: { $in: postMetaIdToBeAddedList } }, { $push: { tagList: tagId } }, { session });
   }
 
-  public deleteTag(paramDto: DeleteTagRepoParamDto) {
-    return useTransaction(async (session: ClientSession) => {
-      const tag: TagDoc = await this.getTagByName(session, paramDto.name);
+  public async deleteTag(paramDto: DeleteTagRepoParamDto, session: ClientSession) {
+    const tag: TagDoc = await this.getTagByName(session, paramDto.name);
 
-      // Delete tag
-      await Tag
-        .deleteOne(paramDto, { session });
+    // Delete tag
+    await Tag
+      .deleteOne(paramDto, { session });
 
-      // Remove the tag from posts
-      await PostMeta
-        .updateMany({ _id: { $in: tag.postMetaList } }, { $pull: { tagList: tag._id } }, { session });
-    });
+    // Remove the tag from posts
+    await PostMeta
+      .updateMany({ _id: { $in: tag.postMetaList } }, { $pull: { tagList: tag._id } }, { session });
   }
 
   private makeQueryToFindTagByName(paramDto: FindTagByNameDto | undefined): FilterQuery<TagDoc> {

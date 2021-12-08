@@ -2,21 +2,32 @@ import _ from 'lodash';
 import { Service } from 'typedi';
 import { ClientSession, FilterQuery } from 'mongoose';
 import Post, { PostDoc } from '@src/post/model/Post';
-import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
 
 @Service()
 export default class PostRepository {
-  public findPost(paramDto: FindPostRepoParamDto): Promise<PostDoc[]> {
-    return useTransaction(async (session: ClientSession) => {
-      const queryToFindPost: FilterQuery<PostDoc> = this.makeQueryToFindPost(paramDto);
-      return Post
-        .find(queryToFindPost)
-        .populate('thumbnailImage')
-        .session(session)
-        .lean();
-    });
+  public async findPost(paramDto: FindPostRepoParamDto, session: ClientSession): Promise<PostDoc[]> {
+    const queryToFindPost: FilterQuery<PostDoc> = this.makeQueryToFindPost(paramDto);
+    return Post
+      .find(queryToFindPost)
+      .populate('thumbnailImage')
+      .session(session)
+      .lean();
   }
+
+  public async createPost(paramDto: CreatePostRepoParamDto, session: ClientSession): Promise<string> {
+    const { postNo } = paramDto;
+    const lastVersionPost: PostDoc | null = await this.getLastVersionPost(session, postNo);
+    const insertedPostList: PostDoc[] = await Post
+      .insertMany([{
+        ...paramDto,
+        thumbnailImage: paramDto.thumbnailImageId,
+        lastVersionPost: lastVersionPost === null ? null : lastVersionPost!._id,
+      }], { session });
+    const [insertedPost] = insertedPostList;
+    return insertedPost._id;
+  }
+
 
   private makeQueryToFindPost(paramDto: FindPostRepoParamDto): FilterQuery<PostDoc> {
     const {
@@ -68,21 +79,6 @@ export default class PostRepository {
       Object.assign(dateQuery, { $lte: to });
     }
     return dateQuery;
-  }
-
-  public createPost(paramDto: CreatePostRepoParamDto): Promise<string> {
-    return useTransaction(async (session: ClientSession) => {
-      const { postNo } = paramDto;
-      const lastVersionPost: PostDoc | null = await this.getLastVersionPost(session, postNo);
-      const insertedPostList: PostDoc[] = await Post
-        .insertMany([{
-          ...paramDto,
-          thumbnailImage: paramDto.thumbnailImageId,
-          lastVersionPost: lastVersionPost === null ? null : lastVersionPost!._id,
-        }], { session });
-      const [insertedPost] = insertedPostList;
-      return insertedPost._id;
-    });
   }
 
   private async getLastVersionPost(session: ClientSession, postNo: number): Promise<PostDoc | null> {

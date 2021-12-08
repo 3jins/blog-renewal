@@ -1,48 +1,45 @@
 import { Service } from 'typedi';
 import { ClientSession, FilterQuery, UpdateQuery } from 'mongoose';
-import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 import PostMeta, { PostMetaDoc } from '@src/post/model/PostMeta';
-import { CreatePostMetaRepoParamDto, FindPostMetaRepoParamDto, UpdatePostMetaRepoParamDto } from '@src/post/dto/PostMetaRepoParamDto';
+import {
+  CreatePostMetaRepoParamDto,
+  FindPostMetaRepoParamDto,
+  UpdatePostMetaRepoParamDto,
+} from '@src/post/dto/PostMetaRepoParamDto';
 import _ from 'lodash';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
 
 @Service()
 export default class PostMetaRepository {
-  public async findPostMeta(paramDto: FindPostMetaRepoParamDto): Promise<PostMetaDoc[]> {
-    return useTransaction(async (session: ClientSession) => {
-      const queryToFindPostMeta: FilterQuery<PostMetaDoc> = this.makeQueryToFindPostMeta(paramDto);
-      return PostMeta
-        .find(queryToFindPostMeta)
-        .sort({ postNo: -1 })
-        .populate('category')
-        .populate('series')
-        .populate('tagList')
-        .session(session);
-    });
+  public async findPostMeta(paramDto: FindPostMetaRepoParamDto, session: ClientSession): Promise<PostMetaDoc[]> {
+    const queryToFindPostMeta: FilterQuery<PostMetaDoc> = this.makeQueryToFindPostMeta(paramDto);
+    return PostMeta
+      .find(queryToFindPostMeta)
+      .sort({ postNo: -1 })
+      .populate('category')
+      .populate('series')
+      .populate('tagList')
+      .session(session);
   }
 
-  public async createPostMeta(paramDto: CreatePostMetaRepoParamDto): Promise<number> {
-    return useTransaction(async (session: ClientSession) => {
-      const postNo: number = await this.getNextPostNo(session);
-      await PostMeta
-        .insertMany([{
-          postNo,
-          ...paramDto,
-          category: paramDto.categoryId,
-          tagList: paramDto.tagIdList,
-          series: paramDto.seriesId,
-        }], { session });
-      return postNo;
-    });
+  public async createPostMeta(paramDto: CreatePostMetaRepoParamDto, session: ClientSession): Promise<number> {
+    const postNo: number = await this.getNextPostNo(session);
+    await PostMeta
+      .insertMany([{
+        postNo,
+        ...paramDto,
+        category: paramDto.categoryId,
+        tagList: paramDto.tagIdList,
+        series: paramDto.seriesId,
+      }], { session });
+    return postNo;
   }
 
-  public async updatePostMeta(paramDto: UpdatePostMetaRepoParamDto): Promise<void> {
-    await useTransaction((async (session: ClientSession) => {
-      const queryToUpdatePostMeta: UpdateQuery<PostMetaDoc> = await this.makeQueryToUpdatePostMeta(session, paramDto);
-      await PostMeta
-        .updateMany({ postNo: paramDto.postNo }, queryToUpdatePostMeta, { session });
-    }));
+  public async updatePostMeta(paramDto: UpdatePostMetaRepoParamDto, session: ClientSession): Promise<void> {
+    const queryToUpdatePostMeta: UpdateQuery<PostMetaDoc> = await this.makeQueryToUpdatePostMeta(session, paramDto);
+    await PostMeta
+      .updateMany({ postNo: paramDto.postNo }, queryToUpdatePostMeta, { session });
   }
 
   private makeQueryToFindPostMeta(paramDto: FindPostMetaRepoParamDto): FilterQuery<PostMetaDoc> {

@@ -15,79 +15,71 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
 @Service()
 export default class SeriesRepository {
-  public findSeries(paramDto: FindSeriesRepoParamDto): Promise<SeriesDoc[]> {
-    return useTransaction(async (session: ClientSession) => {
-      const queryToFindSeriesByName: FilterQuery<SeriesDoc> = this.makeQueryToFindSeriesByName(paramDto);
-      return Series
-        .find({ ...queryToFindSeriesByName })
-        .populate('postMetaList')
-        .session(session)
-        .lean();
-    });
+  public async findSeries(paramDto: FindSeriesRepoParamDto, session: ClientSession): Promise<SeriesDoc[]> {
+    const queryToFindSeriesByName: FilterQuery<SeriesDoc> = this.makeQueryToFindSeriesByName(paramDto);
+    return Series
+      .find({ ...queryToFindSeriesByName })
+      .populate('postMetaList')
+      .session(session)
+      .lean();
   }
 
-  public async createSeries(paramDto: CreateSeriesRepoParamDto): Promise<void> {
-    return useTransaction(async (session: ClientSession) => {
-      const { postMetaList } = paramDto;
+  public async createSeries(paramDto: CreateSeriesRepoParamDto, session: ClientSession): Promise<void> {
+    const { postMetaList } = paramDto;
 
-      await this.validatePostMetaList(session, postMetaList);
+    await this.validatePostMetaList(session, postMetaList);
 
-      // Create a series
-      const series: SeriesDoc = (await Series
-        .insertMany([paramDto], { session }))[0];
+    // Create a series
+    const series: SeriesDoc = (await Series
+      .insertMany([paramDto], { session }))[0];
 
-      // Update posts
-      await PostMeta
-        .updateMany({
-          _id: { $in: postMetaList },
-        }, {
-          series: series._id,
-        }, { session });
-    });
+    // Update posts
+    await PostMeta
+      .updateMany({
+        _id: { $in: postMetaList },
+      }, {
+        series: series._id,
+      }, { session });
   }
 
-  public async updateSeries(paramDto: UpdateSeriesRepoParamDto): Promise<void> {
-    return useTransaction(async (session: ClientSession) => {
-      const { originalName, seriesToBe } = paramDto;
-      const { postMetaIdToBeAddedList, postMetaIdToBeRemovedList } = seriesToBe;
+  public async updateSeries(paramDto: UpdateSeriesRepoParamDto, session: ClientSession): Promise<void> {
+    const { originalName, seriesToBe } = paramDto;
+    const { postMetaIdToBeAddedList, postMetaIdToBeRemovedList } = seriesToBe;
 
-      await this.validatePostMetaList(session, postMetaIdToBeAddedList);
-      const seriesId: string = await this.getSeriesIdByName(session, originalName);
+    await this.validatePostMetaList(session, postMetaIdToBeAddedList);
+    const seriesId: string = await this.getSeriesIdByName(session, originalName);
 
-      // Update series
-      await Series
-        .bulkWrite([{
-          updateOne: {
-            filter: { _id: seriesId },
-            update: { ...seriesToBe, $push: { postMetaList: { $each: postMetaIdToBeAddedList } } },
-          },
-        }, {
-          updateOne: {
-            filter: { _id: seriesId },
-            update: { $pullAll: { postMetaList: postMetaIdToBeRemovedList } },
-          },
-        }], { session });
+    // Update series
+    await Series
+      .bulkWrite([{
+        updateOne: {
+          filter: { _id: seriesId },
+          update: { ...seriesToBe, $push: { postMetaList: { $each: postMetaIdToBeAddedList } } },
+        },
+      }, {
+        updateOne: {
+          filter: { _id: seriesId },
+          update: { $pullAll: { postMetaList: postMetaIdToBeRemovedList } },
+        },
+      }], { session });
 
-      // Update the series field from posts
-      await PostMeta
-        .updateMany({ _id: { $in: postMetaIdToBeRemovedList } }, { series: null }, { session });
-      await PostMeta
-        .updateMany({ _id: { $in: postMetaIdToBeAddedList } }, { series: seriesId }, { session });
-    });
+    // Update the series field from posts
+    await PostMeta
+      .updateMany({ _id: { $in: postMetaIdToBeRemovedList } }, { series: null }, { session });
+    await PostMeta
+      .updateMany({ _id: { $in: postMetaIdToBeAddedList } }, { series: seriesId }, { session });
   }
 
-  public async deleteSeries(paramDto: DeleteSeriesRepoParamDto): Promise<void> {
-    return useTransaction(async (session: ClientSession) => {
-      const postMetaList: string[] = await this.getSeriespostMetaListByName(session, paramDto.name);
+  public async deleteSeries(paramDto: DeleteSeriesRepoParamDto, session: ClientSession): Promise<void> {
+    const postMetaList: string[] = await this.getSeriespostMetaListByName(session, paramDto.name);
 
-      // Delete the series
-      await Series
-        .deleteOne(paramDto, { session });
+    // Delete the series
+    await Series
+      .deleteOne(paramDto, { session });
 
-      // Remove the series from posts
-      await PostMeta
-        .updateMany({ _id: { $in: postMetaList } }, { series: null }, { session });
-    });
+    // Remove the series from posts
+    await PostMeta
+      .updateMany({ _id: { $in: postMetaList } }, { series: null }, { session });
   }
 
   private makeQueryToFindSeriesByName(paramDto: FindSeriesRepoParamDto): FilterQuery<SeriesDoc> {

@@ -3,9 +3,13 @@ import { should } from 'chai';
 import sinon from 'sinon';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
-import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
+import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import PostMetaRepository from '@src/post/repository/PostMetaRepository';
-import { CreatePostMetaRepoParamDto, FindPostMetaRepoParamDto, UpdatePostMetaRepoParamDto } from '@src/post/dto/PostMetaRepoParamDto';
+import {
+  CreatePostMetaRepoParamDto,
+  FindPostMetaRepoParamDto,
+  UpdatePostMetaRepoParamDto,
+} from '@src/post/dto/PostMetaRepoParamDto';
 import Tag, { TagDoc } from '@src/tag/Tag';
 import Category, { CategoryDoc } from '@src/category/Category';
 import Series, { SeriesDoc } from '@src/series/Series';
@@ -30,7 +34,6 @@ describe('PostMetaRepository test', () => {
   beforeEach(async () => {
     session = await conn.startSession();
     session.startTransaction();
-    await replaceUseTransactionForTest(sandbox, session);
   });
 
   afterEach(async () => {
@@ -131,7 +134,7 @@ describe('PostMetaRepository test', () => {
         isDeprecated: postMetaList[0].isDeprecated,
         isDraft: postMetaList[0].isDraft,
       };
-      const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta(paramDto);
+      const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta(paramDto, session);
       foundPostMetaList.should.have.lengthOf(1);
       foundPostMetaList[0].postNo.should.equal(postMetaList[0].postNo);
       foundPostMetaList[0].category.id.should.equal(postMetaList[0].category.id);
@@ -163,7 +166,7 @@ describe('PostMetaRepository test', () => {
     });
 
     it('findPostMeta - with empty parameter', async () => {
-      const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta({});
+      const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta({}, session);
       foundPostMetaList.should.have.lengthOf(postMetaList.length);
       foundPostMetaList[0].postNo.should.equal(postMetaList[2].postNo);
       foundPostMetaList[1].postNo.should.equal(postMetaList[1].postNo);
@@ -200,7 +203,7 @@ describe('PostMetaRepository test', () => {
       const paramDto: FindPostMetaRepoParamDto = {
         postNo: 1993,
       };
-      const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta(paramDto);
+      const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta(paramDto, session);
       foundPostMetaList.should.be.empty;
     });
 
@@ -208,7 +211,7 @@ describe('PostMetaRepository test', () => {
       const paramDto: FindPostMetaRepoParamDto = {
         categoryId: commonTestData.objectIdList[3],
       };
-      const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta(paramDto);
+      const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta(paramDto, session);
       foundPostMetaList.should.be.empty;
     });
   });
@@ -251,8 +254,8 @@ describe('PostMetaRepository test', () => {
         tagIdList,
       };
 
-      await postMetaRepository.createPostMeta(paramDto1);
-      await postMetaRepository.createPostMeta(paramDto2);
+      await postMetaRepository.createPostMeta(paramDto1, session);
+      await postMetaRepository.createPostMeta(paramDto2, session);
 
       const [postMeta1, postMeta2]: PostMetaDoc[] = await PostMeta.find().sort({ postNo: 1 }).session(session);
       postMeta2.postNo.should.equal(postMeta1.postNo + 1);
@@ -317,7 +320,7 @@ describe('PostMetaRepository test', () => {
     it('updatePostMeta - with empty parameter', async () => {
       const paramDto: UpdatePostMetaRepoParamDto = { postNo: originalPostMeta.postNo };
 
-      await postMetaRepository.updatePostMeta(paramDto);
+      await postMetaRepository.updatePostMeta(paramDto, session);
 
       const [updatedPostMeta]: PostMetaDoc[] = await PostMeta.find().sort({ postNo: 1 }).session(session);
       updatedPostMeta.postNo.should.equal(originalPostMeta.postNo);
@@ -345,7 +348,7 @@ describe('PostMetaRepository test', () => {
         isDraft: true,
       };
 
-      await postMetaRepository.updatePostMeta(paramDto);
+      await postMetaRepository.updatePostMeta(paramDto, session);
 
       const [updatedPostMeta]: PostMetaDoc[] = await PostMeta.find({ postNo: originalPostMeta.postNo }).session(session);
       updatedPostMeta.postNo.should.equal(originalPostMeta.postNo);
@@ -364,8 +367,9 @@ describe('PostMetaRepository test', () => {
       const paramDto: UpdatePostMetaRepoParamDto = { postNo: 930713 };
       await errorShouldBeThrown(
         new BlogError(BlogErrorCode.POST_NOT_FOUND, ['930713', 'postNo']),
-        (_paramDto) => postMetaRepository.updatePostMeta(_paramDto),
+        (_paramDto, _session) => postMetaRepository.updatePostMeta(_paramDto, _session),
         paramDto,
+        session,
       );
     });
   });

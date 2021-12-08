@@ -1,7 +1,7 @@
 import fs from 'fs';
 import _ from 'lodash';
 import { Service } from 'typedi';
-import { Types } from 'mongoose';
+import { ClientSession, Types } from 'mongoose';
 import PostMetaRepository from '@src/post/repository/PostMetaRepository';
 import PostRepository from '@src/post/repository/PostRepository';
 import CategoryRepository from '@src/category/CategoryRepository';
@@ -28,6 +28,7 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
 import { FindPostResponseDto, PostDto, PostVersionDataDto } from '@src/post/dto/PostResponseDto';
 import { PostDoc } from '@src/post/model/Post';
+import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 
 @Service()
 export default class PostService {
@@ -40,30 +41,38 @@ export default class PostService {
   ) {}
 
   public async findPost(paramDto: FindPostParamDto): Promise<FindPostResponseDto> {
-    const findPostMetaRepoParamDto: FindPostMetaRepoParamDto = await this.makeFindPostMetaRepoParamDto(paramDto);
-    const postMetaList: PostMetaDoc[] = await this.postMetaRepository.findPostMeta(findPostMetaRepoParamDto);
-    const findPostRepoParamDto: FindPostRepoParamDto = await this.makeFindPostRepoParamDto(paramDto);
-    const postList: PostDoc[] = await this.postRepository.findPost(findPostRepoParamDto);
-    return this.combineFindPostResponse(postMetaList, postList);
+    return useTransaction(async (session: ClientSession) => {
+      const findPostMetaRepoParamDto: FindPostMetaRepoParamDto = await this.makeFindPostMetaRepoParamDto(paramDto);
+      const postMetaList: PostMetaDoc[] = await this.postMetaRepository.findPostMeta(findPostMetaRepoParamDto, session);
+      const findPostRepoParamDto: FindPostRepoParamDto = await this.makeFindPostRepoParamDto(paramDto);
+      const postList: PostDoc[] = await this.postRepository.findPost(findPostRepoParamDto, session);
+      return this.combineFindPostResponse(postMetaList, postList);
+    });
   }
 
   public async createNewPost(paramDto: CreateNewPostParamDto): Promise<number> {
-    const currentDate = new Date();
-    const createPostMetaRepoParamDto: CreatePostMetaRepoParamDto = await this.makeCreatePostMetaRepoParamDto(paramDto, currentDate);
-    const postNo = await this.postMetaRepository.createPostMeta(createPostMetaRepoParamDto);
-    const createPostRepoParamDto: CreatePostRepoParamDto = this.makeCreatePostRepoParamDtoForFirstVersionPost(postNo, paramDto, currentDate);
-    await this.postRepository.createPost(createPostRepoParamDto);
-    return postNo;
+    return useTransaction(async (session: ClientSession) => {
+      const currentDate = new Date();
+      const createPostMetaRepoParamDto: CreatePostMetaRepoParamDto = await this.makeCreatePostMetaRepoParamDto(paramDto, currentDate, session);
+      const postNo = await this.postMetaRepository.createPostMeta(createPostMetaRepoParamDto, session);
+      const createPostRepoParamDto: CreatePostRepoParamDto = this.makeCreatePostRepoParamDtoForFirstVersionPost(postNo, paramDto, currentDate);
+      await this.postRepository.createPost(createPostRepoParamDto, session);
+      return postNo;
+    });
   }
 
   public async addUpdatedVersionPost(paramDto: AddUpdatedVersionPostParamDto): Promise<string> {
-    const repoParamDto: CreatePostRepoParamDto = await this.makeCreatePostRepoParamDto(paramDto);
-    return this.postRepository.createPost(repoParamDto);
+    return useTransaction(async (session: ClientSession) => {
+      const repoParamDto: CreatePostRepoParamDto = await this.makeCreatePostRepoParamDto(paramDto);
+      return this.postRepository.createPost(repoParamDto, session);
+    });
   }
 
   public async updatePostMetaData(paramDto: UpdatePostMetaDataParamDto): Promise<void> {
-    const repoParamDto: UpdatePostMetaRepoParamDto = await this.makeUpdatePostMetaRepoParamDto(paramDto);
-    await this.postMetaRepository.updatePostMeta(repoParamDto);
+    return useTransaction(async (session: ClientSession) => {
+      const repoParamDto: UpdatePostMetaRepoParamDto = await this.makeUpdatePostMetaRepoParamDto(paramDto, session);
+      await this.postMetaRepository.updatePostMeta(repoParamDto, session);
+    });
   }
 
   private makeFindPostMetaRepoParamDto(paramDto: FindPostParamDto): FindPostMetaRepoParamDto {
@@ -96,21 +105,25 @@ export default class PostService {
     return { postList: postDtoList };
   }
 
-  private async makeCreatePostMetaRepoParamDto(paramDto: CreateNewPostParamDto, currentDate: Date): Promise<CreatePostMetaRepoParamDto> {
+  private async makeCreatePostMetaRepoParamDto(
+    paramDto: CreateNewPostParamDto,
+    currentDate: Date,
+    session: ClientSession,
+  ): Promise<CreatePostMetaRepoParamDto> {
     const createPostMetaRepoParamDto: CreatePostMetaRepoParamDto = {
       createdDate: currentDate,
       isPrivate: _.isNil(paramDto.isPrivate) ? false : paramDto.isPrivate,
       isDraft: _.isNil(paramDto.isDraft) ? false : paramDto.isDraft,
     };
     if (!_.isNil(paramDto.categoryName)) {
-      const categoryList: CategoryDoc[] = await this.categoryRepository.findCategory({ name: paramDto.categoryName });
+      const categoryList: CategoryDoc[] = await this.categoryRepository.findCategory({ name: paramDto.categoryName }, session);
       if (_.isEmpty(categoryList)) {
         throw new BlogError(BlogErrorCode.CATEGORY_NOT_FOUND, [paramDto.categoryName, 'name']);
       }
       Object.assign(createPostMetaRepoParamDto, { categoryId: categoryList[0]._id });
     }
     if (!_.isNil(paramDto.seriesName)) {
-      const seriesList: SeriesDoc[] = await this.seriesRepository.findSeries({ name: paramDto.seriesName });
+      const seriesList: SeriesDoc[] = await this.seriesRepository.findSeries({ name: paramDto.seriesName }, session);
       if (_.isEmpty(seriesList)) {
         throw new BlogError(BlogErrorCode.SERIES_NOT_FOUND, [paramDto.seriesName, 'name']);
       }
@@ -122,7 +135,7 @@ export default class PostService {
           nameList: paramDto.tagNameList,
           isOnlyExactNameFound: true,
         },
-      });
+      }, session);
       if (tagList.length !== paramDto.tagNameList.length) {
         const failedToFindTagNameList = _.difference(paramDto.tagNameList, tagList.map((tag) => tag.name));
         throw new BlogError(BlogErrorCode.TAG_NOT_FOUND, ['name', failedToFindTagNameList.join(', ')]);
@@ -178,9 +191,9 @@ export default class PostService {
     return fs.readFileSync(path).toString();
   }
 
-  private async makeUpdatePostMetaRepoParamDto(paramDto: UpdatePostMetaDataParamDto): Promise<UpdatePostMetaRepoParamDto> {
+  private async makeUpdatePostMetaRepoParamDto(paramDto: UpdatePostMetaDataParamDto, session: ClientSession): Promise<UpdatePostMetaRepoParamDto> {
     const { postNo, categoryName, seriesName, tagNameList, isPrivate, isDeprecated, isDraft } = paramDto;
-    const [lastVersionPostMeta]: PostMetaDoc[] = await this.postMetaRepository.findPostMeta({ postNo });
+    const [lastVersionPostMeta]: PostMetaDoc[] = await this.postMetaRepository.findPostMeta({ postNo }, session);
     if (_.isNil(lastVersionPostMeta)) {
       throw new BlogError(BlogErrorCode.POST_NOT_FOUND, [postNo.toString(), 'postNo']);
     }
@@ -193,7 +206,7 @@ export default class PostService {
     };
 
     if (!_.isNil(categoryName)) {
-      const categoryList: CategoryDoc[] = await this.categoryRepository.findCategory({ name: categoryName });
+      const categoryList: CategoryDoc[] = await this.categoryRepository.findCategory({ name: categoryName }, session);
       if (_.isEmpty(categoryList)) {
         throw new BlogError(BlogErrorCode.CATEGORY_NOT_FOUND, [categoryName, 'name']);
       }
@@ -203,7 +216,7 @@ export default class PostService {
     }
 
     if (!_.isNil(seriesName)) {
-      const seriesList: SeriesDoc[] = await this.seriesRepository.findSeries({ name: seriesName });
+      const seriesList: SeriesDoc[] = await this.seriesRepository.findSeries({ name: seriesName }, session);
       if (_.isEmpty(seriesList)) {
         throw new BlogError(BlogErrorCode.SERIES_NOT_FOUND, [seriesName, 'name']);
       }
@@ -218,7 +231,7 @@ export default class PostService {
           nameList: tagNameList,
           isOnlyExactNameFound: true,
         },
-      });
+      }, session);
       if (tagList.length !== tagNameList.length) {
         const failedToFindTagNameList = _.difference(tagNameList, tagList.map((tag) => tag.name));
         throw new BlogError(BlogErrorCode.TAGS_NOT_FOUND, ['name', failedToFindTagNameList.join(', ')]);

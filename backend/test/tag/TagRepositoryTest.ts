@@ -3,7 +3,7 @@ import { should } from 'chai';
 import sinon from 'sinon';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
-import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
+import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import TagRepository from '@src/tag/TagRepository';
 import {
   CreateTagRepoParamDto,
@@ -33,7 +33,6 @@ describe('TagRepository test', () => {
   beforeEach(async () => {
     session = await conn.startSession();
     session.startTransaction();
-    await replaceUseTransactionForTest(sandbox, session);
   });
 
   afterEach(async () => {
@@ -81,7 +80,7 @@ describe('TagRepository test', () => {
           isOnlyExactNameFound: true,
         },
       };
-      const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      const tags: TagDoc[] = await tagRepository.findTag(paramDto, session);
       tags.should.have.lengthOf(2);
       tags[0].name.should.equal(commonTestData.tag3.name);
       tags[1].name.should.equal(commonTestData.tag2.name);
@@ -94,7 +93,7 @@ describe('TagRepository test', () => {
           isOnlyExactNameFound: false,
         },
       };
-      const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      const tags: TagDoc[] = await tagRepository.findTag(paramDto, session);
       tags.should.have.lengthOf(1);
       tags[0].name.should.equal(commonTestData.tag2.name);
     });
@@ -107,7 +106,7 @@ describe('TagRepository test', () => {
         },
       };
 
-      const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      const tags: TagDoc[] = await tagRepository.findTag(paramDto, session);
       tags.should.have.lengthOf(2);
       tags[0].name.should.equal(commonTestData.tag1.name);
       tags[1].name.should.equal(commonTestData.tag3.name);
@@ -120,7 +119,7 @@ describe('TagRepository test', () => {
           isAndCondition: false,
         },
       };
-      const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      const tags: TagDoc[] = await tagRepository.findTag(paramDto, session);
       tags.should.have.lengthOf(2);
       tags[0].name.should.equal(commonTestData.tag2.name);
       tags[1].name.should.equal(commonTestData.tag3.name);
@@ -137,13 +136,13 @@ describe('TagRepository test', () => {
           isOnlyExactNameFound: true,
         },
       };
-      const tags: TagDoc[] = await tagRepository.findTag(paramDto);
+      const tags: TagDoc[] = await tagRepository.findTag(paramDto, session);
       tags.should.have.lengthOf(1);
       tags[0].name.should.equal(commonTestData.tag3.name);
     });
 
     it('findTag - with empty parameter', async () => {
-      const tags: TagDoc[] = await tagRepository.findTag({});
+      const tags: TagDoc[] = await tagRepository.findTag({}, session);
       tags.should.have.lengthOf(3);
     });
   });
@@ -170,7 +169,7 @@ describe('TagRepository test', () => {
         ...commonTestData.tag1,
       };
 
-      await tagRepository.createTag(paramDto);
+      await tagRepository.createTag(paramDto, session);
 
       const tag: (TagDoc | null) = await Tag.findOne({ name: commonTestData.tag1.name }).session(session).lean();
       tag!.should.not.be.empty;
@@ -190,7 +189,7 @@ describe('TagRepository test', () => {
         postMetaList: [postMetaList[0]],
       };
 
-      await tagRepository.createTag(paramDto);
+      await tagRepository.createTag(paramDto, session);
 
       const tag: (TagDoc | null) = await Tag.findOne({ name: commonTestData.tag1.name }).session(session).lean();
       tag!.should.not.be.empty;
@@ -249,7 +248,7 @@ describe('TagRepository test', () => {
         },
       };
 
-      await tagRepository.updateTag(paramDto);
+      await tagRepository.updateTag(paramDto, session);
 
       const tag: (TagDoc | null) = await Tag.findOne({ name: commonTestData.tag3.name }).session(session).lean();
       (tag !== null).should.be.true;
@@ -264,7 +263,7 @@ describe('TagRepository test', () => {
         },
       };
 
-      await tagRepository.updateTag(paramDto);
+      await tagRepository.updateTag(paramDto, session);
 
       const tag: (TagDoc | null) = await Tag.findOne({ name: commonTestData.tag1.name }).session(session).lean();
       (tag !== null).should.be.true;
@@ -290,7 +289,7 @@ describe('TagRepository test', () => {
         },
       };
 
-      await tagRepository.updateTag(paramDto);
+      await tagRepository.updateTag(paramDto, session);
 
       const tag: (TagDoc | null) = await Tag.findOne({ name: commonTestData.tag3.name }).session(session).lean();
       (tag !== null).should.be.true;
@@ -314,7 +313,7 @@ describe('TagRepository test', () => {
           postMetaIdToBeRemovedList: [],
         },
       };
-      await tagRepository.updateTag(paramDto);
+      await tagRepository.updateTag(paramDto, session);
       const tag1: (TagDoc | null) = await Tag.findOne({ name: commonTestData.tag1.name }).session(session).lean();
       const tag2: (TagDoc | null) = await Tag.findOne({ name: commonTestData.tag2.name }).session(session).lean();
       const tag3: (TagDoc | null) = await Tag.findOne({ name: commonTestData.tag3.name }).session(session).lean();
@@ -336,7 +335,7 @@ describe('TagRepository test', () => {
 
       await errorShouldBeThrown(
         new BlogError(BlogErrorCode.TAG_NOT_FOUND, [inexistentName, 'name']),
-        async (_paramDto) => tagRepository.updateTag(_paramDto),
+        async (_paramDto) => tagRepository.updateTag(_paramDto, session),
         paramDto,
       );
     });
@@ -368,7 +367,7 @@ describe('TagRepository test', () => {
         name: commonTestData.tag1.name,
       };
 
-      await tagRepository.deleteTag(paramDto);
+      await tagRepository.deleteTag(paramDto, session);
 
       const tag: (TagDoc | null) = await Tag.findOne({ name: commonTestData.tag1.name }).session(session).lean();
       (tag === null).should.be.true;
