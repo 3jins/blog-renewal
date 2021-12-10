@@ -13,19 +13,30 @@ import BlogError from '@src/common/error/BlogError';
 import TagRepository from '@src/tag/TagRepository';
 import { TagDoc } from '@src/tag/Tag';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
+import { FindTagResponseDto, TagDto } from '@src/tag/dto/TagResponseDto';
 
 @Service()
 export default class TagService {
   public constructor(private readonly tagRepository: TagRepository) {
   }
 
-  public async findTag(paramDto: FindTagParamDto): Promise<TagDoc[]> {
+  public async findTag(paramDto: FindTagParamDto): Promise<FindTagResponseDto> {
     return useTransaction(async (session: ClientSession) => {
       const repoParamDto: FindTagRepoParamDto = {};
       this.addNameQueryToFindTagRepoParamDto(repoParamDto, paramDto);
       this.addPostMetaIdQueryToFindTagRepoParamDto(repoParamDto, paramDto);
-      return this.tagRepository.findTag(repoParamDto, session);
+      const tagDocList: TagDoc[] = await this.tagRepository.findTag(repoParamDto, session);
+      return this.convertToFindTagResponseDto(tagDocList);
     });
+  }
+
+  private convertToFindTagResponseDto(tagDocList: TagDoc[]): FindTagResponseDto {
+    const tagDtoList: TagDto[] = tagDocList.map((tagDoc: TagDoc) => {
+      const { name, postMetaList } = tagDoc;
+      const tagDto: TagDto = { name, postList: postMetaList };
+      return tagDto;
+    });
+    return { tagList: tagDtoList };
   }
 
   public async createTag(paramDto: CreateTagParamDto): Promise<string> {

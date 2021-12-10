@@ -16,6 +16,7 @@ import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUt
 import * as URL from '../common/constant/URL';
 import SeriesService from './SeriesService';
 import HttpHeaderField from '@src/common/constant/HttpHeaderField';
+import { FindSeriesResponseDto } from '@src/series/dto/SeriesResponseDto';
 
 const seriesRouter = new Router();
 const seriesService: SeriesService = Container.get(SeriesService);
@@ -25,8 +26,8 @@ seriesRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/:name*`, (ctx: Context
   const requestDto: FindSeriesRequestDto = getValidatedRequestDtoOf(FindSeriesRequestSchema, { ...ctx.query, name });
 
   seriesService.findSeries(requestDto)
-    .then((series) => {
-      ctx.body = series;
+    .then((responseDto: FindSeriesResponseDto) => {
+      ctx.body = responseDto;
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });
 });

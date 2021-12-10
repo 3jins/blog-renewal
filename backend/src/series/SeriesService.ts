@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Service } from 'typedi';
-import { ClientSession, Types } from 'mongoose';
+import { ClientSession, PopulatedDoc, Types } from 'mongoose';
 import {
   CreateSeriesParamDto,
   DeleteSeriesParamDto,
@@ -13,15 +13,23 @@ import BlogError from '@src/common/error/BlogError';
 import SeriesRepository from '@src/series/SeriesRepository';
 import { SeriesDoc } from '@src/series/Series';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
+import { CategoryDoc } from '@src/category/Category';
+import { CategoryDto } from '@src/category/dto/CategoryResponseDto';
+import { ImageDoc } from '@src/image/Image';
+import { PostMetaDoc } from '@src/post/model/PostMeta';
+import { FindSeriesResponseDto, SeriesDto } from '@src/series/dto/SeriesResponseDto';
 
 @Service()
 export default class SeriesService {
   public constructor(private readonly seriesRepository: SeriesRepository) {
   }
 
-  public async findSeries(paramDto: FindSeriesParamDto): Promise<SeriesDoc[]> {
-    return useTransaction(async (session: ClientSession) => this.seriesRepository
-      .findSeries({ ...paramDto }, session));
+  public async findSeries(paramDto: FindSeriesParamDto): Promise<FindSeriesResponseDto> {
+    return useTransaction(async (session: ClientSession) => {
+      const seriesDocList: SeriesDoc[] = await this.seriesRepository
+        .findSeries({ ...paramDto }, session);
+      return this.convertToFindSeriesResponseDto(seriesDocList);
+    });
   }
 
   public async createSeries(paramDto: CreateSeriesParamDto): Promise<string> {
@@ -55,6 +63,18 @@ export default class SeriesService {
   public async deleteSeries(paramDto: DeleteSeriesParamDto): Promise<void> {
     return useTransaction(async (session: ClientSession) => this.seriesRepository
       .deleteSeries({ ...paramDto }, session));
+  }
+
+  private convertToFindSeriesResponseDto(seriesDocList: SeriesDoc[]): FindSeriesResponseDto {
+    const seriesDtoList: SeriesDto[] = seriesDocList.map((seriesDoc: SeriesDoc) => {
+      const { name, thumbnailContent, thumbnailImage, postMetaList } = seriesDoc;
+      const seriesDto: SeriesDto = { name, thumbnailContent, postList: postMetaList };
+      if (!_.isNil(thumbnailImage)) {
+        Object.assign(seriesDto, { thumbnailImage });
+      }
+      return seriesDto;
+    });
+    return { seriesList: seriesDtoList };
   }
 
   private makeUpdateSeriesRepoParamDto(paramDto: UpdateSeriesParamDto): UpdateSeriesRepoParamDto {

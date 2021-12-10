@@ -13,15 +13,21 @@ import CategoryRepository from '@src/category/CategoryRepository';
 import { CategoryDoc } from '@src/category/Category';
 import { CreateCategoryRepoParamDto } from '@src/category/dto/CategoryRepoParamDto';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
+import { CategoryDto, FindCategoryResponseDto } from '@src/category/dto/CategoryResponseDto';
 
 @Service()
 export default class CategoryService {
   public constructor(private readonly categoryRepository: CategoryRepository) {
   }
 
-  public findCategory(paramDto: FindCategoryParamDto): Promise<CategoryDoc[]> {
-    return useTransaction(async (session: ClientSession) => this.categoryRepository
-      .findCategory({ ...paramDto }, session));
+  public findCategory(paramDto: FindCategoryParamDto): Promise<FindCategoryResponseDto> {
+    return useTransaction(async (session: ClientSession) => {
+      const categoryDocList: CategoryDoc[] = await this.categoryRepository
+        .findCategory({ ...paramDto }, session);
+      return {
+        categoryList: categoryDocList.map((categoryDoc: CategoryDoc) => this.convertToCategoryDto(categoryDoc)),
+      };
+    });
   }
 
   public createCategory(paramDto: CreateCategoryParamDto): Promise<string> {
@@ -50,6 +56,15 @@ export default class CategoryService {
   public deleteCategory(paramDto: DeleteCategoryParamDto): Promise<void> {
     return useTransaction(async (session: ClientSession) => this.categoryRepository
       .deleteCategory({ ...paramDto }, session));
+  }
+
+  private convertToCategoryDto(categoryDoc: CategoryDoc): CategoryDto {
+    const { name, level, parentCategory } = categoryDoc;
+    const categoryDto: CategoryDto = { name, level: level! };
+    if (!_.isNil(parentCategory)) {
+      Object.assign(categoryDto, { parentCategory: this.convertToCategoryDto(parentCategory) });
+    }
+    return categoryDto;
   }
 
   private makeCreateCategoryRepoParamDto(paramDto: CreateCategoryParamDto): CreateCategoryRepoParamDto {

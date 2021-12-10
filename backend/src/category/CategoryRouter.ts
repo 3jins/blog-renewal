@@ -16,6 +16,7 @@ import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUt
 import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 import * as URL from '../common/constant/URL';
 import CategoryService from './CategoryService';
+import { FindCategoryResponseDto } from '@src/category/dto/CategoryResponseDto';
 
 const categoryRouter = new Router();
 const categoryService: CategoryService = Container.get(CategoryService);
@@ -25,8 +26,8 @@ categoryRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:name*`, (ctx: Con
   const requestDto: FindCategoryRequestDto = getValidatedRequestDtoOf(FindCategoryRequestSchema, { ...ctx.query, name });
 
   categoryService.findCategory(requestDto)
-    .then((categories) => {
-      ctx.body = categories;
+    .then((responseDto: FindCategoryResponseDto) => {
+      ctx.body = responseDto;
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });
 });

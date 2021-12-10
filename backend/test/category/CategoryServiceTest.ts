@@ -22,6 +22,7 @@ import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest
 import { CategoryDoc } from '@src/category/Category';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import sinon from 'sinon';
+import { FindCategoryResponseDto } from '@src/category/dto/CategoryResponseDto';
 
 describe('CategoryService test', () => {
   let sandbox;
@@ -30,9 +31,11 @@ describe('CategoryService test', () => {
   let categoryService: CategoryService;
   let categoryRepository: CategoryRepository;
 
+  const categoryLevel1 = 0;
   const {
-    category2: { name: categoryName, level: categoryLevel },
-    objectIdList: [categoryId],
+    category1: { name: categoryName1 },
+    category2: { name: categoryName2, level: categoryLevel2 },
+    objectIdList: [categoryId1, categoryId2],
   } = commonTestData;
 
   before(() => {
@@ -59,65 +62,96 @@ describe('CategoryService test', () => {
   });
 
   describe('findCategory test', () => {
-    it('findCategory - full parameter', () => {
+    it('findCategory - full parameter', async () => {
       const nameOnlyParamDto: FindCategoryParamDto = {
-        parentCategoryId: categoryId,
-        name: categoryName,
-        level: categoryLevel,
+        parentCategoryId: categoryId2,
+        name: categoryName2,
+        level: categoryLevel2,
       };
-      categoryService.findCategory(nameOnlyParamDto);
+      when(categoryRepository.findCategory(anything(), anything()))
+        .thenResolve([]);
+
+      await categoryService.findCategory(nameOnlyParamDto);
       const repoParamDto: FindCategoryRepoParamDto = { ...nameOnlyParamDto };
       verify(categoryRepository.findCategory(deepEqual<FindCategoryRepoParamDto>(repoParamDto), anything())).once();
     });
 
-    it('findCategory - empty parameter', () => {
+    it('findCategory - empty parameter', async () => {
       const emptyParamDto: FindCategoryParamDto = {};
-      categoryService.findCategory(emptyParamDto);
+      when(categoryRepository.findCategory(anything(), anything()))
+        .thenResolve([]);
+
+      await categoryService.findCategory(emptyParamDto);
       verify(categoryRepository.findCategory(deepEqual<FindCategoryRepoParamDto>({}), anything())).once();
+    });
+
+    it('findCategory - response mapping test', async () => {
+      const paramDto: FindCategoryParamDto = {};
+      when(categoryRepository.findCategory(anything(), anything()))
+        .thenResolve([{
+          name: categoryName1,
+          level: categoryLevel1,
+        } as CategoryDoc, {
+          name: categoryName2,
+          parentCategory: {
+            name: categoryName1,
+            level: categoryLevel1,
+          },
+          level: categoryLevel2,
+        } as CategoryDoc]);
+
+      const response: FindCategoryResponseDto = await categoryService.findCategory(paramDto);
+      response.categoryList.should.have.length(2);
+      response.categoryList[0].name.should.equal(categoryName1);
+      response.categoryList[0].level.should.equal(categoryLevel1);
+      (response.categoryList[0].parentCategory === undefined).should.be.true;
+      response.categoryList[1].name.should.equal(categoryName2);
+      response.categoryList[1].level.should.equal(categoryLevel2);
+      response.categoryList[1].parentCategory!.name.should.equal(categoryName1);
     });
   });
 
   describe('createCategory test', () => {
     it('createCategory - with full parameter', async () => {
       const paramDto: CreateCategoryParamDto = {
-        parentCategoryId: categoryId,
-        name: categoryName,
+        parentCategoryId: categoryId2,
+        name: categoryName2,
       };
       when(categoryRepository.findCategory(anything(), anything()))
-        .thenResolve([{ name: categoryName } as CategoryDoc]);
+        .thenResolve([{ name: categoryName2 } as CategoryDoc]);
 
       const result: string = await categoryService.createCategory(paramDto);
 
       const [repoParamDto] = capture<CreateCategoryRepoParamDto, ClientSession>(categoryRepository.createCategory).last();
-      repoParamDto.parentCategory!.should.deep.equal(new Types.ObjectId(categoryId));
-      repoParamDto.name.should.equal(categoryName);
-      result.should.equal(categoryName);
+      repoParamDto.parentCategory!.should.deep.equal(new Types.ObjectId(categoryId2));
+      repoParamDto.name.should.equal(categoryName2);
+      result.should.equal(categoryName2);
     });
 
     it('createCategory - without parentCategoryId', async () => {
       const paramDto: CreateCategoryParamDto = {
-        name: categoryName,
+        name: categoryName2,
       };
       when(categoryRepository.findCategory(anything(), anything()))
-        .thenResolve([{ name: categoryName } as CategoryDoc]);
+        .thenResolve([{ name: categoryName2 } as CategoryDoc]);
 
       const result: string = await categoryService.createCategory(paramDto);
 
       const repoParamDto: CreateCategoryRepoParamDto = { ...paramDto };
       verify(categoryRepository.createCategory(deepEqual<CreateCategoryRepoParamDto>(repoParamDto), anything())).once();
-      result.should.equal(categoryName);
+      result.should.equal(categoryName2);
     });
 
     it('createCategory - when failed to create', async () => {
       const paramDto: CreateCategoryParamDto = {
-        parentCategoryId: categoryId,
-        name: categoryName,
+        parentCategoryId: categoryId2,
+        name: categoryName2,
       };
       when(categoryRepository.findCategory(anything(), anything()))
         .thenResolve([]);
 
       await errorShouldBeThrown(
-        new BlogError(BlogErrorCode.CATEGORY_NOT_CREATED, [categoryName, 'name']),
+        new BlogError(BlogErrorCode.CATEGORY_NOT_CREATED, [categoryName2, 'name']),
         (_paramDto) => categoryService.createCategory(_paramDto),
         paramDto,
       );
@@ -127,10 +161,10 @@ describe('CategoryService test', () => {
   describe('updateCategory test', () => {
     it('updateCategory - with full parameter', async () => {
       const paramDto: UpdateCategoryParamDto = {
-        name: categoryName,
+        name: categoryName2,
         categoryToBe: {
-          parentCategoryId: categoryId,
-          name: categoryName,
+          parentCategoryId: categoryId2,
+          name: categoryName2,
         },
       };
       await categoryService.updateCategory(paramDto);
@@ -141,7 +175,7 @@ describe('CategoryService test', () => {
 
     it('updateCategory - with empty categoryToBe', async () => {
       const paramDto: UpdateCategoryParamDto = {
-        name: categoryName,
+        name: categoryName2,
         categoryToBe: {},
       };
       await errorShouldBeThrown(
@@ -155,7 +189,7 @@ describe('CategoryService test', () => {
   describe('deleteCategory test', () => {
     it('category delete test', async () => {
       const paramDto: DeleteCategoryParamDto = {
-        name: categoryName,
+        name: categoryName2,
       };
       await categoryService.deleteCategory(paramDto);
 

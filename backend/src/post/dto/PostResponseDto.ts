@@ -1,10 +1,10 @@
 import { PopulatedDoc } from 'mongoose';
-import { CategoryDoc } from '@src/category/Category';
-import { SeriesDoc } from '@src/series/Series';
-import { TagDoc } from '@src/tag/Tag';
 import Language from '@src/common/constant/Language';
 import { ImageDoc } from '@src/image/Image';
 import { Heading } from '@src/post/model/Post';
+import { TagDto } from '@src/tag/dto/TagResponseDto';
+import { SeriesDto } from '@src/series/dto/SeriesResponseDto';
+import { CategoryDto } from '@src/category/dto/CategoryResponseDto';
 
 export interface PostVersionDataDto {
   title: string;
@@ -21,9 +21,9 @@ export interface PostVersionDataDto {
 
 export interface PostDto {
   postNo: number;
-  category: PopulatedDoc<CategoryDoc>;
-  series: PopulatedDoc<SeriesDoc>;
-  tagList: PopulatedDoc<TagDoc>[];
+  category: CategoryDto;
+  series: SeriesDto;
+  tagList: TagDto[];
   createdDate: Date;
   isDeleted: boolean;
   commentCount: number;

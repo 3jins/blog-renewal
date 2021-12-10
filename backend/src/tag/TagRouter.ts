@@ -16,6 +16,7 @@ import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUt
 import * as URL from '@src/common/constant/URL';
 import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 import TagService from './TagService';
+import { FindTagResponseDto } from '@src/tag/dto/TagResponseDto';
 
 const tagRouter = new Router();
 const tagService: TagService = Container.get(TagService);
@@ -25,8 +26,8 @@ tagRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}/:name*`, (ctx: Context) => {
   const requestDto: FindTagRequestDto = getValidatedRequestDtoOf(FindTagRequestSchema, { ...ctx.query, name });
 
   tagService.findTag(requestDto)
-    .then((tags) => {
-      ctx.body = tags;
+    .then((responseDto: FindTagResponseDto) => {
+      ctx.body = responseDto;
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });
 });

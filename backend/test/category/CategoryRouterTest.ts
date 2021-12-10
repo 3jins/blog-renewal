@@ -53,7 +53,7 @@ describe('Category router test', () => {
       const paramDto: FindCategoryParamDto = { ...requestDto };
 
       when(categoryService.findCategory(anything()))
-        .thenResolve([]);
+        .thenResolve({ categoryList: [] });
 
       await request
         .get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/${encodeURI(categoryName)}`)
@@ -70,7 +70,7 @@ describe('Category router test', () => {
       const paramDto: FindCategoryParamDto = { ...requestDto };
 
       when(categoryService.findCategory(anything()))
-        .thenResolve([]);
+        .thenResolve({ categoryList: [] });
 
       await request
         .get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`)

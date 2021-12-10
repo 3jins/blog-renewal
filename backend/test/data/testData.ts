@@ -91,6 +91,15 @@ export const common = {
     createdDate: new Date('2020-11-28 13:00:31.131'),
     size: 104431,
   },
+  postMeta1: {
+    postNo: 1,
+    createdDate: new Date('1993-07-13T09:12:34.567+0900'),
+    isDeleted: false,
+    commentCount: 2,
+    isPrivate: false,
+    isDeprecated: false,
+    isDraft: false,
+  },
   post1: {
     postNo: 1,
     title: '스프링이란 무엇인가',
@@ -144,6 +153,15 @@ export const common = {
     thumbnailContent: 'Simpson\'s rule about circles',
     language: Language.EN,
     isLatestVersion: true,
+  },
+  postMeta3: {
+    postNo: 3,
+    createdDate: new Date('2021-07-11T15:25:23.456+0900'),
+    isDeleted: false,
+    commentCount: 1,
+    isPrivate: false,
+    isDeprecated: false,
+    isDraft: false,
   },
   post3: {
     postNo: 3,

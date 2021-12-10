@@ -8,9 +8,9 @@ import { ClientSession, DocumentDefinition } from 'mongoose';
 import BlogError from '@src/common/error/BlogError';
 import ImageRepository from '@src/image/ImageRepository';
 import { ImageDoc } from '@src/image/Image';
-import { UploadImageParamDto } from '@src/image/ImageDto';
-import { BlogErrorCode } from '../common/error/BlogErrorCode';
+import { UploadImageParamDto } from '@src/image/dto/ImageParamDto';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
+import { BlogErrorCode } from '../common/error/BlogErrorCode';
 
 @Service()
 export default class ImageService {
