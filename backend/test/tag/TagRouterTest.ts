@@ -46,7 +46,7 @@ describe('Tag router test', () => {
       const paramDto: FindTagParamDto = { ...requestDto, name: tagName };
 
       when(tagService.findTag(anything()))
-        .thenResolve([]);
+        .thenResolve({ tagList: [] });
 
       await request
         .get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}/${encodeURI(tagName)}`)
@@ -64,7 +64,7 @@ describe('Tag router test', () => {
       const paramDto: FindTagParamDto = { ...requestDto, name: tagName };
 
       when(tagService.findTag(anything()))
-        .thenResolve([]);
+        .thenResolve({ tagList: [] });
 
       await request
         .get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`)
@@ -72,7 +72,6 @@ describe('Tag router test', () => {
         .expect(http2.constants.HTTP_STATUS_OK);
       verify(tagService.findTag(deepEqual(paramDto)));
     });
-
 
     it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.TAG}/:name - parameter error(key)`, async () => {
       const strangeRequestDto = {

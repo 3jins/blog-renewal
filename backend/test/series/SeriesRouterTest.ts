@@ -44,7 +44,7 @@ describe('Series router test', () => {
       const paramDto: FindSeriesParamDto = { ...requestDto };
 
       when(seriesService.findSeries(anything()))
-        .thenResolve([]);
+        .thenResolve({ seriesList: [] });
 
       await request
         .get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/${encodeURI(seriesName)}`)
@@ -60,7 +60,7 @@ describe('Series router test', () => {
       const paramDto: FindSeriesParamDto = { ...requestDto };
 
       when(seriesService.findSeries(anything()))
-        .thenResolve([]);
+        .thenResolve({ seriesList: [] });
 
       await request
         .get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`)
