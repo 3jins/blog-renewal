@@ -284,12 +284,13 @@ describe('PostService test', () => {
         isPrivate: false,
         isDeprecated: false,
         isDraft: false,
+        postVersionId: commonTestData.objectIdList[4],
         title: commonTestData.post1.title,
         rawContent: commonTestData.post1.rawContent,
         renderedContent: commonTestData.post1.renderedContent,
         language: commonTestData.post1.language,
         thumbnailContent: commonTestData.post1.thumbnailContent,
-        thumbnailImageId: commonTestData.objectIdList[4],
+        thumbnailImageId: commonTestData.objectIdList[5],
         updateDateFrom: commonTestData.dateList[0],
         updateDateTo: commonTestData.dateList[1],
         isLatestVersion: commonTestData.post1.isLatestVersion,
@@ -317,12 +318,13 @@ describe('PostService test', () => {
       verify(postRepository.findPost(anything(), anything())).once();
       const [findPostRepoParamDto] = capture<FindPostRepoParamDto, ClientSession>(postRepository.findPost).first();
       findPostRepoParamDto.postNo!.should.equal(commonTestData.post1.postNo);
+      findPostRepoParamDto.postVersionId!.should.equal(commonTestData.objectIdList[4]);
       findPostRepoParamDto.title!.should.equal(commonTestData.post1.title);
       findPostRepoParamDto.rawContent!.should.equal(commonTestData.post1.rawContent);
       findPostRepoParamDto.renderedContent!.should.equal(commonTestData.post1.renderedContent);
       findPostRepoParamDto.language!.should.equal(commonTestData.post1.language);
       findPostRepoParamDto.thumbnailContent!.should.equal(commonTestData.post1.thumbnailContent);
-      findPostRepoParamDto.thumbnailImageId!.should.equal(commonTestData.objectIdList[4]);
+      findPostRepoParamDto.thumbnailImageId!.should.equal(commonTestData.objectIdList[5]);
       findPostRepoParamDto.findPostByUpdatedDateDto!.from!.should.equal(commonTestData.dateList[0]);
       findPostRepoParamDto.findPostByUpdatedDateDto!.to!.should.equal(commonTestData.dateList[1]);
       findPostRepoParamDto.isLatestVersion!.should.equal(commonTestData.post1.isLatestVersion);

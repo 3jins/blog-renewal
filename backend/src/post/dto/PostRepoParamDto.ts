@@ -9,6 +9,7 @@ export interface FindPostByUpdatedDateDto {
 
 export interface FindPostRepoParamDto {
   postNo?: number;
+  postVersionId?: string;
   title?: string;
   rawContent?: string;
   renderedContent?: string;

@@ -41,33 +41,39 @@ describe('PostRepository test', () => {
     beforeEach(async () => {
       await Post.insertMany([
         {
+          _id: commonTestData.objectIdList[0],
           ...commonTestData.post1,
-          thumbnailImage: commonTestData.objectIdList[0],
+          thumbnailImage: commonTestData.objectIdList[6],
           updatedDate: commonTestData.dateList[0],
         },
         {
+          _id: commonTestData.objectIdList[1],
           ...commonTestData.post2V1,
-          thumbnailImage: commonTestData.objectIdList[1],
+          thumbnailImage: commonTestData.objectIdList[7],
           updatedDate: commonTestData.dateList[1],
         },
         {
+          _id: commonTestData.objectIdList[2],
           ...commonTestData.post2V2,
-          thumbnailImage: commonTestData.objectIdList[1],
+          thumbnailImage: commonTestData.objectIdList[7],
           updatedDate: commonTestData.dateList[3],
         },
         {
+          _id: commonTestData.objectIdList[3],
           ...commonTestData.post2EnV1,
-          thumbnailImage: commonTestData.objectIdList[1],
+          thumbnailImage: commonTestData.objectIdList[7],
           updatedDate: commonTestData.dateList[2],
         },
         {
+          _id: commonTestData.objectIdList[4],
           ...commonTestData.post2EnV2,
-          thumbnailImage: commonTestData.objectIdList[1],
+          thumbnailImage: commonTestData.objectIdList[7],
           updatedDate: commonTestData.dateList[4],
         },
         {
+          _id: commonTestData.objectIdList[5],
           ...commonTestData.post3,
-          thumbnailImage: commonTestData.objectIdList[2],
+          thumbnailImage: commonTestData.objectIdList[8],
           updatedDate: commonTestData.dateList[5],
         },
       ], { session });
@@ -76,12 +82,13 @@ describe('PostRepository test', () => {
     it('findPost - with full parameter', async () => {
       const paramDto: FindPostRepoParamDto = {
         postNo: commonTestData.post2EnV2.postNo,
+        postVersionId: commonTestData.objectIdList[4],
         title: commonTestData.post2EnV2.title,
         rawContent: commonTestData.post2EnV2.rawContent,
         renderedContent: commonTestData.post2EnV2.renderedContent,
         language: commonTestData.post2EnV2.language,
         thumbnailContent: commonTestData.post2EnV2.thumbnailContent,
-        thumbnailImageId: commonTestData.objectIdList[1],
+        thumbnailImageId: commonTestData.objectIdList[7],
         findPostByUpdatedDateDto: { from: commonTestData.dateList[0], to: commonTestData.dateList[5] },
         isLatestVersion: commonTestData.post2EnV2.isLatestVersion,
         isOnlyExactSameFieldFound: true,
