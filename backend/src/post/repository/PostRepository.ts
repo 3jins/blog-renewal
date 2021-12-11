@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Service } from 'typedi';
-import { ClientSession, FilterQuery } from 'mongoose';
+import { ClientSession, FilterQuery, Types } from 'mongoose';
 import Post, { PostDoc } from '@src/post/model/Post';
 import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
 
@@ -48,14 +48,14 @@ export default class PostRepository {
     this.setFieldToQuery(queryToFindPost, title, 'title', isOnlyExactSameFieldFound);
     this.setFieldToQuery(queryToFindPost, rawContent, 'rawContent', isOnlyExactSameFieldFound);
     this.setFieldToQuery(queryToFindPost, renderedContent, 'renderedContent', isOnlyExactSameFieldFound);
-    this.setFieldToQuery(queryToFindPost, language, 'language', isOnlyExactSameFieldFound);
+    this.setFieldToQuery(queryToFindPost, language, 'language', true);
     this.setFieldToQuery(queryToFindPost, thumbnailContent, 'thumbnailContent', isOnlyExactSameFieldFound);
-    this.setFieldToQuery(queryToFindPost, thumbnailImageId, 'thumbnailImage', isOnlyExactSameFieldFound);
+    this.setFieldToQuery(queryToFindPost, thumbnailImageId, 'thumbnailImage', true);
     if (!_.isNil(findPostByUpdatedDateDto)) {
       const { from, to } = findPostByUpdatedDateDto;
       Object.assign(queryToFindPost, { updatedDate: this.makeDateQuery(from, to) });
     }
-    this.setFieldToQuery(queryToFindPost, isLatestVersion, 'isLatestVersion', isOnlyExactSameFieldFound);
+    this.setFieldToQuery(queryToFindPost, isLatestVersion, 'isLatestVersion', true);
 
     return queryToFindPost;
   }

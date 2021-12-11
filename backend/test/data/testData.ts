@@ -103,9 +103,9 @@ export const common = {
   post1: {
     postNo: 1,
     title: '스프링이란 무엇인가',
-    rawContent: '##온 김에 스프링하기\n왜 우리는 노드만으로 행복할 수 없는가',
-    renderedContent: '<h2>온 김에 스프링하기</h2><p>왜 우리는 노드만으로 행복할 수 없는가</p>',
-    toc: [{ depth: 2, text: '온 김에 스프링하기' }],
+    rawContent: '##온 김에 Spring하기\n왜 우리는 노드만으로 행복할 수 없는가',
+    renderedContent: '<h2>온 김에 Spring하기</h2><p>왜 우리는 노드만으로 행복할 수 없는가</p>',
+    toc: [{ depth: 2, text: '온 김에 Spring하기' }],
     thumbnailContent: '왜 우리는 우리 자체로 행복할 수 없는가',
     language: Language.KO,
     isLatestVersion: true,

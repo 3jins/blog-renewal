@@ -94,7 +94,7 @@ describe('PostRepository test', () => {
     it('findPost - like search (title, renderedContent)', async () => {
       const paramDto: FindPostRepoParamDto = {
         title: '프링',
-        renderedContent: '는',
+        renderedContent: 'sPring', // should not be case-sensitive
         findPostByUpdatedDateDto: { from: commonTestData.dateList[0], to: commonTestData.dateList[5] },
         isOnlyExactSameFieldFound: false,
       };
