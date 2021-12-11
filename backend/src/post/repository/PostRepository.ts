@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Service } from 'typedi';
-import { ClientSession, FilterQuery, Types } from 'mongoose';
+import { ClientSession, FilterQuery } from 'mongoose';
 import Post, { PostDoc } from '@src/post/model/Post';
 import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
 
@@ -32,6 +32,7 @@ export default class PostRepository {
   private makeQueryToFindPost(paramDto: FindPostRepoParamDto): FilterQuery<PostDoc> {
     const {
       postNo,
+      postVersionId,
       title,
       rawContent,
       renderedContent,
@@ -44,6 +45,7 @@ export default class PostRepository {
     const isOnlyExactSameFieldFound = _.isNil(paramDto.isOnlyExactSameFieldFound) ? true : paramDto.isOnlyExactSameFieldFound;
 
     const queryToFindPost: FilterQuery<PostDoc> = {};
+    this.setFieldToQuery(queryToFindPost, postVersionId, '_id', true);
     this.setFieldToQuery(queryToFindPost, postNo, 'postNo', isOnlyExactSameFieldFound);
     this.setFieldToQuery(queryToFindPost, title, 'title', isOnlyExactSameFieldFound);
     this.setFieldToQuery(queryToFindPost, rawContent, 'rawContent', isOnlyExactSameFieldFound);

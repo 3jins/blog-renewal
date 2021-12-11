@@ -9,6 +9,7 @@ export interface FindPostParamDto {
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
+  postVersionId?: string;
   title?: string;
   rawContent?: string;
   renderedContent?: string;
