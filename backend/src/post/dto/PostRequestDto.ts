@@ -58,6 +58,10 @@ export interface DeletePostVersionRequestDto {
   postVersionId: string;
 }
 
+export interface DeletePostRequestDto {
+  postNo: number;
+}
+
 export const FindPostRequestSchema: JSONSchemaType<FindPostRequestDto> = {
   type: 'object',
   additionalProperties: false,
@@ -131,7 +135,16 @@ export const DeletePostVersionRequestSchema: JSONSchemaType<DeletePostVersionReq
   type: 'object',
   additionalProperties: false,
   properties: {
-    postVersionId: { type: 'string', pattern: OBJECT_ID_PATTERN, nullable: true },
+    postVersionId: { type: 'string', pattern: OBJECT_ID_PATTERN, nullable: false },
   },
   required: ['postVersionId'],
+};
+
+export const DeletePostRequestSchema: JSONSchemaType<DeletePostRequestDto> = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    postNo: { type: 'number', nullable: false },
+  },
+  required: ['postNo'],
 };

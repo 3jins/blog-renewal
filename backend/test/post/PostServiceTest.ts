@@ -9,16 +9,23 @@ import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
 import * as MarkedContentRenderingUtil from '@src/common/marked/MarkedContentRenderingUtil';
-import { CreatePostVersionRepoParamDto, DeletePostVersionRepoParamDto, FindPostVersionRepoParamDto } from '@src/post/dto/PostVersionRepoParamDto';
+import {
+  CreatePostVersionRepoParamDto,
+  DeletePostVersionRepoParamDto,
+  FindPostVersionRepoParamDto,
+} from '@src/post/dto/PostVersionRepoParamDto';
 import {
   AddUpdatedVersionPostParamDto,
-  CreateNewPostParamDto, DeletePostVersionParamDto,
+  CreateNewPostParamDto,
+  DeletePostParamDto,
+  DeletePostVersionParamDto,
   FindPostParamDto,
   UpdatePostMetaDataParamDto,
 } from '@src/post/dto/PostParamDto';
 import { appPath, common as commonTestData } from '@test/data/testData';
 import {
   CreatePostMetaRepoParamDto,
+  DeletePostMetaRepoParamDto,
   FindPostMetaRepoParamDto,
   UpdatePostMetaRepoParamDto,
 } from '@src/post/dto/PostMetaRepoParamDto';
@@ -908,6 +915,19 @@ describe('PostService test', () => {
       verify(postVersionRepository.deletePostVersion(anything(), session)).once();
       const [deletePostVersionRepoParamDto] = capture<DeletePostVersionRepoParamDto, ClientSession>(postVersionRepository.deletePostVersion).first();
       deletePostVersionRepoParamDto.postVersionId.should.equal(commonTestData.objectIdList[0]);
+    });
+  });
+
+  describe('deletePostMeta', () => {
+    it('deletePostMeta - normal case', async () => {
+      const paramDto: DeletePostParamDto = {
+        postNo: commonTestData.postMeta1.postNo,
+      };
+
+      await postService.deletePost(paramDto);
+      verify(postMetaRepository.deletePostMeta(anything(), session)).once();
+      const [deletePostMetaRepoParamDto] = capture<DeletePostMetaRepoParamDto, ClientSession>(postMetaRepository.deletePostMeta).first();
+      deletePostMetaRepoParamDto.postNo.should.equal(commonTestData.postMeta1.postNo);
     });
   });
 });

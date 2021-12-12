@@ -14,6 +14,8 @@ import {
   AddUpdatedVersionPostRequestSchema,
   CreateNewPostRequestDto,
   CreateNewPostRequestSchema,
+  DeletePostRequestDto,
+  DeletePostRequestSchema,
   DeletePostVersionRequestDto,
   DeletePostVersionRequestSchema,
   FindPostRequestDto,
@@ -89,6 +91,15 @@ postRouter.delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}/:p
   const requestDto: DeletePostVersionRequestDto = getValidatedRequestDtoOf(DeletePostVersionRequestSchema, ctx.params);
 
   postService.deletePostVersion({ ...requestDto })
+    .then(() => {
+      ctx.status = http2.constants.HTTP_STATUS_OK;
+    });
+});
+
+postRouter.delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo`, koaBody(koaBodyOptions), (ctx: Context) => {
+  const requestDto: DeletePostRequestDto = getValidatedRequestDtoOf(DeletePostRequestSchema, ctx.params);
+
+  postService.deletePost({ ...requestDto })
     .then(() => {
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });
