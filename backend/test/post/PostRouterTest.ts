@@ -13,6 +13,7 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import {
   AddUpdatedVersionPostRequestDto,
   CreateNewPostRequestDto,
+  DeletePostVersionRequestDto,
   FindPostRequestDto,
   UpdatePostMetaDataRequestDto,
 } from '@src/post/dto/PostRequestDto';
@@ -379,6 +380,41 @@ describe('Post router test', () => {
       await request
         .patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`)
         .field(typeDistortedRequestDto)
+        .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
+        .expect((res) => {
+          (!!(res.body.message)).should.be.true;
+          res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
+        });
+    });
+  });
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  describe(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`, () => {
+    it(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION} - normal case`, async () => {
+      const requestDto: DeletePostVersionRequestDto = {
+        postVersionId: commonTestData.objectIdList[0],
+      };
+
+      when(postService.deletePostVersion(anything()))
+        .thenResolve();
+
+      await request
+        .delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}/${commonTestData.objectIdList[0]}`)
+        .expect(http2.constants.HTTP_STATUS_OK);
+      verify(postService.deletePostVersion(objectContaining({
+        ...requestDto,
+      }))).once();
+    });
+
+    it(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION} - parameter error(parameter not passed)`, async () => {
+      await request
+        .delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`)
+        .expect(http2.constants.HTTP_STATUS_NOT_FOUND);
+    });
+
+    it(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION} - parameter error(not objectId type)`, async () => {
+      await request
+        .delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}/${encodeURI(commonTestData.simpleTexts[0])}`)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
           (!!(res.body.message)).should.be.true;

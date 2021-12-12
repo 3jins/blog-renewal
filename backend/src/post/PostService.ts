@@ -15,7 +15,7 @@ import {
 } from '@src/post/dto/PostMetaRepoParamDto';
 import {
   AddUpdatedVersionPostParamDto,
-  CreateNewPostParamDto,
+  CreateNewPostParamDto, DeletePostVersionParamDto,
   FindPostParamDto,
   UpdatePostMetaDataParamDto,
 } from '@src/post/dto/PostParamDto';
@@ -75,6 +75,10 @@ export default class PostService {
     });
   }
 
+  public async deletePostVersion(paramDto: DeletePostVersionParamDto): Promise<void> {
+    return useTransaction(async (session: ClientSession) => this.postRepository
+      .deletePost(paramDto, session));
+  }
   private makeFindPostMetaRepoParamDto(paramDto: FindPostParamDto): FindPostMetaRepoParamDto {
     return { ...paramDto };
   }

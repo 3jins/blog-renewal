@@ -9,10 +9,10 @@ import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
 import * as MarkedContentRenderingUtil from '@src/common/marked/MarkedContentRenderingUtil';
-import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
+import { CreatePostRepoParamDto, DeletePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
 import {
   AddUpdatedVersionPostParamDto,
-  CreateNewPostParamDto,
+  CreateNewPostParamDto, DeletePostVersionParamDto,
   FindPostParamDto,
   UpdatePostMetaDataParamDto,
 } from '@src/post/dto/PostParamDto';
@@ -895,6 +895,19 @@ describe('PostService test', () => {
       updatePostMetaRepoParamDto.isPrivate!.should.be.false;
       updatePostMetaRepoParamDto.isDeprecated!.should.be.false;
       updatePostMetaRepoParamDto.isDraft!.should.be.false;
+    });
+  });
+
+  describe('deletePostVersion', () => {
+    it('deletePostVersion - normal case', async () => {
+      const paramDto: DeletePostVersionParamDto = {
+        postVersionId: commonTestData.objectIdList[0],
+      };
+
+      await postService.deletePostVersion(paramDto);
+      verify(postRepository.deletePost(anything(), session)).once();
+      const [deletePostRepoParamDto] = capture<DeletePostRepoParamDto, ClientSession>(postRepository.deletePost).first();
+      deletePostRepoParamDto.postVersionId.should.equal(commonTestData.objectIdList[0]);
     });
   });
 });

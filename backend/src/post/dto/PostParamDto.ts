@@ -54,3 +54,7 @@ export interface UpdatePostMetaDataParamDto {
   isDeprecated?: boolean;
   isDraft?: boolean;
 }
+
+export interface DeletePostVersionParamDto {
+  postVersionId: string;
+}
