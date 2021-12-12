@@ -141,7 +141,7 @@ describe('SeriesRepository test', () => {
       series!.name.should.equal(commonTestData.series2.name);
       series!.postMetaList!.should.be.empty;
 
-      const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
+      const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1V1.postNo }).session(session).lean();
       _.isEmpty(postMeta1!.series!).should.be.true; // should not be updated
 
       const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2V1.postNo }).session(session).lean();
@@ -163,7 +163,7 @@ describe('SeriesRepository test', () => {
       series!.thumbnailImage!.should.deep.equal(gifImage._id);
       series!.postMetaList!.should.deep.equal([postMetaList[0]._id]);
 
-      const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
+      const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1V1.postNo }).session(session).lean();
       postMeta1!.series!.should.deep.equal(series!._id); // should be updated (added)
 
       const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2V1.postNo }).session(session).lean();
@@ -248,7 +248,7 @@ describe('SeriesRepository test', () => {
       series2!.thumbnailImage!.should.deep.equal(gifImageId);
       series2!.postMetaList.should.deep.equal([postMetaList[1]._id]);
 
-      const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1.postNo }).session(session).lean();
+      const postMeta1: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post1V1.postNo }).session(session).lean();
       (postMeta1!.series === null).should.be.true;
 
       const postMeta2: (PostMetaDoc | null) = await PostMeta.findOne({ postNo: commonTestData.post2V1.postNo }).session(session).lean();

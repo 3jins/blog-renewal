@@ -4,12 +4,12 @@ import fs from 'fs';
 import { File } from 'formidable';
 import PostService from '@src/post/PostService';
 import PostMetaRepository from '@src/post/repository/PostMetaRepository';
-import PostRepository from '@src/post/repository/PostRepository';
+import PostVersionRepository from '@src/post/repository/PostVersionRepository';
 import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
 import * as MarkedContentRenderingUtil from '@src/common/marked/MarkedContentRenderingUtil';
-import { CreatePostRepoParamDto, DeletePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
+import { CreatePostVersionRepoParamDto, DeletePostVersionRepoParamDto, FindPostVersionRepoParamDto } from '@src/post/dto/PostVersionRepoParamDto';
 import {
   AddUpdatedVersionPostParamDto,
   CreateNewPostParamDto, DeletePostVersionParamDto,
@@ -36,7 +36,7 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import Language from '@src/common/constant/Language';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
 import { FindPostResponseDto } from '@src/post/dto/PostResponseDto';
-import { PostDoc } from '@src/post/model/Post';
+import { PostVersionDoc } from '@src/post/model/PostVersion';
 import sinon from 'sinon';
 import { ClientSession, Connection } from 'mongoose';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
@@ -47,7 +47,7 @@ describe('PostService test', () => {
   let session: ClientSession;
   let postService: PostService;
   let postMetaRepository: PostMetaRepository;
-  let postRepository: PostRepository;
+  let postVersionRepository: PostVersionRepository;
   let categoryRepository: CategoryRepository;
   let seriesRepository: SeriesRepository;
   let tagRepository: TagRepository;
@@ -61,13 +61,13 @@ describe('PostService test', () => {
 
   beforeEach(async () => {
     postMetaRepository = spy(mock(PostMetaRepository));
-    postRepository = spy(mock(PostRepository));
+    postVersionRepository = spy(mock(PostVersionRepository));
     categoryRepository = mock(CategoryRepository);
     seriesRepository = mock(SeriesRepository);
     tagRepository = mock(TagRepository);
     postService = new PostService(
       instance(postMetaRepository),
-      instance(postRepository),
+      instance(postVersionRepository),
       instance(categoryRepository),
       instance(seriesRepository),
       instance(tagRepository),
@@ -89,14 +89,14 @@ describe('PostService test', () => {
     let postMeta1: PostMetaDoc;
     let postMeta2: PostMetaDoc;
     let postMeta3: PostMetaDoc;
-    let post1: PostDoc;
-    let post2V1: PostDoc;
-    let post2V2: PostDoc;
-    let post3: PostDoc;
+    let post1: PostVersionDoc;
+    let post2V1: PostVersionDoc;
+    let post2V2: PostVersionDoc;
+    let post3: PostVersionDoc;
 
     before(() => {
       postMeta1 = {
-        postNo: commonTestData.post1.postNo,
+        postNo: commonTestData.post1V1.postNo,
         category: commonTestData.category1.name,
         series: commonTestData.series1.name,
         tagList: [commonTestData.tag1.name, commonTestData.tag2.name],
@@ -132,17 +132,17 @@ describe('PostService test', () => {
         isDraft: false,
       } as PostMetaDoc;
       post1 = {
-        postNo: commonTestData.post1.postNo,
-        title: commonTestData.post1.title,
-        rawContent: commonTestData.post1.rawContent,
-        renderedContent: commonTestData.post1.renderedContent,
-        toc: commonTestData.post1.toc,
-        language: commonTestData.post1.language,
-        thumbnailContent: commonTestData.post1.thumbnailContent,
+        postNo: commonTestData.post1V1.postNo,
+        title: commonTestData.post1V1.title,
+        rawContent: commonTestData.post1V1.rawContent,
+        renderedContent: commonTestData.post1V1.renderedContent,
+        toc: commonTestData.post1V1.toc,
+        language: commonTestData.post1V1.language,
+        thumbnailContent: commonTestData.post1V1.thumbnailContent,
         thumbnailImage: commonTestData.objectIdList[0],
         updatedDate: commonTestData.dateList[3],
-        isLatestVersion: commonTestData.post1.isLatestVersion,
-      } as PostDoc;
+        isLatestVersion: commonTestData.post1V1.isLatestVersion,
+      } as PostVersionDoc;
       post2V1 = {
         postNo: commonTestData.post2V1.postNo,
         title: commonTestData.post2V1.title,
@@ -154,7 +154,7 @@ describe('PostService test', () => {
         thumbnailImage: commonTestData.objectIdList[1],
         updatedDate: commonTestData.dateList[4],
         isLatestVersion: commonTestData.post2V1.isLatestVersion,
-      } as PostDoc;
+      } as PostVersionDoc;
       post2V2 = {
         postNo: commonTestData.post2V2.postNo,
         title: commonTestData.post2V2.title,
@@ -166,8 +166,8 @@ describe('PostService test', () => {
         thumbnailImage: commonTestData.objectIdList[1],
         updatedDate: commonTestData.dateList[4],
         isLatestVersion: commonTestData.post2V2.isLatestVersion,
-        lastVersionPost: commonTestData.objectIdList[0],
-      } as PostDoc;
+        lastPostVersion: commonTestData.objectIdList[0],
+      } as PostVersionDoc;
       post3 = {
         postNo: commonTestData.post3.postNo,
         title: commonTestData.post3.title,
@@ -179,7 +179,7 @@ describe('PostService test', () => {
         thumbnailImage: commonTestData.objectIdList[1],
         updatedDate: commonTestData.dateList[4],
         isLatestVersion: commonTestData.post3.isLatestVersion,
-      } as PostDoc;
+      } as PostVersionDoc;
     });
 
     it('findPost test - empty parameter, full response', async () => {
@@ -187,7 +187,7 @@ describe('PostService test', () => {
 
       when(postMetaRepository.findPostMeta(anything(), anything()))
         .thenResolve([postMeta3, postMeta2, postMeta1]);
-      when(postRepository.findPost(anything(), anything()))
+      when(postVersionRepository.findPostVersion(anything(), anything()))
         .thenResolve([post3, post2V2, post2V1, post1]);
 
       const responseDto: FindPostResponseDto = await postService.findPost(paramDto);
@@ -202,17 +202,17 @@ describe('PostService test', () => {
       responseDto.postList[0].isPrivate.should.equal(postMeta3.isPrivate);
       responseDto.postList[0].isDeprecated.should.equal(postMeta3.isDeprecated);
       responseDto.postList[0].isDraft.should.equal(postMeta3.isDraft);
-      responseDto.postList[0].postVersionDataList.length.should.equal(1);
-      responseDto.postList[0].postVersionDataList[0].title.should.equal(post3.title);
-      responseDto.postList[0].postVersionDataList[0].rawContent.should.equal(post3.rawContent);
-      responseDto.postList[0].postVersionDataList[0].renderedContent.should.equal(post3.renderedContent);
-      responseDto.postList[0].postVersionDataList[0].toc.should.deep.equal(post3.toc);
-      responseDto.postList[0].postVersionDataList[0].language.should.equal(post3.language);
-      responseDto.postList[0].postVersionDataList[0].thumbnailContent.should.equal(post3.thumbnailContent);
-      responseDto.postList[0].postVersionDataList[0].thumbnailImage.should.equal(post3.thumbnailImage);
-      responseDto.postList[0].postVersionDataList[0].updatedDate.should.equal(post3.updatedDate);
-      responseDto.postList[0].postVersionDataList[0].isLatestVersion.should.equal(post3.isLatestVersion);
-      (responseDto.postList[0].postVersionDataList[0].lastVersionPost === undefined).should.be.true;
+      responseDto.postList[0].postVersionList.length.should.equal(1);
+      responseDto.postList[0].postVersionList[0].title.should.equal(post3.title);
+      responseDto.postList[0].postVersionList[0].rawContent.should.equal(post3.rawContent);
+      responseDto.postList[0].postVersionList[0].renderedContent.should.equal(post3.renderedContent);
+      responseDto.postList[0].postVersionList[0].toc.should.deep.equal(post3.toc);
+      responseDto.postList[0].postVersionList[0].language.should.equal(post3.language);
+      responseDto.postList[0].postVersionList[0].thumbnailContent.should.equal(post3.thumbnailContent);
+      responseDto.postList[0].postVersionList[0].thumbnailImage.should.equal(post3.thumbnailImage);
+      responseDto.postList[0].postVersionList[0].updatedDate.should.equal(post3.updatedDate);
+      responseDto.postList[0].postVersionList[0].isLatestVersion.should.equal(post3.isLatestVersion);
+      (responseDto.postList[0].postVersionList[0].lastPostVersion === undefined).should.be.true;
       responseDto.postList[1].postNo.should.equal(postMeta2.postNo);
       responseDto.postList[1].category.should.equal(postMeta2.category);
       responseDto.postList[1].series.should.equal(postMeta2.series);
@@ -223,27 +223,27 @@ describe('PostService test', () => {
       responseDto.postList[1].isPrivate.should.equal(postMeta2.isPrivate);
       responseDto.postList[1].isDeprecated.should.equal(postMeta2.isDeprecated);
       responseDto.postList[1].isDraft.should.equal(postMeta2.isDraft);
-      responseDto.postList[1].postVersionDataList.length.should.equal(2);
-      responseDto.postList[1].postVersionDataList[0].title.should.equal(post2V2.title);
-      responseDto.postList[1].postVersionDataList[0].rawContent.should.equal(post2V2.rawContent);
-      responseDto.postList[1].postVersionDataList[0].renderedContent.should.equal(post2V2.renderedContent);
-      responseDto.postList[1].postVersionDataList[0].toc.should.deep.equal(post2V2.toc);
-      responseDto.postList[1].postVersionDataList[0].language.should.equal(post2V2.language);
-      responseDto.postList[1].postVersionDataList[0].thumbnailContent.should.equal(post2V2.thumbnailContent);
-      responseDto.postList[1].postVersionDataList[0].thumbnailImage.should.equal(post2V2.thumbnailImage);
-      responseDto.postList[1].postVersionDataList[0].updatedDate.should.equal(post2V2.updatedDate);
-      responseDto.postList[1].postVersionDataList[0].isLatestVersion.should.equal(post2V2.isLatestVersion);
-      responseDto.postList[1].postVersionDataList[0].lastVersionPost.should.equal(post2V2.lastVersionPost);
-      responseDto.postList[1].postVersionDataList[1].title.should.equal(post2V1.title);
-      responseDto.postList[1].postVersionDataList[1].rawContent.should.equal(post2V1.rawContent);
-      responseDto.postList[1].postVersionDataList[1].renderedContent.should.equal(post2V1.renderedContent);
-      responseDto.postList[1].postVersionDataList[1].toc.should.deep.equal(post2V1.toc);
-      responseDto.postList[1].postVersionDataList[1].language.should.equal(post2V1.language);
-      responseDto.postList[1].postVersionDataList[1].thumbnailContent.should.equal(post2V1.thumbnailContent);
-      responseDto.postList[1].postVersionDataList[1].thumbnailImage.should.equal(post2V1.thumbnailImage);
-      responseDto.postList[1].postVersionDataList[1].updatedDate.should.equal(post2V1.updatedDate);
-      responseDto.postList[1].postVersionDataList[1].isLatestVersion.should.equal(post2V1.isLatestVersion);
-      (responseDto.postList[1].postVersionDataList[1].lastVersionPost === undefined).should.be.true;
+      responseDto.postList[1].postVersionList.length.should.equal(2);
+      responseDto.postList[1].postVersionList[0].title.should.equal(post2V2.title);
+      responseDto.postList[1].postVersionList[0].rawContent.should.equal(post2V2.rawContent);
+      responseDto.postList[1].postVersionList[0].renderedContent.should.equal(post2V2.renderedContent);
+      responseDto.postList[1].postVersionList[0].toc.should.deep.equal(post2V2.toc);
+      responseDto.postList[1].postVersionList[0].language.should.equal(post2V2.language);
+      responseDto.postList[1].postVersionList[0].thumbnailContent.should.equal(post2V2.thumbnailContent);
+      responseDto.postList[1].postVersionList[0].thumbnailImage.should.equal(post2V2.thumbnailImage);
+      responseDto.postList[1].postVersionList[0].updatedDate.should.equal(post2V2.updatedDate);
+      responseDto.postList[1].postVersionList[0].isLatestVersion.should.equal(post2V2.isLatestVersion);
+      responseDto.postList[1].postVersionList[0].lastPostVersion.should.equal(post2V2.lastPostVersion);
+      responseDto.postList[1].postVersionList[1].title.should.equal(post2V1.title);
+      responseDto.postList[1].postVersionList[1].rawContent.should.equal(post2V1.rawContent);
+      responseDto.postList[1].postVersionList[1].renderedContent.should.equal(post2V1.renderedContent);
+      responseDto.postList[1].postVersionList[1].toc.should.deep.equal(post2V1.toc);
+      responseDto.postList[1].postVersionList[1].language.should.equal(post2V1.language);
+      responseDto.postList[1].postVersionList[1].thumbnailContent.should.equal(post2V1.thumbnailContent);
+      responseDto.postList[1].postVersionList[1].thumbnailImage.should.equal(post2V1.thumbnailImage);
+      responseDto.postList[1].postVersionList[1].updatedDate.should.equal(post2V1.updatedDate);
+      responseDto.postList[1].postVersionList[1].isLatestVersion.should.equal(post2V1.isLatestVersion);
+      (responseDto.postList[1].postVersionList[1].lastPostVersion === undefined).should.be.true;
       responseDto.postList[2].postNo.should.equal(postMeta1.postNo);
       responseDto.postList[2].category.should.equal(postMeta1.category);
       responseDto.postList[2].series.should.equal(postMeta1.series);
@@ -254,30 +254,30 @@ describe('PostService test', () => {
       responseDto.postList[2].isPrivate.should.equal(postMeta1.isPrivate);
       responseDto.postList[2].isDeprecated.should.equal(postMeta1.isDeprecated);
       responseDto.postList[2].isDraft.should.equal(postMeta1.isDraft);
-      responseDto.postList[2].postVersionDataList.length.should.equal(1);
-      responseDto.postList[2].postVersionDataList[0].title.should.equal(post1.title);
-      responseDto.postList[2].postVersionDataList[0].rawContent.should.equal(post1.rawContent);
-      responseDto.postList[2].postVersionDataList[0].renderedContent.should.equal(post1.renderedContent);
-      responseDto.postList[2].postVersionDataList[0].toc.should.deep.equal(post1.toc);
-      responseDto.postList[2].postVersionDataList[0].language.should.equal(post1.language);
-      responseDto.postList[2].postVersionDataList[0].thumbnailContent.should.equal(post1.thumbnailContent);
-      responseDto.postList[2].postVersionDataList[0].thumbnailImage.should.equal(post1.thumbnailImage);
-      responseDto.postList[2].postVersionDataList[0].updatedDate.should.equal(post1.updatedDate);
-      responseDto.postList[2].postVersionDataList[0].isLatestVersion.should.equal(post1.isLatestVersion);
-      (responseDto.postList[2].postVersionDataList[0].lastVersionPost === undefined).should.be.true;
+      responseDto.postList[2].postVersionList.length.should.equal(1);
+      responseDto.postList[2].postVersionList[0].title.should.equal(post1.title);
+      responseDto.postList[2].postVersionList[0].rawContent.should.equal(post1.rawContent);
+      responseDto.postList[2].postVersionList[0].renderedContent.should.equal(post1.renderedContent);
+      responseDto.postList[2].postVersionList[0].toc.should.deep.equal(post1.toc);
+      responseDto.postList[2].postVersionList[0].language.should.equal(post1.language);
+      responseDto.postList[2].postVersionList[0].thumbnailContent.should.equal(post1.thumbnailContent);
+      responseDto.postList[2].postVersionList[0].thumbnailImage.should.equal(post1.thumbnailImage);
+      responseDto.postList[2].postVersionList[0].updatedDate.should.equal(post1.updatedDate);
+      responseDto.postList[2].postVersionList[0].isLatestVersion.should.equal(post1.isLatestVersion);
+      (responseDto.postList[2].postVersionList[0].lastPostVersion === undefined).should.be.true;
 
       verify(postMetaRepository.findPostMeta(anything(), anything())).once();
       const [findPostMetaRepoParamDto] = capture<FindPostMetaRepoParamDto, ClientSession>(postMetaRepository.findPostMeta).first();
       findPostMetaRepoParamDto.should.be.empty;
 
-      verify(postRepository.findPost(anything(), anything())).once();
-      const [findPostRepoParamDto] = capture<FindPostRepoParamDto, ClientSession>(postRepository.findPost).first();
-      findPostRepoParamDto.should.be.empty;
+      verify(postVersionRepository.findPostVersion(anything(), anything())).once();
+      const [findPostVersionRepoParamDto] = capture<FindPostVersionRepoParamDto, ClientSession>(postVersionRepository.findPostVersion).first();
+      findPostVersionRepoParamDto.should.be.empty;
     });
 
     it('findPost test - full parameter, empty response', async () => {
       const paramDto: FindPostParamDto = {
-        postNo: commonTestData.post1.postNo,
+        postNo: commonTestData.post1V1.postNo,
         categoryId: commonTestData.objectIdList[0],
         seriesId: commonTestData.objectIdList[1],
         tagIdList: [commonTestData.objectIdList[2], commonTestData.objectIdList[3]],
@@ -285,21 +285,21 @@ describe('PostService test', () => {
         isDeprecated: false,
         isDraft: false,
         postVersionId: commonTestData.objectIdList[4],
-        title: commonTestData.post1.title,
-        rawContent: commonTestData.post1.rawContent,
-        renderedContent: commonTestData.post1.renderedContent,
-        language: commonTestData.post1.language,
-        thumbnailContent: commonTestData.post1.thumbnailContent,
+        title: commonTestData.post1V1.title,
+        rawContent: commonTestData.post1V1.rawContent,
+        renderedContent: commonTestData.post1V1.renderedContent,
+        language: commonTestData.post1V1.language,
+        thumbnailContent: commonTestData.post1V1.thumbnailContent,
         thumbnailImageId: commonTestData.objectIdList[5],
         updateDateFrom: commonTestData.dateList[0],
         updateDateTo: commonTestData.dateList[1],
-        isLatestVersion: commonTestData.post1.isLatestVersion,
+        isLatestVersion: commonTestData.post1V1.isLatestVersion,
         isOnlyExactSameFieldFound: true,
       };
 
       when(postMetaRepository.findPostMeta(anything(), anything()))
         .thenResolve([]);
-      when(postRepository.findPost(anything(), anything()))
+      when(postVersionRepository.findPostVersion(anything(), anything()))
         .thenResolve([]);
 
       const responseDto: FindPostResponseDto = await postService.findPost(paramDto);
@@ -307,7 +307,7 @@ describe('PostService test', () => {
 
       verify(postMetaRepository.findPostMeta(anything(), anything())).once();
       const [findPostMetaRepoParamDto] = capture<FindPostMetaRepoParamDto, ClientSession>(postMetaRepository.findPostMeta).first();
-      findPostMetaRepoParamDto.postNo!.should.equal(commonTestData.post1.postNo);
+      findPostMetaRepoParamDto.postNo!.should.equal(commonTestData.post1V1.postNo);
       findPostMetaRepoParamDto.categoryId!.should.equal(commonTestData.objectIdList[0]);
       findPostMetaRepoParamDto.seriesId!.should.equal(commonTestData.objectIdList[1]);
       findPostMetaRepoParamDto.tagIdList!.should.deep.equal([commonTestData.objectIdList[2], commonTestData.objectIdList[3]]);
@@ -315,20 +315,20 @@ describe('PostService test', () => {
       findPostMetaRepoParamDto.isDeprecated!.should.equal(false);
       findPostMetaRepoParamDto.isDraft!.should.equal(false);
 
-      verify(postRepository.findPost(anything(), anything())).once();
-      const [findPostRepoParamDto] = capture<FindPostRepoParamDto, ClientSession>(postRepository.findPost).first();
-      findPostRepoParamDto.postNo!.should.equal(commonTestData.post1.postNo);
-      findPostRepoParamDto.postVersionId!.should.equal(commonTestData.objectIdList[4]);
-      findPostRepoParamDto.title!.should.equal(commonTestData.post1.title);
-      findPostRepoParamDto.rawContent!.should.equal(commonTestData.post1.rawContent);
-      findPostRepoParamDto.renderedContent!.should.equal(commonTestData.post1.renderedContent);
-      findPostRepoParamDto.language!.should.equal(commonTestData.post1.language);
-      findPostRepoParamDto.thumbnailContent!.should.equal(commonTestData.post1.thumbnailContent);
-      findPostRepoParamDto.thumbnailImageId!.should.equal(commonTestData.objectIdList[5]);
-      findPostRepoParamDto.findPostByUpdatedDateDto!.from!.should.equal(commonTestData.dateList[0]);
-      findPostRepoParamDto.findPostByUpdatedDateDto!.to!.should.equal(commonTestData.dateList[1]);
-      findPostRepoParamDto.isLatestVersion!.should.equal(commonTestData.post1.isLatestVersion);
-      findPostRepoParamDto.isOnlyExactSameFieldFound!.should.equal(true);
+      verify(postVersionRepository.findPostVersion(anything(), anything())).once();
+      const [findPostVersionRepoParamDto] = capture<FindPostVersionRepoParamDto, ClientSession>(postVersionRepository.findPostVersion).first();
+      findPostVersionRepoParamDto.postNo!.should.equal(commonTestData.post1V1.postNo);
+      findPostVersionRepoParamDto.postVersionId!.should.equal(commonTestData.objectIdList[4]);
+      findPostVersionRepoParamDto.title!.should.equal(commonTestData.post1V1.title);
+      findPostVersionRepoParamDto.rawContent!.should.equal(commonTestData.post1V1.rawContent);
+      findPostVersionRepoParamDto.renderedContent!.should.equal(commonTestData.post1V1.renderedContent);
+      findPostVersionRepoParamDto.language!.should.equal(commonTestData.post1V1.language);
+      findPostVersionRepoParamDto.thumbnailContent!.should.equal(commonTestData.post1V1.thumbnailContent);
+      findPostVersionRepoParamDto.thumbnailImageId!.should.equal(commonTestData.objectIdList[5]);
+      findPostVersionRepoParamDto.findPostVersionByUpdatedDateDto!.from!.should.equal(commonTestData.dateList[0]);
+      findPostVersionRepoParamDto.findPostVersionByUpdatedDateDto!.to!.should.equal(commonTestData.dateList[1]);
+      findPostVersionRepoParamDto.isLatestVersion!.should.equal(commonTestData.post1V1.isLatestVersion);
+      findPostVersionRepoParamDto.isOnlyExactSameFieldFound!.should.equal(true);
     });
   });
 
@@ -349,7 +349,7 @@ describe('PostService test', () => {
       };
 
       when(postMetaRepository.createPostMeta(anything(), anything()))
-        .thenResolve(commonTestData.post1.postNo);
+        .thenResolve(commonTestData.post1V1.postNo);
       sandbox.stub(MarkedContentRenderingUtil, 'renderContent')
         .returns({
           renderedContent: commonTestData.simpleTexts[0],
@@ -369,28 +369,28 @@ describe('PostService test', () => {
       createPostMetaRepoParamDto.createdDate.should.within(date1, date2);
       createPostMetaRepoParamDto.isPrivate!.should.be.false;
 
-      verify(postRepository.createPost(anything(), anything())).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).last();
-      createPostRepoParamDto.postNo.should.equal(1);
-      createPostRepoParamDto.title.should.equal(file.name);
-      createPostRepoParamDto.rawContent.should.equal(fileContent);
-      createPostRepoParamDto.renderedContent.should.equal(commonTestData.simpleTexts[0]);
-      createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
-      createPostRepoParamDto.toc.length.should.equal(1);
-      createPostRepoParamDto.toc[0].depth.should.equal(0);
-      createPostRepoParamDto.toc[0].text.should.equal(commonTestData.simpleTexts[1]);
-      createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
-      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleTexts[2]);
-      (createPostRepoParamDto.thumbnailImageId === undefined).should.be.true;
-      createPostRepoParamDto.isLatestVersion.should.be.true;
-      (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
-      createPostRepoParamDto.updatedDate!.should.within(date1, date2);
+      verify(postVersionRepository.createPostVersion(anything(), anything())).once();
+      const [createPostVersionRepoParamDto] = capture<CreatePostVersionRepoParamDto, ClientSession>(postVersionRepository.createPostVersion).last();
+      createPostVersionRepoParamDto.postNo.should.equal(1);
+      createPostVersionRepoParamDto.title.should.equal(file.name);
+      createPostVersionRepoParamDto.rawContent.should.equal(fileContent);
+      createPostVersionRepoParamDto.renderedContent.should.equal(commonTestData.simpleTexts[0]);
+      createPostVersionRepoParamDto.renderedContent.should.not.equal(fileContent);
+      createPostVersionRepoParamDto.toc.length.should.equal(1);
+      createPostVersionRepoParamDto.toc[0].depth.should.equal(0);
+      createPostVersionRepoParamDto.toc[0].text.should.equal(commonTestData.simpleTexts[1]);
+      createPostVersionRepoParamDto.language.should.equal(commonTestData.post1V1.language);
+      createPostVersionRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleTexts[2]);
+      (createPostVersionRepoParamDto.thumbnailImageId === undefined).should.be.true;
+      createPostVersionRepoParamDto.isLatestVersion.should.be.true;
+      (createPostVersionRepoParamDto.lastPostVersion === undefined).should.be.true;
+      createPostVersionRepoParamDto.updatedDate!.should.within(date1, date2);
     });
 
     it('createNewPost test - with full parameters', async () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
-        ...commonTestData.post1,
+        ...commonTestData.post1V1,
         thumbnailContent: commonTestData.simpleTexts[0],
         thumbnailImageId: gifImageId,
         categoryName: commonTestData.category1.name,
@@ -414,7 +414,7 @@ describe('PostService test', () => {
           { _id: commonTestData.objectIdList[3], name: commonTestData.tag2.name } as TagDoc,
         ]);
       when(postMetaRepository.createPostMeta(anything(), session))
-        .thenResolve(commonTestData.post1.postNo);
+        .thenResolve(commonTestData.post1V1.postNo);
 
       const date1 = new Date();
       const result = await postService.createNewPost(serviceParamDto);
@@ -429,27 +429,27 @@ describe('PostService test', () => {
       createPostMetaRepoParamDto.isPrivate!.should.be.true;
       createPostMetaRepoParamDto.isDraft!.should.be.true;
 
-      verify(postRepository.createPost(anything(), session)).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).last();
-      createPostRepoParamDto.postNo.should.equal(1);
-      createPostRepoParamDto.title.should.equal(file.name);
-      createPostRepoParamDto.rawContent.should.equal(fileContent);
-      createPostRepoParamDto.renderedContent.should.not.be.empty;
-      createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
-      createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
-      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleTexts[0]);
-      createPostRepoParamDto.thumbnailImageId!.toString().should.equal(gifImageId);
-      createPostRepoParamDto.isLatestVersion.should.be.true;
-      (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
-      createPostRepoParamDto.updatedDate!.should.within(date1, date2);
+      verify(postVersionRepository.createPostVersion(anything(), session)).once();
+      const [createPostVersionRepoParamDto] = capture<CreatePostVersionRepoParamDto, ClientSession>(postVersionRepository.createPostVersion).last();
+      createPostVersionRepoParamDto.postNo.should.equal(1);
+      createPostVersionRepoParamDto.title.should.equal(file.name);
+      createPostVersionRepoParamDto.rawContent.should.equal(fileContent);
+      createPostVersionRepoParamDto.renderedContent.should.not.be.empty;
+      createPostVersionRepoParamDto.renderedContent.should.not.equal(fileContent);
+      createPostVersionRepoParamDto.language.should.equal(commonTestData.post1V1.language);
+      createPostVersionRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleTexts[0]);
+      createPostVersionRepoParamDto.thumbnailImageId!.toString().should.equal(gifImageId);
+      createPostVersionRepoParamDto.isLatestVersion.should.be.true;
+      (createPostVersionRepoParamDto.lastPostVersion === undefined).should.be.true;
+      createPostVersionRepoParamDto.updatedDate!.should.within(date1, date2);
 
-      result.should.equal(commonTestData.post1.postNo);
+      result.should.equal(commonTestData.post1V1.postNo);
     });
 
     it('createNewPost test - with inexistent categoryName', async () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
-        ...commonTestData.post1,
+        ...commonTestData.post1V1,
         thumbnailContent: commonTestData.simpleTexts[0],
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
@@ -480,7 +480,7 @@ describe('PostService test', () => {
     it('createNewPost test - with inexistent seriesName', async () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
-        ...commonTestData.post1,
+        ...commonTestData.post1V1,
         thumbnailContent: commonTestData.simpleTexts[0],
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
@@ -511,7 +511,7 @@ describe('PostService test', () => {
     it('createNewPost test - with inexistent tagNames', async () => {
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
-        ...commonTestData.post1,
+        ...commonTestData.post1V1,
         thumbnailContent: commonTestData.simpleTexts[0],
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
@@ -566,16 +566,16 @@ describe('PostService test', () => {
       const { file } = extractFileInfoFromRawFile(`${fileName}.md`);
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
-        ...commonTestData.post1,
+        ...commonTestData.post1V1,
       };
       when(postMetaRepository.createPostMeta(anything(), session))
-        .thenResolve(commonTestData.post1.postNo);
+        .thenResolve(commonTestData.post1V1.postNo);
 
       await postService.createNewPost(serviceParamDto);
 
-      verify(postRepository.createPost(anything(), session)).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).last();
-      createPostRepoParamDto.toc.should.deep.equal([
+      verify(postVersionRepository.createPostVersion(anything(), session)).once();
+      const [createPostVersionRepoParamDto] = capture<CreatePostVersionRepoParamDto, ClientSession>(postVersionRepository.createPostVersion).last();
+      createPostVersionRepoParamDto.toc.should.deep.equal([
         { depth: 2, text: 'ul/li' },
         { depth: 3, text: 'only plain text' },
         { depth: 3, text: 'with other elements' },
@@ -597,8 +597,8 @@ describe('PostService test', () => {
         { depth: 3, text: 'two new lines between normal lines' },
         { depth: 3, text: 'three new lines between normal lines' },
       ]);
-      createPostRepoParamDto.thumbnailContent.length.should.be.greaterThan(0);
-      createPostRepoParamDto.thumbnailContent.length.should.be.lessThanOrEqual(303);
+      createPostVersionRepoParamDto.thumbnailContent.length.should.be.greaterThan(0);
+      createPostVersionRepoParamDto.thumbnailContent.length.should.be.lessThanOrEqual(303);
     });
 
     it('content rendering test - code blocks', async () => {
@@ -606,16 +606,16 @@ describe('PostService test', () => {
       const { file } = extractFileInfoFromRawFile(`${fileName}.md`);
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
-        ...commonTestData.post1,
+        ...commonTestData.post1V1,
       };
       when(postMetaRepository.createPostMeta(anything(), session))
-        .thenResolve(commonTestData.post1.postNo);
+        .thenResolve(commonTestData.post1V1.postNo);
 
       await postService.createNewPost(serviceParamDto);
 
-      verify(postRepository.createPost(anything(), session)).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).last();
-      createPostRepoParamDto.toc.should.deep.equal([
+      verify(postVersionRepository.createPostVersion(anything(), session)).once();
+      const [createPostVersionRepoParamDto] = capture<CreatePostVersionRepoParamDto, ClientSession>(postVersionRepository.createPostVersion).last();
+      createPostVersionRepoParamDto.toc.should.deep.equal([
         { depth: 2, text: '코드' },
         { depth: 3, text: 'list indentation 없음' },
         { depth: 3, text: 'list indentation 1단계 (tab)' },
@@ -627,8 +627,8 @@ describe('PostService test', () => {
         { depth: 3, text: 'list indentation 2단계 (tab & 2 spaces mixed)' },
         { depth: 3, text: 'inline code' },
       ]);
-      createPostRepoParamDto.thumbnailContent.length.should.be.greaterThan(0);
-      createPostRepoParamDto.thumbnailContent.length.should.be.lessThanOrEqual(303);
+      createPostVersionRepoParamDto.thumbnailContent.length.should.be.greaterThan(0);
+      createPostVersionRepoParamDto.thumbnailContent.length.should.be.lessThanOrEqual(303);
     });
 
     it('content rendering test - mathematical expressions', async () => {
@@ -636,17 +636,17 @@ describe('PostService test', () => {
       const { file } = extractFileInfoFromRawFile(`${fileName}.md`);
       const serviceParamDto: CreateNewPostParamDto = {
         post: file,
-        ...commonTestData.post1,
+        ...commonTestData.post1V1,
       };
       when(postMetaRepository.createPostMeta(anything(), session))
-        .thenResolve(commonTestData.post1.postNo);
+        .thenResolve(commonTestData.post1V1.postNo);
 
       await postService.createNewPost(serviceParamDto);
 
-      verify(postRepository.createPost(anything(), session)).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).last();
-      renderedHtml = createPostRepoParamDto.renderedContent;
-      createPostRepoParamDto.toc.should.deep.equal([
+      verify(postVersionRepository.createPostVersion(anything(), session)).once();
+      const [createPostVersionRepoParamDto] = capture<CreatePostVersionRepoParamDto, ClientSession>(postVersionRepository.createPostVersion).last();
+      renderedHtml = createPostVersionRepoParamDto.renderedContent;
+      createPostVersionRepoParamDto.toc.should.deep.equal([
         { depth: 2, text: '수식 (block)' },
         { depth: 3, text: '간단한 수식' },
         { depth: 3, text: 'list indentation 없음' },
@@ -665,8 +665,8 @@ describe('PostService test', () => {
         { depth: 3, text: 'list indentation 2단계 (2 spaces)' },
         { depth: 3, text: 'list indentation 2단계 (4 spaces)' },
       ]);
-      createPostRepoParamDto.thumbnailContent.length.should.be.greaterThan(0);
-      createPostRepoParamDto.thumbnailContent.length.should.be.lessThanOrEqual(303);
+      createPostVersionRepoParamDto.thumbnailContent.length.should.be.greaterThan(0);
+      createPostVersionRepoParamDto.thumbnailContent.length.should.be.lessThanOrEqual(303);
     });
   });
 
@@ -688,7 +688,7 @@ describe('PostService test', () => {
         thumbnailContent: commonTestData.simpleTexts[0],
         thumbnailImageId: gifImageId,
       };
-      when(postRepository.createPost(anything(), session))
+      when(postVersionRepository.createPostVersion(anything(), session))
         .thenResolve(commonTestData.objectIdList[1]);
 
       const date1 = new Date();
@@ -696,19 +696,19 @@ describe('PostService test', () => {
       const date2 = new Date();
 
       result.should.equal(commonTestData.objectIdList[1]);
-      verify(postRepository.createPost(anything(), session)).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).first();
-      createPostRepoParamDto.postNo.should.equal(commonTestData.post2V1.postNo);
-      createPostRepoParamDto.title.should.equal(file.name);
-      createPostRepoParamDto.rawContent.should.equal(fileContent);
-      createPostRepoParamDto.renderedContent.should.not.be.empty;
-      createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
-      createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
-      createPostRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleTexts[0]);
-      (createPostRepoParamDto.thumbnailImageId!.toString() === gifImageId).should.be.true;
-      createPostRepoParamDto.isLatestVersion.should.be.true;
-      (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
-      createPostRepoParamDto.updatedDate!.should.within(date1, date2);
+      verify(postVersionRepository.createPostVersion(anything(), session)).once();
+      const [createPostVersionRepoParamDto] = capture<CreatePostVersionRepoParamDto, ClientSession>(postVersionRepository.createPostVersion).first();
+      createPostVersionRepoParamDto.postNo.should.equal(commonTestData.post2V1.postNo);
+      createPostVersionRepoParamDto.title.should.equal(file.name);
+      createPostVersionRepoParamDto.rawContent.should.equal(fileContent);
+      createPostVersionRepoParamDto.renderedContent.should.not.be.empty;
+      createPostVersionRepoParamDto.renderedContent.should.not.equal(fileContent);
+      createPostVersionRepoParamDto.language.should.equal(commonTestData.post1V1.language);
+      createPostVersionRepoParamDto.thumbnailContent.should.equal(commonTestData.simpleTexts[0]);
+      (createPostVersionRepoParamDto.thumbnailImageId!.toString() === gifImageId).should.be.true;
+      createPostVersionRepoParamDto.isLatestVersion.should.be.true;
+      (createPostVersionRepoParamDto.lastPostVersion === undefined).should.be.true;
+      createPostVersionRepoParamDto.updatedDate!.should.within(date1, date2);
     });
 
     it('addUpdatedVersionPost test - thumbnailContent: X, thumbnailImage: X', async () => {
@@ -717,7 +717,7 @@ describe('PostService test', () => {
         post: file,
         language: Language.KO,
       };
-      when(postRepository.createPost(anything(), session))
+      when(postVersionRepository.createPostVersion(anything(), session))
         .thenResolve(commonTestData.objectIdList[1]);
 
       const date1 = new Date();
@@ -725,26 +725,26 @@ describe('PostService test', () => {
       const date2 = new Date();
 
       result.should.equal(commonTestData.objectIdList[1]);
-      verify(postRepository.createPost(anything(), session)).once();
-      const [createPostRepoParamDto] = capture<CreatePostRepoParamDto, ClientSession>(postRepository.createPost).first();
-      createPostRepoParamDto.postNo.should.equal(commonTestData.post2V1.postNo);
-      createPostRepoParamDto.title.should.equal(file.name);
-      createPostRepoParamDto.rawContent.should.equal(fileContent);
-      createPostRepoParamDto.renderedContent.should.not.be.empty;
-      createPostRepoParamDto.renderedContent.should.not.equal(fileContent);
-      createPostRepoParamDto.language.should.equal(commonTestData.post1.language);
-      createPostRepoParamDto.thumbnailContent.should.not.be.empty;
-      (createPostRepoParamDto.thumbnailImageId === undefined).should.be.true;
-      createPostRepoParamDto.isLatestVersion.should.be.true;
-      (createPostRepoParamDto.lastVersionPost === undefined).should.be.true;
-      createPostRepoParamDto.updatedDate!.should.within(date1, date2);
+      verify(postVersionRepository.createPostVersion(anything(), session)).once();
+      const [createPostVersionRepoParamDto] = capture<CreatePostVersionRepoParamDto, ClientSession>(postVersionRepository.createPostVersion).first();
+      createPostVersionRepoParamDto.postNo.should.equal(commonTestData.post2V1.postNo);
+      createPostVersionRepoParamDto.title.should.equal(file.name);
+      createPostVersionRepoParamDto.rawContent.should.equal(fileContent);
+      createPostVersionRepoParamDto.renderedContent.should.not.be.empty;
+      createPostVersionRepoParamDto.renderedContent.should.not.equal(fileContent);
+      createPostVersionRepoParamDto.language.should.equal(commonTestData.post1V1.language);
+      createPostVersionRepoParamDto.thumbnailContent.should.not.be.empty;
+      (createPostVersionRepoParamDto.thumbnailImageId === undefined).should.be.true;
+      createPostVersionRepoParamDto.isLatestVersion.should.be.true;
+      (createPostVersionRepoParamDto.lastPostVersion === undefined).should.be.true;
+      createPostVersionRepoParamDto.updatedDate!.should.within(date1, date2);
     });
   });
 
   describe('updatePostMetaData test', () => {
     it('updatePostMetaData - with full parameter', async () => {
       const paramDto: UpdatePostMetaDataParamDto = {
-        postNo: commonTestData.post1.postNo,
+        postNo: commonTestData.post1V1.postNo,
         categoryName: commonTestData.category1.name,
         seriesName: commonTestData.series1.name,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
@@ -753,7 +753,7 @@ describe('PostService test', () => {
         isDraft: true,
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1V1.postNo }), session))
         .thenResolve([{
           isPrivate: false,
           isDeprecated: false,
@@ -787,14 +787,14 @@ describe('PostService test', () => {
 
     it('updatePostMetaData - with inexistent postNo', async () => {
       const paramDto: UpdatePostMetaDataParamDto = {
-        postNo: commonTestData.post1.postNo,
+        postNo: commonTestData.post1V1.postNo,
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1V1.postNo }), session))
         .thenResolve([]);
 
       await errorShouldBeThrown(
-        new BlogError(BlogErrorCode.POST_NOT_FOUND, [commonTestData.post1.postNo.toString(), 'postNo']),
+        new BlogError(BlogErrorCode.POST_NOT_FOUND, [commonTestData.post1V1.postNo.toString(), 'postNo']),
         (_param) => postService.updatePostMetaData(_param),
         paramDto,
       );
@@ -802,11 +802,11 @@ describe('PostService test', () => {
 
     it('updatePostMetaData - with inexistent categoryName', async () => {
       const paramDto: UpdatePostMetaDataParamDto = {
-        postNo: commonTestData.post1.postNo,
+        postNo: commonTestData.post1V1.postNo,
         categoryName: commonTestData.category1.name,
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1V1.postNo }), session))
         .thenResolve([{
           isPrivate: false,
           isDeprecated: false,
@@ -824,11 +824,11 @@ describe('PostService test', () => {
 
     it('updatePostMetaData - with inexistent seriesName', async () => {
       const paramDto: UpdatePostMetaDataParamDto = {
-        postNo: commonTestData.post1.postNo,
+        postNo: commonTestData.post1V1.postNo,
         seriesName: commonTestData.series1.name,
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1V1.postNo }), session))
         .thenResolve([{
           isPrivate: false,
           isDeprecated: false,
@@ -846,11 +846,11 @@ describe('PostService test', () => {
 
     it('updatePostMetaData - with inexistent tagNames', async () => {
       const paramDto: UpdatePostMetaDataParamDto = {
-        postNo: commonTestData.post1.postNo,
+        postNo: commonTestData.post1V1.postNo,
         tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name, commonTestData.tag3.name],
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1V1.postNo }), session))
         .thenResolve([{
           isPrivate: false,
           isDeprecated: false,
@@ -873,10 +873,10 @@ describe('PostService test', () => {
 
     it('updatePostMetaData - with empty parameter', async () => {
       const paramDto: UpdatePostMetaDataParamDto = {
-        postNo: commonTestData.post1.postNo,
+        postNo: commonTestData.post1V1.postNo,
       };
 
-      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1.postNo }), session))
+      when(postMetaRepository.findPostMeta(deepEqual({ postNo: commonTestData.post1V1.postNo }), session))
         .thenResolve([{
           isPrivate: false,
           isDeprecated: false,
@@ -905,9 +905,9 @@ describe('PostService test', () => {
       };
 
       await postService.deletePostVersion(paramDto);
-      verify(postRepository.deletePost(anything(), session)).once();
-      const [deletePostRepoParamDto] = capture<DeletePostRepoParamDto, ClientSession>(postRepository.deletePost).first();
-      deletePostRepoParamDto.postVersionId.should.equal(commonTestData.objectIdList[0]);
+      verify(postVersionRepository.deletePostVersion(anything(), session)).once();
+      const [deletePostVersionRepoParamDto] = capture<DeletePostVersionRepoParamDto, ClientSession>(postVersionRepository.deletePostVersion).first();
+      deletePostVersionRepoParamDto.postVersionId.should.equal(commonTestData.objectIdList[0]);
     });
   });
 });
