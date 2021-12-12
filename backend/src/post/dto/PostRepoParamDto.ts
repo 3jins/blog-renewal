@@ -34,3 +34,7 @@ export interface CreatePostRepoParamDto {
   isLatestVersion: boolean;
   lastVersionPost?: Types.ObjectId;
 }
+
+export interface DeletePostRepoParamDto {
+  postVersionId: string;
+}

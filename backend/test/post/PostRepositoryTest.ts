@@ -3,12 +3,14 @@ import { should } from 'chai';
 import sinon from 'sinon';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
-import { abortTestTransaction } from '@test/TestUtil';
+import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import PostRepository from '@src/post/repository/PostRepository';
-import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
+import { CreatePostRepoParamDto, DeletePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
 import Post, { PostDoc } from '@src/post/model/Post';
 import Image from '@src/image/Image';
 import { OBJECT_ID_PATTERN } from '@src/common/constant/RegexPattern';
+import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import BlogError from '@src/common/error/BlogError';
 
 describe('PostRepository test', () => {
   let sandbox;
@@ -241,6 +243,56 @@ describe('PostRepository test', () => {
       post1.postNo.should.be.equal(post2.postNo);
       (post1.lastVersionPost === null).should.be.true;
       post2.lastVersionPost.should.deep.equal(post1._id);
+    });
+  });
+
+  describe('deletePost test', () => {
+    beforeEach(async () => {
+      await Post.insertMany([
+        {
+          _id: commonTestData.objectIdList[0],
+          ...commonTestData.post1,
+          thumbnailImage: commonTestData.objectIdList[3],
+          updatedDate: commonTestData.dateList[0],
+        },
+        {
+          _id: commonTestData.objectIdList[1],
+          ...commonTestData.post2V1,
+          thumbnailImage: commonTestData.objectIdList[4],
+          updatedDate: commonTestData.dateList[1],
+        },
+        {
+          _id: commonTestData.objectIdList[2],
+          ...commonTestData.post2V2,
+          thumbnailImage: commonTestData.objectIdList[4],
+          updatedDate: commonTestData.dateList[3],
+        },
+      ], { session });
+    });
+
+    it('deletePost - normal case', async () => {
+      const paramDto: DeletePostRepoParamDto = {
+        postVersionId: commonTestData.objectIdList[1],
+      };
+      await postRepository.deletePost(paramDto, session);
+      const postList: PostDoc[] = await Post.find().session(session);
+      postList.should.have.lengthOf(2);
+      postList[0].id.should.equal(commonTestData.objectIdList[0]);
+      postList[1].id.should.equal(commonTestData.objectIdList[2]);
+    });
+
+    it('deletePost - try deleting an inexistent post', async () => {
+      const paramDto: DeletePostRepoParamDto = {
+        postVersionId: commonTestData.objectIdList[10],
+      };
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.POST_NOT_FOUND, [commonTestData.objectIdList[10], 'postVersionId']),
+        (_paramDto, _session) => postRepository.deletePost(_paramDto, _session),
+        paramDto,
+        session,
+      );
+      const postList: PostDoc[] = await Post.find().session(session);
+      postList.should.have.lengthOf(3);
     });
   });
 });

@@ -2,7 +2,9 @@ import _ from 'lodash';
 import { Service } from 'typedi';
 import { ClientSession, FilterQuery } from 'mongoose';
 import Post, { PostDoc } from '@src/post/model/Post';
-import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
+import { CreatePostRepoParamDto, DeletePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
+import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import BlogError from '@src/common/error/BlogError';
 
 @Service()
 export default class PostRepository {
@@ -28,6 +30,18 @@ export default class PostRepository {
     return insertedPost._id;
   }
 
+  public async deletePost(paramDto: DeletePostRepoParamDto, session: ClientSession): Promise<void> {
+    const { postVersionId } = paramDto;
+    const target: PostDoc | null = await Post
+      .findById(postVersionId)
+      .session(session);
+    if (target === null) {
+      throw new BlogError(BlogErrorCode.POST_NOT_FOUND, [postVersionId, 'postVersionId']);
+    }
+    await Post
+      .deleteOne({ _id: postVersionId })
+      .session(session);
+  }
 
   private makeQueryToFindPost(paramDto: FindPostRepoParamDto): FilterQuery<PostDoc> {
     const {

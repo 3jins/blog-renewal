@@ -54,6 +54,10 @@ export interface UpdatePostMetaDataRequestDto {
   isDraft?: boolean;
 }
 
+export interface DeletePostVersionRequestDto {
+  postVersionId: string;
+}
+
 export const FindPostRequestSchema: JSONSchemaType<FindPostRequestDto> = {
   type: 'object',
   additionalProperties: false,
@@ -121,4 +125,13 @@ export const UpdatePostMetaDataRequestSchema: JSONSchemaType<UpdatePostMetaDataR
     isDraft: { type: 'boolean', nullable: true },
   },
   required: ['postNo'],
+};
+
+export const DeletePostVersionRequestSchema: JSONSchemaType<DeletePostVersionRequestDto> = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    postVersionId: { type: 'string', pattern: OBJECT_ID_PATTERN, nullable: true },
+  },
+  required: ['postVersionId'],
 };
