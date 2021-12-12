@@ -44,7 +44,7 @@ postRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo*`, (ctx: Context) 
     });
 });
 
-postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW}`, koaBody(koaBodyOptions), (ctx: Context) => {
+postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`, koaBody(koaBodyOptions), (ctx: Context) => {
   if (_.isEmpty(ctx.request.files)) {
     throw new BlogError(BlogErrorCode.FILE_NOT_UPLOADED);
   }
@@ -59,7 +59,7 @@ postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW}`, koaB
     });
 });
 
-postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION}`, koaBody(koaBodyOptions), (ctx: Context) => {
+postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`, koaBody(koaBodyOptions), (ctx: Context) => {
   if (_.isEmpty(ctx.request.files)) {
     throw new BlogError(BlogErrorCode.FILE_NOT_UPLOADED);
   }

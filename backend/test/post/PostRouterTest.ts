@@ -179,8 +179,8 @@ describe('Post router test', () => {
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
-  describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW}`, () => {
-    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW} - normal case`, async () => {
+  describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}`, () => {
+    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST} - normal case`, async () => {
       const baseUrl = `${URL.PREFIX.API}${URL.ENDPOINT.POST}`;
       const requestDto: CreateNewPostRequestDto = {
         seriesName: commonTestData.series1.name,
@@ -191,7 +191,7 @@ describe('Post router test', () => {
         .thenResolve(commonTestData.post1.postNo);
 
       await request
-        .post(`${baseUrl}${URL.BEHAVIOR.NEW}`)
+        .post(`${baseUrl}`)
         .field(requestDto)
         .attach('post', `${appPath.testData}/${FILE_NAME}`, { contentType: 'application/octet-stream' })
         .expect(http2.constants.HTTP_STATUS_CREATED)
@@ -203,14 +203,14 @@ describe('Post router test', () => {
       }))).once();
     });
 
-    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW} - parameter error(file is absent)`, async () => {
+    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST} - parameter error(file is absent)`, async () => {
       const requestDto: CreateNewPostRequestDto = {
         seriesName: commonTestData.series1.name,
         language: Language.KO,
       };
 
       await request
-        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW}`)
+        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`)
         .field(requestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
@@ -219,7 +219,7 @@ describe('Post router test', () => {
         });
     });
 
-    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW} - parameter error(key)`, async () => {
+    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST} - parameter error(key)`, async () => {
       const strangeRequestDto = {
         doWeLearnMathTo: 'add the dead\'s sum',
         subtractTheWeakOnes: 'count cash for great ones',
@@ -227,7 +227,7 @@ describe('Post router test', () => {
       };
 
       await request
-        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW}`)
+        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`)
         .field(strangeRequestDto)
         .attach('post', `${appPath.testData}/${FILE_NAME}`, { contentType: 'application/octet-stream' })
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
@@ -237,14 +237,14 @@ describe('Post router test', () => {
         });
     });
 
-    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW} - parameter error(type of value)`, async () => {
+    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST} - parameter error(type of value)`, async () => {
       const requestDto = {
         seriesName: commonTestData.series1.name,
         language: Language.KO,
       };
 
       await request
-        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW}`)
+        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`)
         .field(requestDto)
         .attach('post', `${appPath.testData}/${FILE_NAME}`, { contentType: 'application/json' })
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
@@ -256,8 +256,8 @@ describe('Post router test', () => {
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
-  describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION}`, () => {
-    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION} - normal case`, async () => {
+  describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`, () => {
+    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION} - normal case`, async () => {
       const baseUrl = `${URL.PREFIX.API}${URL.ENDPOINT.POST}`;
       const requestDto: AddUpdatedVersionPostRequestDto = {
         postNo: commonTestData.post2V1.postNo,
@@ -268,7 +268,7 @@ describe('Post router test', () => {
         .thenResolve(commonTestData.objectIdList[0]);
 
       await request
-        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION}`)
+        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`)
         .field(requestDto)
         .attach('post', `${appPath.testData}/${FILE_NAME}`, { contentType: 'application/octet-stream' })
         .expect(http2.constants.HTTP_STATUS_CREATED)
@@ -281,14 +281,14 @@ describe('Post router test', () => {
       }))).once();
     });
 
-    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION} - parameter error(file is absent)`, async () => {
+    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION} - parameter error(file is absent)`, async () => {
       const requestDto: AddUpdatedVersionPostRequestDto = {
         postNo: commonTestData.post2V1.postNo,
         language: Language.KO,
       };
 
       await request
-        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION}`)
+        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`)
         .field(requestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
@@ -297,7 +297,7 @@ describe('Post router test', () => {
         });
     });
 
-    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION} - parameter error(key)`, async () => {
+    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION} - parameter error(key)`, async () => {
       const strangeRequestDto = {
         doWeLearnMathTo: 'add the dead\'s sum',
         subtractTheWeakOnes: 'count cash for great ones',
@@ -305,7 +305,7 @@ describe('Post router test', () => {
       };
 
       await request
-        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION}`)
+        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`)
         .field(strangeRequestDto)
         .attach('post', `${appPath.testData}/${FILE_NAME}`, { contentType: 'application/octet-stream' })
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
@@ -315,14 +315,14 @@ describe('Post router test', () => {
         });
     });
 
-    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION} - parameter error(type of value)`, async () => {
+    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION} - parameter error(type of value)`, async () => {
       const requestDto: AddUpdatedVersionPostRequestDto = {
         postNo: commonTestData.post2V1.postNo,
         language: Language.KO,
       };
 
       await request
-        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.BEHAVIOR.NEW_VERSION}`)
+        .post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`)
         .field(requestDto)
         .attach('post', `${appPath.testData}/${FILE_NAME}`, { contentType: 'application/json' })
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
