@@ -7,6 +7,7 @@ import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import PostMetaRepository from '@src/post/repository/PostMetaRepository';
 import {
   CreatePostMetaRepoParamDto,
+  DeletePostMetaRepoParamDto,
   FindPostMetaRepoParamDto,
   UpdatePostMetaRepoParamDto,
 } from '@src/post/dto/PostMetaRepoParamDto';
@@ -371,6 +372,78 @@ describe('PostMetaRepository test', () => {
         paramDto,
         session,
       );
+    });
+  });
+
+  describe('deletePostMeta', () => {
+    let categoryList: CategoryDoc[];
+    let seriesList: SeriesDoc[];
+    let tagList: TagDoc[];
+    let postMeta1: PostMetaDoc;
+    let postMeta3: PostMetaDoc;
+
+    beforeEach(async () => {
+      categoryList = await Category.insertMany([
+        { ...commonTestData.category1 },
+        { ...commonTestData.category2 },
+      ], { session });
+      seriesList = await Series.insertMany([
+        { ...commonTestData.series1 },
+        { ...commonTestData.series2 },
+      ], { session });
+      tagList = await Tag.insertMany([
+        { ...commonTestData.tag1 },
+        { ...commonTestData.tag2 },
+        { ...commonTestData.tag3 },
+      ], { session });
+      [postMeta1, postMeta3] = await PostMeta.insertMany([{
+        ...commonTestData.postMeta1,
+        category: categoryList[0]._id,
+        series: seriesList[0]._id,
+        tagList: [tagList[0]._id, tagList[1]._id],
+      }, {
+        ...commonTestData.postMeta3,
+        category: categoryList[0]._id,
+        series: seriesList[0]._id,
+        tagList: [tagList[0]._id, tagList[2]._id],
+      }], { session });
+
+      Series.updateOne({ name: seriesList[0].name }, { postMetaList: [postMeta1._id] }, { session });
+      seriesList[0] = (await Series.findById(seriesList[0]._id).session(session)) as SeriesDoc;
+      Series.updateOne({ name: seriesList[1].name }, { postMetaList: [postMeta3._id] }, { session });
+      seriesList[1] = (await Series.findById(seriesList[1]._id).session(session)) as SeriesDoc;
+      Tag.updateOne({ name: tagList[0].name }, { postMetaList: [postMeta1._id] }, { session });
+      tagList[0] = (await Tag.findById(tagList[0]._id).session(session)) as TagDoc;
+      Tag.updateOne({ name: tagList[1].name }, { postMetaList: [postMeta1._id] }, { session });
+      tagList[1] = (await Tag.findById(tagList[1]._id).session(session)) as TagDoc;
+      Tag.updateOne({ name: tagList[0].name }, { postMetaList: [postMeta3._id] }, { session });
+      tagList[0] = (await Tag.findById(tagList[0]._id).session(session)) as TagDoc;
+      Tag.updateOne({ name: tagList[2].name }, { postMetaList: [postMeta3._id] }, { session });
+      tagList[2] = (await Tag.findById(tagList[2]._id).session(session)) as TagDoc;
+    });
+
+    it('deletePostMeta - normal case', async () => {
+      const paramDto: DeletePostMetaRepoParamDto = {
+        postNo: commonTestData.postMeta1.postNo,
+      };
+      await postMetaRepository.deletePostMeta(paramDto, session);
+      const postMetaList: PostMetaDoc[] = await PostMeta.find().session(session);
+      postMetaList.should.have.lengthOf(1);
+      postMetaList[0].postNo.should.equal(commonTestData.postMeta3.postNo);
+    });
+
+    it('deletePostMeta - try deleting an inexistent post', async () => {
+      const paramDto: DeletePostMetaRepoParamDto = {
+        postNo: 1048576,
+      };
+      await errorShouldBeThrown(
+        new BlogError(BlogErrorCode.POST_NOT_FOUND, ['1048576', 'postNo']),
+        (_paramDto, _session) => postMetaRepository.deletePostMeta(_paramDto, _session),
+        paramDto,
+        session,
+      );
+      const postMetaList: PostMetaDoc[] = await PostMeta.find().session(session);
+      postMetaList.should.have.lengthOf(2);
     });
   });
 });

@@ -58,3 +58,7 @@ export interface UpdatePostMetaDataParamDto {
 export interface DeletePostVersionParamDto {
   postVersionId: string;
 }
+
+export interface DeletePostParamDto {
+  postNo: number;
+}

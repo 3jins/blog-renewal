@@ -30,3 +30,7 @@ export interface UpdatePostMetaRepoParamDto {
   isDeprecated?: boolean;
   isDraft?: boolean;
 }
+
+export interface DeletePostMetaRepoParamDto {
+  postNo: number;
+}

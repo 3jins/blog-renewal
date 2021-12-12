@@ -3,6 +3,7 @@ import { ClientSession, FilterQuery, UpdateQuery } from 'mongoose';
 import PostMeta, { PostMetaDoc } from '@src/post/model/PostMeta';
 import {
   CreatePostMetaRepoParamDto,
+  DeletePostMetaRepoParamDto,
   FindPostMetaRepoParamDto,
   UpdatePostMetaRepoParamDto,
 } from '@src/post/dto/PostMetaRepoParamDto';
@@ -37,9 +38,25 @@ export default class PostMetaRepository {
   }
 
   public async updatePostMeta(paramDto: UpdatePostMetaRepoParamDto, session: ClientSession): Promise<void> {
-    const queryToUpdatePostMeta: UpdateQuery<PostMetaDoc> = await this.makeQueryToUpdatePostMeta(session, paramDto);
+    await this.validatePostExistence(paramDto.postNo, session);
+    const queryToUpdatePostMeta: UpdateQuery<PostMetaDoc> = await this.makeQueryToUpdatePostMeta(paramDto);
     await PostMeta
       .updateMany({ postNo: paramDto.postNo }, queryToUpdatePostMeta, { session });
+  }
+
+  public async deletePostMeta(paramDto: DeletePostMetaRepoParamDto, session: ClientSession): Promise<void> {
+    await this.validatePostExistence(paramDto.postNo, session);
+    await PostMeta
+      .deleteOne({ postNo: paramDto.postNo }, { session });
+  }
+
+  private async validatePostExistence(postNo: number, session: ClientSession): Promise<void> {
+    const originalPostMeta: PostMetaDoc | null = await PostMeta
+      .findOne({ postNo }, { postNo: false })
+      .session(session);
+    if (originalPostMeta === null) {
+      throw new BlogError(BlogErrorCode.POST_NOT_FOUND, [_.toString(postNo), 'postNo']);
+    }
   }
 
   private makeQueryToFindPostMeta(paramDto: FindPostMetaRepoParamDto): FilterQuery<PostMetaDoc> {
@@ -70,14 +87,7 @@ export default class PostMetaRepository {
     return queryToFindPostMeta;
   }
 
-  private async makeQueryToUpdatePostMeta(session: ClientSession, paramDto: UpdatePostMetaRepoParamDto): Promise<UpdateQuery<PostMetaDoc>> {
-    const originalPostMeta: PostMetaDoc | null = await PostMeta
-      .findOne({ postNo: paramDto.postNo }, { postNo: false })
-      .session(session);
-    if (originalPostMeta === null) {
-      throw new BlogError(BlogErrorCode.POST_NOT_FOUND, [paramDto.postNo.toString(), 'postNo']);
-    }
-
+  private async makeQueryToUpdatePostMeta(paramDto: UpdatePostMetaRepoParamDto): Promise<UpdateQuery<PostMetaDoc>> {
     const queryToUpdatePostMeta: UpdateQuery<PostMetaDoc> = {};
     if (!_.isNil(paramDto.categoryId)) {
       Object.assign(queryToUpdatePostMeta, { category: paramDto.categoryId });

@@ -13,6 +13,7 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import {
   AddUpdatedVersionPostRequestDto,
   CreateNewPostRequestDto,
+  DeletePostRequestDto,
   DeletePostVersionRequestDto,
   FindPostRequestDto,
   UpdatePostMetaDataRequestDto,
@@ -409,12 +410,47 @@ describe('Post router test', () => {
     it(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION} - parameter error(parameter not passed)`, async () => {
       await request
         .delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`)
-        .expect(http2.constants.HTTP_STATUS_NOT_FOUND);
+        .expect(http2.constants.HTTP_STATUS_BAD_REQUEST); // 'VERSION' will be recognized as a `postNo`
     });
 
     it(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION} - parameter error(not objectId type)`, async () => {
       await request
         .delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}/${encodeURI(commonTestData.simpleTexts[0])}`)
+        .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
+        .expect((res) => {
+          (!!(res.body.message)).should.be.true;
+          res.body.message.should.equal(BlogErrorCode.INVALID_REQUEST_PARAMETER.errorMessage);
+        });
+    });
+  });
+
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  describe(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.POST}`, () => {
+    it(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.POST} - normal case`, async () => {
+      const requestDto: DeletePostRequestDto = {
+        postNo: commonTestData.postMeta1.postNo,
+      };
+
+      when(postService.deletePost(anything()))
+        .thenResolve();
+
+      await request
+        .delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.postMeta1.postNo}`)
+        .expect(http2.constants.HTTP_STATUS_OK);
+      verify(postService.deletePost(objectContaining({
+        ...requestDto,
+      }))).once();
+    });
+
+    it(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.POST} - parameter error(parameter not passed)`, async () => {
+      await request
+        .delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`)
+        .expect(http2.constants.HTTP_STATUS_NOT_FOUND);
+    });
+
+    it(`DELETE ${URL.PREFIX.API}${URL.ENDPOINT.POST} - parameter error(not objectId type)`, async () => {
+      await request
+        .delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${encodeURI(commonTestData.simpleTexts[0])}`)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
           (!!(res.body.message)).should.be.true;
