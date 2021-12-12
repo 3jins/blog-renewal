@@ -7,7 +7,7 @@ export interface Heading {
   text: string;
 }
 
-export type PostDoc = {
+export type PostVersionDoc = {
   postNo: number;
   title: string;
   rawContent: string;
@@ -18,10 +18,10 @@ export type PostDoc = {
   thumbnailImage?: PopulatedDoc<ImageDoc>;
   updatedDate: Date;
   isLatestVersion: boolean;
-  lastVersionPost?: PopulatedDoc<PostDoc>;
+  lastPostVersion?: PopulatedDoc<PostVersionDoc>;
 } & Document;
 
-export const postSchema = new Schema({
+export const postVersionSchema = new Schema({
   postNo: { type: Number, required: true },
   title: { type: String, required: true },
   rawContent: { type: String, required: true },
@@ -32,7 +32,7 @@ export const postSchema = new Schema({
   thumbnailImage: { type: Types.ObjectId, ref: 'Image', required: false, default: null },
   updatedDate: { type: Date, required: true },
   isLatestVersion: { type: Boolean, required: true },
-  lastVersionPost: { type: Types.ObjectId, ref: 'Post', required: false, default: null },
+  lastPostVersion: { type: Types.ObjectId, ref: 'PostVersion', required: false, default: null },
 });
 
-export default model<PostDoc>('Post', postSchema, 'Posts');
+export default model<PostVersionDoc>('PostVersion', postVersionSchema, 'PostVersions');

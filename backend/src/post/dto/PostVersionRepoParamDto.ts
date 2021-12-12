@@ -1,13 +1,13 @@
 import { Types } from 'mongoose';
 import Language from '@src/common/constant/Language';
-import { Heading } from '@src/post/model/Post';
+import { Heading } from '@src/post/model/PostVersion';
 
-export interface FindPostByUpdatedDateDto {
+export interface FindPostVersionByUpdatedDateDto {
   from?: Date;
   to?: Date;
 }
 
-export interface FindPostRepoParamDto {
+export interface FindPostVersionRepoParamDto {
   postNo?: number;
   postVersionId?: string;
   title?: string;
@@ -16,12 +16,12 @@ export interface FindPostRepoParamDto {
   language?: Language;
   thumbnailContent?: string;
   thumbnailImageId?: string;
-  findPostByUpdatedDateDto?: FindPostByUpdatedDateDto;
+  findPostVersionByUpdatedDateDto?: FindPostVersionByUpdatedDateDto;
   isLatestVersion?: boolean;
   isOnlyExactSameFieldFound?: boolean;
 }
 
-export interface CreatePostRepoParamDto {
+export interface CreatePostVersionRepoParamDto {
   postNo: number;
   title: string;
   rawContent: string;
@@ -32,9 +32,9 @@ export interface CreatePostRepoParamDto {
   thumbnailImageId?: Types.ObjectId;
   updatedDate?: Date;
   isLatestVersion: boolean;
-  lastVersionPost?: Types.ObjectId;
+  lastPostVersion?: Types.ObjectId;
 }
 
-export interface DeletePostRepoParamDto {
+export interface DeletePostVersionRepoParamDto {
   postVersionId: string;
 }

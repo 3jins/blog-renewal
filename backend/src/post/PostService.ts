@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { Service } from 'typedi';
 import { ClientSession, Types } from 'mongoose';
 import PostMetaRepository from '@src/post/repository/PostMetaRepository';
-import PostRepository from '@src/post/repository/PostRepository';
+import PostVersionRepository from '@src/post/repository/PostVersionRepository';
 import CategoryRepository from '@src/category/CategoryRepository';
 import SeriesRepository from '@src/series/SeriesRepository';
 import TagRepository from '@src/tag/TagRepository';
@@ -19,22 +19,22 @@ import {
   FindPostParamDto,
   UpdatePostMetaDataParamDto,
 } from '@src/post/dto/PostParamDto';
-import { CreatePostRepoParamDto, FindPostRepoParamDto } from '@src/post/dto/PostRepoParamDto';
+import { CreatePostVersionRepoParamDto, FindPostVersionRepoParamDto } from '@src/post/dto/PostVersionRepoParamDto';
 import { CategoryDoc } from '@src/category/Category';
 import { SeriesDoc } from '@src/series/Series';
 import { TagDoc } from '@src/tag/Tag';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
-import { FindPostResponseDto, PostDto, PostVersionDataDto } from '@src/post/dto/PostResponseDto';
-import { PostDoc } from '@src/post/model/Post';
+import { FindPostResponseDto, PostDto, PostVersionDto } from '@src/post/dto/PostResponseDto';
+import { PostVersionDoc } from '@src/post/model/PostVersion';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 
 @Service()
 export default class PostService {
   public constructor(
     private readonly postMetaRepository: PostMetaRepository,
-    private readonly postRepository: PostRepository,
+    private readonly postVersionRepository: PostVersionRepository,
     private readonly categoryRepository: CategoryRepository,
     private readonly seriesRepository: SeriesRepository,
     private readonly tagRepository: TagRepository,
@@ -44,9 +44,9 @@ export default class PostService {
     return useTransaction(async (session: ClientSession) => {
       const findPostMetaRepoParamDto: FindPostMetaRepoParamDto = await this.makeFindPostMetaRepoParamDto(paramDto);
       const postMetaList: PostMetaDoc[] = await this.postMetaRepository.findPostMeta(findPostMetaRepoParamDto, session);
-      const findPostRepoParamDto: FindPostRepoParamDto = await this.makeFindPostRepoParamDto(paramDto);
-      const postList: PostDoc[] = await this.postRepository.findPost(findPostRepoParamDto, session);
-      return this.combineFindPostResponse(postMetaList, postList);
+      const findPostRepoParamDto: FindPostVersionRepoParamDto = await this.makeFindPostRepoParamDto(paramDto);
+      const postVersionList: PostVersionDoc[] = await this.postVersionRepository.findPostVersion(findPostRepoParamDto, session);
+      return this.combineFindPostResponse(postMetaList, postVersionList);
     });
   }
 
@@ -55,16 +55,16 @@ export default class PostService {
       const currentDate = new Date();
       const createPostMetaRepoParamDto: CreatePostMetaRepoParamDto = await this.makeCreatePostMetaRepoParamDto(paramDto, currentDate, session);
       const postNo = await this.postMetaRepository.createPostMeta(createPostMetaRepoParamDto, session);
-      const createPostRepoParamDto: CreatePostRepoParamDto = this.makeCreatePostRepoParamDtoForFirstVersionPost(postNo, paramDto, currentDate);
-      await this.postRepository.createPost(createPostRepoParamDto, session);
+      const createPostRepoParamDto: CreatePostVersionRepoParamDto = this.makeCreatePostRepoParamDtoForFirstVersionPost(postNo, paramDto, currentDate);
+      await this.postVersionRepository.createPostVersion(createPostRepoParamDto, session);
       return postNo;
     });
   }
 
   public async addUpdatedVersionPost(paramDto: AddUpdatedVersionPostParamDto): Promise<string> {
     return useTransaction(async (session: ClientSession) => {
-      const repoParamDto: CreatePostRepoParamDto = await this.makeCreatePostRepoParamDto(paramDto);
-      return this.postRepository.createPost(repoParamDto, session);
+      const repoParamDto: CreatePostVersionRepoParamDto = await this.makeCreatePostRepoParamDto(paramDto);
+      return this.postVersionRepository.createPostVersion(repoParamDto, session);
     });
   }
 
@@ -76,14 +76,14 @@ export default class PostService {
   }
 
   public async deletePostVersion(paramDto: DeletePostVersionParamDto): Promise<void> {
-    return useTransaction(async (session: ClientSession) => this.postRepository
-      .deletePost(paramDto, session));
+    return useTransaction(async (session: ClientSession) => this.postVersionRepository
+      .deletePostVersion(paramDto, session));
   }
   private makeFindPostMetaRepoParamDto(paramDto: FindPostParamDto): FindPostMetaRepoParamDto {
     return { ...paramDto };
   }
 
-  private makeFindPostRepoParamDto(paramDto: FindPostParamDto): FindPostRepoParamDto {
+  private makeFindPostRepoParamDto(paramDto: FindPostParamDto): FindPostVersionRepoParamDto {
     const { updateDateFrom, updateDateTo } = paramDto;
 
     if (_.isNil(updateDateFrom) && _.isNil(updateDateTo)) {
@@ -91,20 +91,20 @@ export default class PostService {
     }
     return {
       ...paramDto,
-      findPostByUpdatedDateDto: {
+      findPostVersionByUpdatedDateDto: {
         from: updateDateFrom,
         to: updateDateTo,
       },
     };
   }
 
-  private combineFindPostResponse(postMetaList: PostMetaDoc[], postList: PostDoc[]): FindPostResponseDto {
+  private combineFindPostResponse(postMetaList: PostMetaDoc[], postVersionList: PostVersionDoc[]): FindPostResponseDto {
     const postDtoList: PostDto[] = postMetaList
       .map((postMeta) => {
-        const postVersionDataDtoList: PostVersionDataDto[] = postList
-          .filter((post) => post.postNo === postMeta.postNo)
-          .map((post) => post as PostVersionDataDto);
-        return { ...postMeta, postVersionDataList: postVersionDataDtoList } as PostDto;
+        const postVersionDataDtoList: PostVersionDto[] = postVersionList
+          .filter((postVersion) => postVersion.postNo === postMeta.postNo)
+          .map((postVersion) => postVersion as PostVersionDto);
+        return { ...postMeta, postVersionList: postVersionDataDtoList } as PostDto;
       });
     return { postList: postDtoList };
   }
@@ -149,11 +149,11 @@ export default class PostService {
     return createPostMetaRepoParamDto;
   }
 
-  private makeCreatePostRepoParamDtoForFirstVersionPost(postNo: number, paramDto: CreateNewPostParamDto, currentDate: Date): CreatePostRepoParamDto {
+  private makeCreatePostRepoParamDtoForFirstVersionPost(postNo: number, paramDto: CreateNewPostParamDto, currentDate: Date): CreatePostVersionRepoParamDto {
     const { post, language, thumbnailContent } = paramDto;
     const rawContent: string = this.readPostContent(post.path);
     const { renderedContent, toc, defaultThumbnailContent } = renderContent(rawContent);
-    const createPostRepoParamDto: CreatePostRepoParamDto = {
+    const createPostRepoParamDto: CreatePostVersionRepoParamDto = {
       postNo,
       title: post.name as string,
       rawContent,
@@ -170,11 +170,11 @@ export default class PostService {
     return createPostRepoParamDto;
   }
 
-  private makeCreatePostRepoParamDto(paramDto: AddUpdatedVersionPostParamDto): CreatePostRepoParamDto {
+  private makeCreatePostRepoParamDto(paramDto: AddUpdatedVersionPostParamDto): CreatePostVersionRepoParamDto {
     const { postNo, post, language, thumbnailContent } = paramDto;
     const rawContent: string = this.readPostContent(post.path);
     const { renderedContent, toc, defaultThumbnailContent } = renderContent(rawContent);
-    const createPostRepoParamDto: CreatePostRepoParamDto = {
+    const createPostRepoParamDto: CreatePostVersionRepoParamDto = {
       postNo,
       title: post.name as string,
       rawContent,

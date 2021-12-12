@@ -1,4 +1,4 @@
-import { Heading } from '@src/post/model/Post';
+import { Heading } from '@src/post/model/PostVersion';
 import { Token, TokensList } from 'marked';
 
 export const makeToc = (tokenList: TokensList): Heading[] => (tokenList

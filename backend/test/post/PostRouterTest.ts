@@ -47,20 +47,20 @@ describe('Post router test', () => {
         isDeprecated: false,
         isDraft: false,
         postVersionId: commonTestData.objectIdList[4],
-        title: encodeURI(commonTestData.post1.title),
-        rawContent: encodeURI(commonTestData.post1.rawContent),
-        renderedContent: encodeURI(commonTestData.post1.renderedContent),
-        language: commonTestData.post1.language.toLocaleLowerCase(),
-        thumbnailContent: encodeURI(commonTestData.post1.thumbnailContent),
+        title: encodeURI(commonTestData.post1V1.title),
+        rawContent: encodeURI(commonTestData.post1V1.rawContent),
+        renderedContent: encodeURI(commonTestData.post1V1.renderedContent),
+        language: commonTestData.post1V1.language.toLocaleLowerCase(),
+        thumbnailContent: encodeURI(commonTestData.post1V1.thumbnailContent),
         thumbnailImageId: commonTestData.objectIdList[4],
         updateDateFrom: commonTestData.dateList[0].toISOString(),
         updateDateTo: commonTestData.dateList[1].toISOString(),
-        isLatestVersion: commonTestData.post1.isLatestVersion,
+        isLatestVersion: commonTestData.post1V1.isLatestVersion,
         isOnlyExactSameFieldFound: true,
       };
       const paramDto: FindPostParamDto = {
         ...requestDto,
-        language: commonTestData.post1.language,
+        language: commonTestData.post1V1.language,
         updateDateFrom: commonTestData.dateList[0],
         updateDateTo: commonTestData.dateList[1],
       };
@@ -69,7 +69,7 @@ describe('Post router test', () => {
         .thenResolve({ postList: [] });
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1.postNo}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1V1.postNo}`)
         .query(requestDto)
         .expect(http2.constants.HTTP_STATUS_OK);
       verify(postService.findPost(deepEqual(paramDto)));
@@ -77,7 +77,7 @@ describe('Post router test', () => {
 
     it(`GET ${URL.PREFIX.API}${URL.ENDPOINT.POST} - normal case`, async () => {
       const requestDto: FindPostRequestDto = {
-        postNo: commonTestData.post1.postNo,
+        postNo: commonTestData.post1V1.postNo,
         categoryId: commonTestData.objectIdList[0],
         seriesId: commonTestData.objectIdList[1],
         tagIdList: [commonTestData.objectIdList[2], commonTestData.objectIdList[3]],
@@ -85,20 +85,20 @@ describe('Post router test', () => {
         isDeprecated: false,
         isDraft: false,
         postVersionId: commonTestData.objectIdList[4],
-        title: commonTestData.post1.title,
-        rawContent: commonTestData.post1.rawContent,
-        renderedContent: commonTestData.post1.renderedContent,
-        language: commonTestData.post1.language.toLocaleLowerCase(),
-        thumbnailContent: commonTestData.post1.thumbnailContent,
+        title: commonTestData.post1V1.title,
+        rawContent: commonTestData.post1V1.rawContent,
+        renderedContent: commonTestData.post1V1.renderedContent,
+        language: commonTestData.post1V1.language.toLocaleLowerCase(),
+        thumbnailContent: commonTestData.post1V1.thumbnailContent,
         thumbnailImageId: commonTestData.objectIdList[4],
         updateDateFrom: commonTestData.dateList[0].toISOString(),
         updateDateTo: commonTestData.dateList[1].toISOString(),
-        isLatestVersion: commonTestData.post1.isLatestVersion,
+        isLatestVersion: commonTestData.post1V1.isLatestVersion,
         isOnlyExactSameFieldFound: true,
       };
       const paramDto: FindPostParamDto = {
         ...requestDto,
-        language: commonTestData.post1.language,
+        language: commonTestData.post1V1.language,
         updateDateFrom: commonTestData.dateList[0],
         updateDateTo: commonTestData.dateList[1],
       };
@@ -107,7 +107,7 @@ describe('Post router test', () => {
         .thenResolve({ postList: [] });
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1.postNo}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1V1.postNo}`)
         .query(requestDto)
         .expect(http2.constants.HTTP_STATUS_OK);
       verify(postService.findPost(deepEqual(paramDto)));
@@ -119,7 +119,7 @@ describe('Post router test', () => {
       };
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1.postNo}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1V1.postNo}`)
         .query(strangeRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
@@ -136,7 +136,7 @@ describe('Post router test', () => {
       };
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1.postNo}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1V1.postNo}`)
         .query(strangeRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
@@ -167,7 +167,7 @@ describe('Post router test', () => {
       describe(`GET ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - parameter error(type of value)`, () => {
         it(`case ${testIdx}: ${typeDistortedRequestDto}`, async () => {
           await request
-            .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1.postNo}`)
+            .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1V1.postNo}`)
             .query(typeDistortedRequestDto)
             .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
             .expect((res) => {
@@ -189,14 +189,14 @@ describe('Post router test', () => {
       };
 
       when(postService.createNewPost(anything()))
-        .thenResolve(commonTestData.post1.postNo);
+        .thenResolve(commonTestData.post1V1.postNo);
 
       await request
         .post(`${baseUrl}`)
         .field(requestDto)
         .attach('post', `${appPath.testData}/${FILE_NAME}`, { contentType: 'application/octet-stream' })
         .expect(http2.constants.HTTP_STATUS_CREATED)
-        .expect((res) => res.get(HttpHeaderField.CONTENT_LOCATION).should.equal(`${baseUrl}/${commonTestData.post1.postNo}`));
+        .expect((res) => res.get(HttpHeaderField.CONTENT_LOCATION).should.equal(`${baseUrl}/${commonTestData.post1V1.postNo}`));
 
       verify(postService.createNewPost(objectContaining({
         post: anything(),

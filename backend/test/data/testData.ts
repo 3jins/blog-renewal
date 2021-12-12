@@ -1,7 +1,7 @@
 import Language from '@src/common/constant/Language';
 import http2 from 'http2';
 import LogLevel from '@src/common/logging/LogLevel';
-import { Heading } from '@src/post/model/Post';
+import { Heading } from '@src/post/model/PostVersion';
 
 const root = process.env.PWD;
 export const appPath = {
@@ -100,7 +100,7 @@ export const common = {
     isDeprecated: false,
     isDraft: false,
   },
-  post1: {
+  post1V1: {
     postNo: 1,
     title: '스프링이란 무엇인가',
     rawContent: '##온 김에 Spring하기\n왜 우리는 노드만으로 행복할 수 없는가',

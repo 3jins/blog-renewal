@@ -2,7 +2,7 @@ import _ from 'lodash';
 import marked, { Tokenizer, TokensList } from 'marked';
 import hljs from 'highlight.js';
 import katex from 'katex';
-import { Heading } from '@src/post/model/Post';
+import { Heading } from '@src/post/model/PostVersion';
 import { makeDefaultThumbnailContent, makeToc } from '@src/common/marked/MarkedMetaDataUtil';
 
 export const renderContent = (rawContent: string): { renderedContent: string, toc: Heading[], defaultThumbnailContent: string } => {
