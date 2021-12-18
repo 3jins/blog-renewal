@@ -3,6 +3,10 @@
   "reporter": ["html", "text"],
   "all": true,
   "check-coverage": true,
+  "branches": 90,
+  "lines": 95,
+  "functions": 95,
+  "statements": 95,
   "exclude": [
     "test/",
     "coverage/",
