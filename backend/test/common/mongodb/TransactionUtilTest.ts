@@ -12,7 +12,6 @@ import config from 'config';
 describe('TransactionUtil Test', () => {
   // eslint-disable-next-line mocha/no-setup-in-describe
   const { retryCount } = config.get('db');
-  const testDelay = (retryCount + 1) * 1000;
   const testTimeout = (retryCount + 2) * 1000;
   let sandbox: SinonSandbox;
   let clientSessionSpy: SinonSpiedInstance<ClientSessionForTest>;
@@ -64,21 +63,20 @@ describe('TransactionUtil Test', () => {
         throw new Error(blogErrorCode.TEST_ERROR.errorMessage);
       }),
     );
-    setTimeout(() => {
-      clientSessionSpy.startTransaction.calledOnce.should.be.true;
-      clientSessionSpy.abortTransaction.calledOnce.should.be.true;
-      clientSessionSpy.endSession.calledOnce.should.be.true;
-    }, testDelay);
+    clientSessionSpy.startTransaction.calledOnce.should.be.true;
+    clientSessionSpy.abortTransaction.calledOnce.should.be.true;
+    clientSessionSpy.endSession.calledOnce.should.be.true;
   }).timeout(testTimeout);
 
-  it('Transaction failure test - retry maximum count', () => {
+  it('Transaction failure test - retry maximum count', async () => {
     const expectedError = new BlogError(blogErrorCode.TEST_ERROR);
     const spyJob: SinonSpy = sandbox.spy(async () => {
       throw expectedError;
     });
-    useTransaction(spyJob);
-    setTimeout(() => {
-      spyJob.callCount.should.equal(retryCount + 1);
-    }, testDelay);
-  }).timeout(testTimeout);
+    await errorShouldBeThrown(
+      expectedError,
+      () => useTransaction(spyJob),
+    );
+    spyJob.callCount.should.equal(retryCount + 1);
+  }).timeout(testTimeout * 200);
 });
