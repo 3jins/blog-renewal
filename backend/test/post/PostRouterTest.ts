@@ -4,7 +4,7 @@ import { Server } from 'http';
 import { anything, deepEqual, instance, mock, objectContaining, verify, when } from 'ts-mockito';
 import { Container } from 'typedi';
 import PostService from '@src/post/PostService';
-import { endApp, startApp } from '@src/app';
+import { endApp } from '@src/app';
 import * as URL from '@src/common/constant/URL';
 import Language from '@src/common/constant/Language';
 import { appPath, common as commonTestData } from '@test/data/testData';
@@ -20,6 +20,7 @@ import {
 } from '@src/post/dto/PostRequestDto';
 import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 import { FindPostParamDto } from '@src/post/dto/PostParamDto';
+import { startAppForTest } from '@test/TestUtil';
 
 const postService: PostService = mock(PostService);
 Container.set(PostService, instance(postService));
@@ -31,9 +32,9 @@ describe('Post router test', () => {
   let server: Server;
   let request: supertest.SuperTest<supertest.Test>;
 
-  before(() => {
+  before(async () => {
     should();
-    server = startApp([PostRouter.default]);
+    server = await startAppForTest([PostRouter.default]);
     request = supertest(server);
   });
 

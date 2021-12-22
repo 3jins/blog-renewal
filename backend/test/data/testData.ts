@@ -197,6 +197,9 @@ export const common = {
     'Do not miss your chance to blow',
     '세치 혀를 뻗어 심장과 귀를 찔러 우린 마치 Sunken Colony',
   ],
+  simpleNumbers: [
+    930713,
+  ],
   objectIdList: [
     'c0ffee0f0ff1cecafe15900d',
     'c0ffee0f0ff1cecafe50900d',

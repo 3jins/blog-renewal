@@ -1,9 +1,23 @@
 import { ClientSession } from 'mongoose';
+import fs from 'fs';
+import { File, FileJSON } from 'formidable';
+import detect from 'detect-port';
+import Router from '@koa/router';
+import { startApp } from '@src/app';
 import * as TransactionUtil from '@src/common/mongodb/TransactionUtil';
 import BlogError from '@src/common/error/BlogError';
 import { appPath } from '@test/data/testData';
-import fs from 'fs';
-import { File, FileJSON } from 'formidable';
+import config from 'config';
+import { Server } from 'http';
+
+export const startAppForTest = async (routerList: Router[]): Promise<Server> => {
+  const { port } = config.get('server');
+  let alternativePort;
+  do {
+    alternativePort = await detect(port); // eslint-disable-line no-await-in-loop
+  } while (alternativePort !== port);
+  return startApp(routerList, alternativePort);
+};
 
 export const replaceUseTransactionForTest = async (sandbox, session: ClientSession): Promise<any> => sandbox.replace(
   TransactionUtil,
