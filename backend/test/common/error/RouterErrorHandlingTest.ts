@@ -3,11 +3,12 @@ import { should } from 'chai';
 import { Server } from 'http';
 import { anything, instance, mock, when } from 'ts-mockito';
 import { Container } from 'typedi';
-import { endApp, startApp } from '@src/app';
+import { endApp } from '@src/app';
 import * as URL from '@src/common/constant/URL';
 import BlogError from '@src/common/error/BlogError';
 import TagService from '@src/tag/TagService';
 import { blogErrorCode, common as commonTestData } from '@test/data/testData';
+import { startAppForTest } from '@test/TestUtil';
 
 const tagService: TagService = mock(TagService);
 Container.set(TagService, instance(tagService));
@@ -19,9 +20,9 @@ describe('Router error handling test', () => {
   let request: supertest.SuperTest<supertest.Test>;
   const { tag2: { name: tagName }, postMetaIdList } = commonTestData;
 
-  before(() => {
+  before(async () => {
     should();
-    server = startApp([TagRouter.default]);
+    server = await startAppForTest([TagRouter.default]);
     request = supertest(server);
   });
 

@@ -3,7 +3,7 @@ import { should } from 'chai';
 import { Server } from 'http';
 import { anything, deepEqual, instance, mock, reset, verify, when } from 'ts-mockito';
 import { Container } from 'typedi';
-import { endApp, startApp } from '@src/app';
+import { endApp } from '@src/app';
 import * as URL from '@src/common/constant/URL';
 import CategoryService from '@src/category/CategoryService';
 import {
@@ -21,6 +21,7 @@ import { common as commonTestData } from '@test/data/testData';
 import * as http2 from 'http2';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import HttpHeaderField from '@src/common/constant/HttpHeaderField';
+import { startAppForTest } from '@test/TestUtil';
 
 const categoryService: CategoryService = mock(CategoryService);
 Container.set(CategoryService, instance(categoryService));
@@ -37,9 +38,9 @@ describe('Category router test', () => {
     objectIdList: [categoryId],
   } = commonTestData;
 
-  before(() => {
+  before(async () => {
     should();
-    server = startApp([CategoryRouter.default]);
+    server = await startAppForTest([CategoryRouter.default]);
     request = supertest(server);
   });
 

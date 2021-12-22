@@ -4,7 +4,7 @@ import { Server } from 'http';
 import * as http2 from 'http2';
 import { anything, deepEqual, instance, mock, reset, verify, when } from 'ts-mockito';
 import { Container } from 'typedi';
-import { endApp, startApp } from '@src/app';
+import { endApp } from '@src/app';
 import TagService from '@src/tag/TagService';
 import {
   CreateTagRequestDto,
@@ -17,6 +17,7 @@ import { common as commonTestData } from '@test/data/testData';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import * as URL from '@src/common/constant/URL';
 import HttpHeaderField from '@src/common/constant/HttpHeaderField';
+import { startAppForTest } from '@test/TestUtil';
 
 const tagService: TagService = mock(TagService);
 Container.set(TagService, instance(tagService));
@@ -29,9 +30,9 @@ describe('Tag router test', () => {
 
   const { tag2: { name: tagName }, postMetaIdList } = commonTestData;
 
-  before(() => {
+  before(async () => {
     should();
-    server = startApp([TagRouter.default]);
+    server = await startAppForTest([TagRouter.default]);
     request = supertest(server);
   });
 

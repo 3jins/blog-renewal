@@ -1,16 +1,17 @@
 import supertest from 'supertest';
 import { should } from 'chai';
-import { endApp, startApp } from '@src/app';
+import { endApp } from '@src/app';
 import { Server } from 'http';
 import HomeRouter from '@src/home/HomeRouter';
+import { startAppForTest } from '@test/TestUtil';
 
 describe('api test', () => {
   let server: Server;
   let request: supertest.SuperTest<supertest.Test>;
 
-  before(() => {
+  before(async () => {
     should();
-    server = startApp([HomeRouter]);
+    server = await startAppForTest([HomeRouter]);
     request = supertest(server);
   });
 

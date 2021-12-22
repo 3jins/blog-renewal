@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import _ from 'lodash';
 import Koa from 'koa';
 import koaBody from 'koa-body';
 import Router from '@koa/router';
@@ -10,7 +11,6 @@ import * as DbConnection from '@src/common/mongodb/DbConnectionUtil';
 import { handleError } from '@src/common/error/BlogErrorHandlingUtil';
 import { leaveLog } from '@src/common/logging/LoggingUtil';
 import LogLevel from '@src/common/logging/LogLevel';
-import { randomInt } from 'crypto';
 
 const connectToDb = () => {
   DbConnection.setConnection();
@@ -50,38 +50,16 @@ const makeApp = (router: Router): Koa => {
   return app;
 };
 
-const retryStartingApp = (server: Server, previousPort: number) => {
-  server.close();
-  let randomPort;
-  do {
-    randomPort = randomInt(1024, 65535);
-  } while (randomPort !== previousPort);
-
-  setTimeout(
-    () => server.listen(randomPort, () => leaveLog(`Server restarted to listening from port ${randomPort}.`, LogLevel.INFO)),
-    1000,
-  );
-};
-
-const startApp = (routerList: Router[]): Server => {
-  const { port, retryCount } = config.get('server');
+const startApp = (routerList: Router[], port?: number): Server => {
+  const { port: configPort } = config.get('server');
+  const portToUse = _.isNil(port) ? configPort : port;
   const router = makeRouter(routerList);
   const app = makeApp(router);
-  let retryIdx = 0;
   leaveLog(`process: ${process}`, LogLevel.DEBUG);
-
-  const server: Server = app.listen(
-    port,
-    () => leaveLog(`Server started to listening from port ${port}.`, LogLevel.INFO),
+  return app.listen(
+    portToUse,
+    () => leaveLog(`Server started to listening from port ${portToUse}.`, LogLevel.INFO),
   );
-  server.on('error', (err) => {
-    // @ts-ignore
-    if (['EADDRINUSE', 'ERR_SERVER_ALREADY_LISTEN'].includes(err.code) && retryIdx++ < retryCount) {
-      leaveLog(`Retrying to start server... (${retryIdx}/${retryCount})`, LogLevel.INFO);
-      retryStartingApp(server, port);
-    }
-  });
-  return server;
 };
 
 const endApp = (server: Server) => server.close();

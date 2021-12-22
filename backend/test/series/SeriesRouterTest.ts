@@ -3,7 +3,7 @@ import { should } from 'chai';
 import { Server } from 'http';
 import { anything, deepEqual, instance, mock, reset, verify, when } from 'ts-mockito';
 import { Container } from 'typedi';
-import { endApp, startApp } from '@src/app';
+import { endApp } from '@src/app';
 import * as URL from '@src/common/constant/URL';
 import SeriesService from '@src/series/SeriesService';
 import {
@@ -17,6 +17,7 @@ import { common as commonTestData } from '@test/data/testData';
 import * as http2 from 'http2';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import HttpHeaderField from '@src/common/constant/HttpHeaderField';
+import { startAppForTest } from '@test/TestUtil';
 
 const seriesService: SeriesService = mock(SeriesService);
 Container.set(SeriesService, instance(seriesService));
@@ -29,9 +30,9 @@ describe('Series router test', () => {
 
   const { series2: { name: seriesName, thumbnailContent }, postMetaIdList } = commonTestData;
 
-  before(() => {
+  before(async () => {
     should();
-    server = startApp([SeriesRouter.default]);
+    server = await startAppForTest([SeriesRouter.default]);
     request = supertest(server);
   });
 

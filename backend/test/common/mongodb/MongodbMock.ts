@@ -8,14 +8,20 @@ export class ClientSessionForTest implements ClientSession {
    * If the implementation mock(ClientSessionForTest) should be modified for the change of the test scenario, refer `mongoose.ClientSession`.
    */
 
-  abortTransaction = (): Promise<any> => Promise.resolve({});
+  public abortTransaction(): Promise<any> {
+    return Promise.resolve({});
+  }
 
-  commitTransaction = (): Promise<any> => Promise.resolve({});
+  public commitTransaction(): Promise<any> {
+    return Promise.resolve({});
+  }
 
   // eslint-disable-next-line no-unused-vars
-  endSession = async (options?: Object): Promise<void> => {};
+  public async endSession(options?: Object): Promise<void> {
+  }
 
-  startTransaction = (): void => {};
+  public startTransaction(): void {
+  }
 }
 
 export class ConnectionForTest extends Connection {
@@ -27,5 +33,17 @@ export class ConnectionForTest extends Connection {
     this.clientSessionStub = clientSessionStub;
   }
 
-  startSession = (): Promise<ClientSession> => new Promise((resolve) => resolve(this.clientSessionStub as ClientSession));
+  public startSession(): Promise<ClientSession> {
+    return new Promise((resolve) => resolve(this.clientSessionStub as ClientSession));
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  public on(eventName: string | symbol, listener: (...args: any[]) => void): this {
+    return this;
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  public once(eventName: string | symbol, listener: (...args: any[]) => void): this {
+    return this;
+  }
 }

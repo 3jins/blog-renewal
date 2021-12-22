@@ -17,6 +17,13 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
     logLevel: LogLevel.ERROR,
   },
+  INVALID_REQUEST_PARAMETER: {
+    code: 'INVALID_REQUEST_PARAMETER',
+    errorMessage: '형식에 맞지 않는 요청 파라미터가 시스템에 인입되었습니다.',
+    loggingMessage: '형식에 맞지 않는 요청 파라미터({0})가 시스템에 인입되었습니다.',
+    httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
+    logLevel: LogLevel.WARN,
+  },
   FILE_NOT_UPLOADED: {
     code: 'FILE_NOT_UPLOADED',
     errorMessage: '파일이 업로드되지 않았습니다.',
@@ -71,13 +78,6 @@ const BlogErrorCode: { [key: string]: BlogErrorCodeFormat } = {
     errorMessage: 'tag가 생성되지 않았습니다.',
     loggingMessage: 'tag({1}:{0})가 생성되지 않았습니다.',
     httpErrorCode: http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
-    logLevel: LogLevel.WARN,
-  },
-  INVALID_REQUEST_PARAMETER: {
-    code: 'INVALID_REQUEST_PARAMETER',
-    errorMessage: '형식에 맞지 않는 요청 파라미터가 시스템에 인입되었습니다.',
-    loggingMessage: '형식에 맞지 않는 요청 파라미터({0})가 시스템에 인입되었습니다.',
-    httpErrorCode: http2.constants.HTTP_STATUS_BAD_REQUEST,
     logLevel: LogLevel.WARN,
   },
   CATEGORY_NOT_FOUND: {

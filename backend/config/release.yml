@@ -1,6 +1,5 @@
 server:
   port: 443
-  retryCount: 7
 
 client:
   url: TBD

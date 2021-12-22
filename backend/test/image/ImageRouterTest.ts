@@ -4,9 +4,10 @@ import { Server } from 'http';
 import { anything, instance, mock, when } from 'ts-mockito';
 import ImageService from '@src/image/ImageService';
 import { Container } from 'typedi';
-import { endApp, startApp } from '../../src/app';
+import { endApp } from '../../src/app';
 import { appPath } from '../data/testData';
 import * as URL from '../../src/common/constant/URL';
+import { startAppForTest } from '@test/TestUtil';
 
 const imageService: ImageService = mock(ImageService);
 Container.set(ImageService, instance(imageService));
@@ -17,9 +18,9 @@ describe('Image router test', () => {
   let server: Server;
   let request: supertest.SuperTest<supertest.Test>;
 
-  before(() => {
+  before(async () => {
     should();
-    server = startApp([ImageRouter.default]);
+    server = await startAppForTest([ImageRouter.default]);
     request = supertest(server);
   });
 
