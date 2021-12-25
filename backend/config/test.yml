@@ -12,7 +12,7 @@ db:
   connectionOptions:
     useNewUrlParser: true
     useUnifiedTopology: true
-  retryCount: 2
+  retryCount: 7
 
 path:
   appData: ./appData
