@@ -33,7 +33,8 @@ describe('logging test', () => {
     it('call Logger.leaveBlogErrorLog with ERROR option', () => loggingUtilTest.leaveErrorLogTest());
     it('call Logger.leaveBlogErrorLog with FATAL option', () => loggingUtilTest.leaveFatalLogTest());
     it('call Logger.leaveBlogErrorLog with DEFAULT option', () => loggingUtilTest.leaveDefaultLogTest());
-    it('call Logger.leaveBlogErrorLog with parameters', () => loggingUtilTest.leaveLogForErrorWithParametersTest());
+    it('call Logger.leaveBlogErrorLog with parameters', () => loggingUtilTest.leaveBlogErrorLogForErrorWithParametersTest());
+    it('call Logger.leaveBlogErrorLog with default message', () => loggingUtilTest.leaveBlogErrorLogWithDefaultMessageTest());
   });
 
   describe('logging ', () => {

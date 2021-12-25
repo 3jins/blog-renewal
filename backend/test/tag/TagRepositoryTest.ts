@@ -98,18 +98,17 @@ describe('TagRepository test', () => {
       tags[0].name.should.equal(commonTestData.tag2.name);
     });
 
-    it('findTag - by postMeta ID with AND condition', async () => {
+    it('findTag - by postMeta ID with AND condition', async () => { // here
       const paramDto: FindTagRepoParamDto = {
         findTagByPostMetaIdDto: {
-          postMetaIdList: [postMetaIdList[0]],
+          postMetaIdList: [postMetaIdList[0], postMetaIdList[1]],
           isAndCondition: true,
         },
       };
 
       const tags: TagDoc[] = await tagRepository.findTag(paramDto, session);
-      tags.should.have.lengthOf(2);
-      tags[0].name.should.equal(commonTestData.tag1.name);
-      tags[1].name.should.equal(commonTestData.tag3.name);
+      tags.should.have.lengthOf(1);
+      tags[0].name.should.equal(commonTestData.tag3.name);
     });
 
     it('findTag - by postMeta ID with OR condition', async () => {

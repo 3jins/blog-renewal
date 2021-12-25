@@ -14,12 +14,10 @@ const buildMessage = (blogError: BlogError): string => {
     replacedLoggingMessage = replacedLoggingMessage.replace(`{${idx}}`, param);
   });
   let fullMessage = `- error code: ${code}\n- message: ${replacedLoggingMessage}`;
-  if (!_.isNil(rawErrorMessage)) {
+  if (!_.isEmpty(rawErrorMessage)) {
     fullMessage = fullMessage.concat(`\n- raw error message: ${rawErrorMessage}`);
   }
-  if (!_.isNil(stack)) {
-    fullMessage = fullMessage.concat(`\n- stack: ${stack}`);
-  }
+  fullMessage = fullMessage.concat(`\n- stack: ${stack}`);
 
   return fullMessage;
 };

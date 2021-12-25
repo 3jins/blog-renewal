@@ -3,14 +3,19 @@ import sinon from 'sinon';
 import { should } from 'chai';
 import ImageService from '@src/image/ImageService';
 import { File, FileJSON, Files } from 'formidable';
-import fs from 'fs';
+import fs, { PathLike } from 'fs';
 import ImageRepository from '@src/image/ImageRepository';
 import { anyOfClass, anything, capture, instance, mock, verify } from 'ts-mockito';
 import { ImageDoc } from '@src/image/Image';
 import { ClientSession, Connection, DocumentDefinition } from 'mongoose';
 import { appPath } from '../data/testData';
 import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
-import { abortTestTransaction, replaceUseTransactionForTest } from '@test/TestUtil';
+import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
+import { common as commonTestData } from '@test/data/testData';
+import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import BlogError from '@src/common/error/BlogError';
+import config from 'config';
+import path from 'path';
 
 describe('ImageService test', () => {
   let sandbox;
@@ -42,29 +47,51 @@ describe('ImageService test', () => {
     await conn.close();
   });
 
-  it('uploadImage test', () => {
-    const renameSyncStub = sinon.stub(fs, 'renameSync');
-    const fileNameList = ['iu-clap.gif', 'roseblade.png'];
-    const fileList: File[] = fileNameList.map((fileName) => {
-      const filePath = `${appPath.testData}/${fileName}`;
-      const fileStream: Buffer = fs.readFileSync(filePath);
-      const file: File = {
-        size: fileStream.byteLength,
-        path: filePath,
-        name: fileName,
-        type: 'application/octet-stream',
-        toJSON(): FileJSON {
-          return {} as FileJSON;
-        },
-      };
-      return file;
-    });
-    const files: Files = _.zipObject(fileNameList, fileList);
+  describe('uploadImage test', () => {
+    let fileNameList;
+    let files: Files;
 
-    imageService.uploadImage({ files });
-    renameSyncStub.calledTwice.should.be.true;
-    verify(imageRepository.createImages(anyOfClass(Array), anything())).once();
-    const capturedImageList: DocumentDefinition<ImageDoc>[] = capture(imageRepository.createImages).last()[0];
-    capturedImageList.map((capturedImage) => capturedImage.title).should.deep.equal(fileNameList);
+    before(() => {
+      fileNameList = [commonTestData.gifImage.title, commonTestData.pngImage.title];
+      const fileList: File[] = fileNameList.map((fileName) => {
+        const filePath = `${appPath.testData}/${fileName}`;
+        const fileStream: Buffer = fs.readFileSync(filePath);
+        const file: File = {
+          size: fileStream.byteLength,
+          path: filePath,
+          name: fileName,
+          type: 'application/octet-stream',
+          toJSON(): FileJSON {
+            return {} as FileJSON;
+          },
+        };
+        return file;
+      });
+      files = _.zipObject(fileNameList, fileList);
+    });
+
+    it('uploadImage - normal case', () => {
+      const renameSyncStub = sandbox.stub(fs, 'renameSync');
+
+      imageService.uploadImage({ files });
+      renameSyncStub.calledTwice.should.be.true;
+      verify(imageRepository.createImages(anyOfClass(Array), anything())).once();
+      const capturedImageList: DocumentDefinition<ImageDoc>[] = capture(imageRepository.createImages).last()[0];
+      capturedImageList.map((capturedImage) => capturedImage.title).should.deep.equal(fileNameList);
+    });
+
+    it('uploadImage - failed to move', async () => {
+      sandbox.stub(fs, 'renameSync').throws(new Error(commonTestData.simpleTexts[0]));
+
+      const newPath: PathLike = `${config.get('path.appData')}${config.get('path.image')}`;
+      await errorShouldBeThrown(
+        new BlogError(
+          BlogErrorCode.FILE_CANNOT_BE_MOVED,
+          [`${appPath.testData}/${commonTestData.gifImage.title}`, `${path.resolve(newPath, commonTestData.gifImage.title)}`],
+        ),
+        async (_param) => imageService.uploadImage(_param),
+        { files },
+      );
+    });
   });
 });
