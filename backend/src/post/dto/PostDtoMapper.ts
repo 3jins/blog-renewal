@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { FindPostRequestDto } from '@src/post/dto/PostRequestDto';
 import { FindPostParamDto } from '@src/post/dto/PostParamDto';
 import Language from '@src/common/constant/Language';
@@ -8,9 +7,6 @@ export const mapFindPostRequestDtoToFindPostParamDto = (source: FindPostRequestD
   Object.keys(source)
     .forEach((key) => {
       const assignObject = {};
-      if (_.isNil(source[key])) {
-        return;
-      }
       if (key === 'language') {
         assignObject[key] = source[key] as Language;
         Object.assign(destination, assignObject);

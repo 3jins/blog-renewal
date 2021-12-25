@@ -8,6 +8,8 @@ import { endApp } from '../../src/app';
 import { appPath } from '../data/testData';
 import * as URL from '../../src/common/constant/URL';
 import { startAppForTest } from '@test/TestUtil';
+import http2 from 'http2';
+import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
 const imageService: ImageService = mock(ImageService);
 Container.set(ImageService, instance(imageService));
@@ -24,18 +26,38 @@ describe('Image router test', () => {
     request = supertest(server);
   });
 
-  it(`${URL.PREFIX.API}${URL.ENDPOINT.IMAGE}`, async () => {
-    const fileName = 'roseblade.png';
-    const payload = { title: fileName };
+  // eslint-disable-next-line mocha/no-setup-in-describe
+  describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.IMAGE}`, async () => {
+    it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.IMAGE} - normal case`, async () => {
+      const fileName = 'roseblade.png';
+      const payload = { title: fileName };
 
-    when(imageService.uploadImage(anything()))
-      .thenResolve();
+      when(imageService.uploadImage(anything()))
+        .thenResolve();
 
-    await request
-      .post(`${URL.PREFIX.API}${URL.ENDPOINT.IMAGE}`)
-      .field(payload)
-      .attach(fileName, `${appPath.testData}/${fileName}`, { contentType: 'application/octet-stream' })
-      .expect(201);
+      await request
+        .post(`${URL.PREFIX.API}${URL.ENDPOINT.IMAGE}`)
+        .field(payload)
+        .attach(fileName, `${appPath.testData}/${fileName}`, { contentType: 'application/octet-stream' })
+        .expect(201);
+    });
+
+    it(`${URL.PREFIX.API}${URL.ENDPOINT.IMAGE} - parameter error(file is absent)`, async () => {
+      const fileName = 'roseblade.png';
+      const payload = { title: fileName };
+
+      when(imageService.uploadImage(anything()))
+        .thenResolve();
+
+      await request
+        .post(`${URL.PREFIX.API}${URL.ENDPOINT.IMAGE}`)
+        .field(payload)
+        .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
+        .expect((res) => {
+          (!!(res.body.message)).should.be.true;
+          res.body.message.should.equal(BlogErrorCode.FILE_NOT_UPLOADED.errorMessage);
+        });
+    });
   });
 
   after(() => endApp(server));

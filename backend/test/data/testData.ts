@@ -2,6 +2,7 @@ import Language from '@src/common/constant/Language';
 import http2 from 'http2';
 import LogLevel from '@src/common/logging/LogLevel';
 import { Heading } from '@src/post/model/PostVersion';
+import RoleLevel from '@src/common/constant/RoleLevel';
 
 const root = process.env.PWD;
 export const appPath = {
@@ -15,6 +16,7 @@ export const common = {
   masterMember: {
     memberNo: 1,
     name: 'Sejin Jeon',
+    roleLevel: RoleLevel.BLOG_MASTER,
   },
   guestMember1: {
     memberNo: 2,
@@ -176,19 +178,19 @@ export const common = {
   postMetaIdList: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439022', '507f1f77bcf86cd799439033'],
 
   comment1: {
-    isCommentAuthor: false,
+    isPostAuthor: false,
     content: '오늘 저녁 메뉴 추천해줘요!',
   },
   comment2: {
-    isCommentAuthor: false,
+    isPostAuthor: false,
     content: '좋은 글이네요! ^^',
   },
   comment3: {
-    isCommentAuthor: true,
+    isPostAuthor: true,
     content: '교촌 허니콤보 어떠신가요?',
   },
   comment4: {
-    isCommentAuthor: false,
+    isPostAuthor: false,
     content: '나한테 이래라 저래라 하지 마세요. 난 노랑통닭이 좋아요.',
   },
 

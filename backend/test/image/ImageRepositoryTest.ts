@@ -52,4 +52,15 @@ describe('ImageRepository test', () => {
       (err as BlogError).blogErrorCode.should.equal(BlogErrorCode.DUPLICATED_FILE_NAME);
     }
   });
+
+  it('createImages - already saved image file name', async () => {
+    await Image.insertMany([commonTestData.pngImage], { session });
+    const imageDocumentDefinitionList: DocumentDefinition<ImageDoc>[] = [commonTestData.gifImage, commonTestData.pngImage];
+    try {
+      await imageRepository.createImages(imageDocumentDefinitionList, session);
+    } catch (err) {
+      (err instanceof BlogError).should.be.true;
+      (err as BlogError).blogErrorCode.should.equal(BlogErrorCode.DUPLICATED_FILE_NAME);
+    }
+  });
 });

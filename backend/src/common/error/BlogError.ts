@@ -8,7 +8,7 @@ export default class BlogError extends Error {
 
   public constructor(code: BlogErrorCodeFormat, params?: string[], message?: string) {
     super(message);
-    this._blogErrorCode = _.isEmpty(code) ? BlogErrorCode.UNEXPECTED_ERROR : code as BlogErrorCodeFormat;
+    this._blogErrorCode = code as BlogErrorCodeFormat;
     this._params = _.isEmpty(params) ? [] : params as string[];
   }
 
@@ -20,7 +20,10 @@ export default class BlogError extends Error {
     return this._params;
   }
 
+  // TODO: Cannot figure out why this function remains not tested. Improve the test code if you know the reason.
+  /* istanbul ignore next */
   get stack(): string | undefined {
+    /* istanbul ignore next */
     return this._stack;
   }
 }

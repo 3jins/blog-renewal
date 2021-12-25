@@ -42,13 +42,13 @@ export default (loggerStub, dummyBlogErrorCode) => ({
     loggerStub.warn.args[0][0].should.contain('다음 메시지에 대한 log level이 지정되지 않았습니다:\n');
     loggerStub.warn.args[0][0].should.contain(`- error code: ${dummyBlogErrorCode.TEST_DEFAULT.code}\n`);
     loggerStub.warn.args[0][0].should.contain(`- message: ${commonTestData.simpleTexts[0]}\n`);
-    loggerStub.warn.args[0][0].should.contain('- raw error message:');
+    loggerStub.warn.args[0][0].should.not.contain('- raw error message:');
     loggerStub.warn.args[0][0].should.contain('- stack:');
     _.keys(loggerStub)
       .filter((spyFunction) => spyFunction !== 'warn' && loggerStub[spyFunction].notCalled !== undefined)
       .forEach((spyFunction) => loggerStub[spyFunction].notCalled.should.be.true);
   },
-  leaveLogForErrorWithParametersTest: () => {
+  leaveBlogErrorLogForErrorWithParametersTest: () => {
     const params = ['Tablo', 'Mithra', 'Tukutz'];
     leaveBlogErrorLog(new BlogError(dummyBlogErrorCode.TEST_ERROR_WITH_PARAMS, params));
     loggerStub.error.calledOnce.should.be.true;
@@ -56,7 +56,17 @@ export default (loggerStub, dummyBlogErrorCode) => ({
     loggerStub.error.args[0].should.have.lengthOf(1);
     loggerStub.error.args[0][0].should.contain(`- error code: ${dummyBlogErrorCode.TEST_ERROR_WITH_PARAMS.code}\n`);
     loggerStub.error.args[0][0].should.contain(`- message: Parameters are given: ${params[0]}, ${params[1]}, and ${params[2]}.\n`);
-    loggerStub.error.args[0][0].should.contain('- raw error message:');
+    loggerStub.error.args[0][0].should.not.contain('- raw error message:');
+    loggerStub.error.args[0][0].should.contain('- stack:');
+  },
+  leaveBlogErrorLogWithDefaultMessageTest: () => {
+    leaveBlogErrorLog(new BlogError(dummyBlogErrorCode.TEST_ERROR, [], commonTestData.simpleTexts[1]));
+    loggerStub.error.calledOnce.should.be.true;
+    loggerStub.error.args.should.have.lengthOf(1);
+    loggerStub.error.args[0].should.have.lengthOf(1);
+    loggerStub.error.args[0][0].should.contain(`- error code: ${dummyBlogErrorCode.TEST_ERROR.code}\n`);
+    loggerStub.error.args[0][0].should.contain(`- message: ${dummyBlogErrorCode.TEST_ERROR.errorMessage}\n`);
+    loggerStub.error.args[0][0].should.contain(`- raw error message: ${commonTestData.simpleTexts[1]}`);
     loggerStub.error.args[0][0].should.contain('- stack:');
   },
 });

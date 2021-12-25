@@ -24,13 +24,13 @@ export const memberSchema = new Schema({
   authToken: { type: String },
   name: { type: String, required: true },
   mailAddressList: [{ type: String, required: false }],
-  mentionNoti: { type: Boolean, required: true, default: true },
-  subscriptionNoti: { type: Boolean, required: true, default: false },
+  mentionNoti: { type: Boolean, default: true },
+  subscriptionNoti: { type: Boolean, default: false },
   categoryNoti: { type: [Types.ObjectId], ref: 'Category' },
   tagNoti: { type: [Types.ObjectId], ref: 'Tag' },
   seriesNoti: { type: [Types.ObjectId], ref: 'Series' },
-  roleLevel: { type: Number, required: true, default: RoleLevel.ORDINARY },
-  isBlocked: { type: Boolean, required: true, default: false },
+  roleLevel: { type: Number, default: RoleLevel.ORDINARY },
+  isBlocked: { type: Boolean, default: false },
 });
 
 export default model<MemberDoc>('Member', memberSchema, 'Members');
