@@ -18,16 +18,17 @@ import { common as commonTestData } from '@test/data/testData';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
-import { ClientSession, Connection, PopulatedDoc, Types } from 'mongoose';
+import { ClientSession, Connection, Types } from 'mongoose';
 import { SeriesDoc } from '@src/series/Series';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import sinon from 'sinon';
-import { ImageDoc } from '@src/image/Image';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
 import { FindSeriesResponseDto } from '@src/series/dto/SeriesResponseDto';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 describe('SeriesService test', () => {
   let sandbox;
+  let replSet: MongoMemoryReplSet;
   let conn: Connection;
   let session: ClientSession;
   let seriesService: SeriesService;
@@ -41,14 +42,14 @@ describe('SeriesService test', () => {
     objectIdList,
   } = commonTestData;
 
-  before(() => {
+  before(async () => {
     seriesRepository = spy(mock(SeriesRepository));
     seriesService = new SeriesService(instance(seriesRepository));
     postMetaList = objectIdList.slice(0, 2);
     [, , gifImageId] = objectIdList;
     should();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -64,6 +65,7 @@ describe('SeriesService test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   describe('findSeries test', () => {

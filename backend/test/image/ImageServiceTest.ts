@@ -9,27 +9,29 @@ import { anyOfClass, anything, capture, instance, mock, verify } from 'ts-mockit
 import { ImageDoc } from '@src/image/Image';
 import { ClientSession, Connection, DocumentDefinition } from 'mongoose';
 import { appPath } from '../data/testData';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
 import { common as commonTestData } from '@test/data/testData';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
 import config from 'config';
 import path from 'path';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 describe('ImageService test', () => {
   let sandbox;
+  let replSet: MongoMemoryReplSet;
   let conn: Connection;
   let session: ClientSession;
   let imageService: ImageService;
   let imageRepository: ImageRepository;
 
-  before(() => {
+  before(async () => {
     imageRepository = mock(ImageRepository);
     imageService = new ImageService(instance(imageRepository));
     should();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -45,6 +47,7 @@ describe('ImageService test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   describe('uploadImage test', () => {

@@ -15,13 +15,15 @@ import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
 import { TagDoc } from '@src/tag/Tag';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import sinon from 'sinon';
 import { FindTagResponseDto } from '@src/tag/dto/TagResponseDto';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 describe('TagService test', () => {
   let sandbox;
+  let replSet: MongoMemoryReplSet;
   let conn: Connection;
   let session: ClientSession;
   let tagService: TagService;
@@ -34,13 +36,13 @@ describe('TagService test', () => {
     objectIdList: postMetaIdList,
   } = commonTestData;
 
-  before(() => {
+  before(async () => {
     tagRepository = spy(mock(TagRepository));
     tagService = new TagService(instance(tagRepository));
     postMetaList = postMetaIdList.map((postMetaId) => new Types.ObjectId(postMetaId));
     should();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -56,6 +58,7 @@ describe('TagService test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   describe('findTag test', () => {

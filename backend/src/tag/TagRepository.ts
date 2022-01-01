@@ -26,6 +26,7 @@ export default class TagRepository {
     const tagList = await Tag
       .find({ ...queryToFindTagByName })
       .populate('postMetaList')
+      .sort({ name: 1 })
       .session(session)
       .lean();
 

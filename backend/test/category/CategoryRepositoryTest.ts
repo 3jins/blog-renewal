@@ -1,7 +1,7 @@
 import { ClientSession, Connection, Types } from 'mongoose';
 import { should } from 'chai';
 import sinon from 'sinon';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
 import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import CategoryRepository from '@src/category/CategoryRepository';
@@ -14,18 +14,20 @@ import {
 import Category, { CategoryDoc } from '@src/category/Category';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 describe('CategoryRepository test', () => {
   let sandbox;
   let categoryRepository: CategoryRepository;
+  let replSet: MongoMemoryReplSet;
   let conn: Connection;
   let session: ClientSession;
 
-  before(() => {
+  before(async () => {
     should();
     categoryRepository = new CategoryRepository();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -40,6 +42,7 @@ describe('CategoryRepository test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   describe('findCategory test', () => {

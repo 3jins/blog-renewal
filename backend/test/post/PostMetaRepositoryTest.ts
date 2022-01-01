@@ -1,7 +1,7 @@
 import { ClientSession, Connection } from 'mongoose';
 import { should } from 'chai';
 import sinon from 'sinon';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
 import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import PostMetaRepository from '@src/post/repository/PostMetaRepository';
@@ -17,18 +17,20 @@ import Series, { SeriesDoc } from '@src/series/Series';
 import PostMeta, { PostMetaDoc } from '@src/post/model/PostMeta';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 describe('PostMetaRepository test', () => {
   let sandbox;
   let postMetaRepository: PostMetaRepository;
+  let replSet: MongoMemoryReplSet;
   let conn: Connection;
   let session: ClientSession;
 
-  before(() => {
+  before(async () => {
     should();
     postMetaRepository = new PostMetaRepository();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -43,6 +45,7 @@ describe('PostMetaRepository test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   describe('findPostMeta test', () => {

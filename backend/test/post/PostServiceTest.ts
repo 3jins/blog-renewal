@@ -46,10 +46,12 @@ import { FindPostResponseDto } from '@src/post/dto/PostResponseDto';
 import { PostVersionDoc } from '@src/post/model/PostVersion';
 import sinon from 'sinon';
 import { ClientSession, Connection } from 'mongoose';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 describe('PostService test', () => {
   let sandbox;
+  let replSet: MongoMemoryReplSet;
   let conn: Connection;
   let session: ClientSession;
   let postService: PostService;
@@ -59,10 +61,10 @@ describe('PostService test', () => {
   let seriesRepository: SeriesRepository;
   let tagRepository: TagRepository;
 
-  before(() => {
+  before(async () => {
     should();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -90,6 +92,7 @@ describe('PostService test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   describe('findPost test', () => {

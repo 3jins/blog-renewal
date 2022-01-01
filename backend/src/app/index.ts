@@ -13,7 +13,8 @@ import { leaveLog } from '@src/common/logging/LoggingUtil';
 import LogLevel from '@src/common/logging/LogLevel';
 
 const connectToDb = () => {
-  DbConnection.setConnection();
+  const { uri } = config.get('db');
+  DbConnection.setConnection(uri);
   const conn: Connection = DbConnection.getConnection();
   conn.on('error', (err: Error) => leaveLog(err.toString(), LogLevel.ERROR));
   conn.once('open', () => {
