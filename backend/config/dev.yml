@@ -1,0 +1,18 @@
+server:
+  port: 5913
+
+client:
+  url: http://localhost
+  port: 8080
+
+db:
+  uri: mongodb://localhost:27017/blog
+  connectionOptions:
+    useNewUrlParser: true
+    useUnifiedTopology: true
+  retryCount: 1
+
+path:
+  appData: ./appData
+  image: /image
+  logging: /log.txt
