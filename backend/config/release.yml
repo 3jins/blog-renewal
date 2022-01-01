@@ -6,9 +6,7 @@ client:
   port: TBD
 
 db:
-  url: TBD
-  port: 27017
-  dbName: blog
+  uri: TBD
   connectionOptions:
     useNewUrlParser: true
     useUnifiedTopology: true
@@ -17,4 +15,4 @@ db:
 path:
   appData: /home/blog
   image: /image
-  logging: /log
+  logging: /log.txt

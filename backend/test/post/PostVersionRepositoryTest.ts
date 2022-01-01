@@ -1,28 +1,34 @@
 import { ClientSession, Connection } from 'mongoose';
 import { should } from 'chai';
 import sinon from 'sinon';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
 import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import PostVersionRepository from '@src/post/repository/PostVersionRepository';
-import { CreatePostVersionRepoParamDto, DeletePostVersionRepoParamDto, FindPostVersionRepoParamDto } from '@src/post/dto/PostVersionRepoParamDto';
+import {
+  CreatePostVersionRepoParamDto,
+  DeletePostVersionRepoParamDto,
+  FindPostVersionRepoParamDto,
+} from '@src/post/dto/PostVersionRepoParamDto';
 import PostVersion, { PostVersionDoc } from '@src/post/model/PostVersion';
 import Image from '@src/image/Image';
 import { OBJECT_ID_PATTERN } from '@src/common/constant/RegexPattern';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 describe('PostVersionRepository test', () => {
   let sandbox;
   let postVersionRepository: PostVersionRepository;
+  let replSet: MongoMemoryReplSet;
   let conn: Connection;
   let session: ClientSession;
 
-  before(() => {
+  before(async () => {
     should();
     postVersionRepository = new PostVersionRepository();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -37,6 +43,7 @@ describe('PostVersionRepository test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   describe('findPostVersion test', () => {

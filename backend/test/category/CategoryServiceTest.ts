@@ -1,6 +1,8 @@
 import { should } from 'chai';
+import sinon from 'sinon';
 import { anything, capture, deepEqual, instance, mock, spy, verify, when } from 'ts-mockito';
 import { ClientSession, Connection, Types } from 'mongoose';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import CategoryService from '@src/category/CategoryService';
 import CategoryRepository from '@src/category/CategoryRepository';
 import {
@@ -15,17 +17,17 @@ import {
   FindCategoryRepoParamDto,
   UpdateCategoryRepoParamDto,
 } from '@src/category/dto/CategoryRepoParamDto';
-import { common as commonTestData } from '@test/data/testData';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
-import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
 import { CategoryDoc } from '@src/category/Category';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
-import sinon from 'sinon';
+import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { FindCategoryResponseDto } from '@src/category/dto/CategoryResponseDto';
+import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
+import { common as commonTestData } from '@test/data/testData';
 
 describe('CategoryService test', () => {
   let sandbox;
+  let replSet: MongoMemoryReplSet;
   let conn: Connection;
   let session: ClientSession;
   let categoryService: CategoryService;
@@ -38,12 +40,12 @@ describe('CategoryService test', () => {
     objectIdList: [categoryId1, categoryId2],
   } = commonTestData;
 
-  before(() => {
+  before(async () => {
     categoryRepository = spy(mock(CategoryRepository));
     categoryService = new CategoryService(instance(categoryRepository));
     should();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -59,6 +61,7 @@ describe('CategoryService test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   describe('findCategory test', () => {

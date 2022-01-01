@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { ClientSession, Connection } from 'mongoose';
 import { should } from 'chai';
 import sinon from 'sinon';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
 import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import SeriesRepository from '@src/series/SeriesRepository';
@@ -17,18 +17,20 @@ import PostMeta, { PostMetaDoc } from '@src/post/model/PostMeta';
 import Image from '@src/image/Image';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 describe('SeriesRepository test', () => {
   let sandbox;
   let seriesRepository: SeriesRepository;
+  let replSet: MongoMemoryReplSet;
   let conn: Connection;
   let session: ClientSession;
 
-  before(() => {
+  before(async () => {
     should();
     seriesRepository = new SeriesRepository();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -43,6 +45,7 @@ describe('SeriesRepository test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   describe('findSeries test', () => {

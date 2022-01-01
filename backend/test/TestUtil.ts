@@ -12,10 +12,16 @@ import { Server } from 'http';
 
 export const startAppForTest = async (routerList: Router[]): Promise<Server> => {
   const { port } = config.get('server');
+  let portInUse = port;
   let alternativePort;
-  do {
-    alternativePort = await detect(port); // eslint-disable-line no-await-in-loop
-  } while (alternativePort !== port);
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    alternativePort = await detect(portInUse); // eslint-disable-line no-await-in-loop
+    if (portInUse === alternativePort) {
+      break;
+    }
+    portInUse = alternativePort;
+  }
   return startApp(routerList, alternativePort);
 };
 

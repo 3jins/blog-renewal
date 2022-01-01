@@ -3,23 +3,25 @@ import Image, { ImageDoc } from '@src/image/Image';
 import { common as commonTestData } from '@test/data/testData';
 import { ClientSession, Connection, DocumentDefinition } from 'mongoose';
 import ImageRepository from '@src/image/ImageRepository';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { abortTestTransaction } from '@test/TestUtil';
 import sinon from 'sinon';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 describe('ImageRepository test', () => {
   let sandbox;
   let imageRepository: ImageRepository;
+  let replSet: MongoMemoryReplSet;
   let conn: Connection;
   let session: ClientSession;
 
-  before(() => {
+  before(async () => {
     should();
     imageRepository = new ImageRepository();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -34,6 +36,7 @@ describe('ImageRepository test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   it('createImages', async () => {

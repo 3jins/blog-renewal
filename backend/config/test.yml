@@ -6,9 +6,9 @@ client:
   port: 8080
 
 db:
-  url: localhost
-  port: 27017
-  dbName: blog
+  name: "blog"
+  count: 1
+  ip: "127.0.0.1"
   connectionOptions:
     useNewUrlParser: true
     useUnifiedTopology: true

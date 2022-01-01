@@ -1,7 +1,7 @@
 import { ClientSession, Connection, Types } from 'mongoose';
 import { should } from 'chai';
 import sinon from 'sinon';
-import { getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
 import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import TagRepository from '@src/tag/TagRepository';
@@ -15,18 +15,20 @@ import Tag, { TagDoc } from '@src/tag/Tag';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import PostMeta, { PostMetaDoc } from '@src/post/model/PostMeta';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 describe('TagRepository test', () => {
   let sandbox;
   let tagRepository: TagRepository;
   let conn: Connection;
+  let replSet: MongoMemoryReplSet;
   let session: ClientSession;
 
-  before(() => {
+  before(async () => {
     should();
     tagRepository = new TagRepository();
-    setConnection();
-    conn = getConnection();
+    replSet = await createMongoMemoryReplSet();
+    conn = setConnection(replSet.getUri());
     sandbox = sinon.createSandbox();
   });
 
@@ -41,6 +43,7 @@ describe('TagRepository test', () => {
 
   after(async () => {
     await conn.close();
+    await replSet.stop();
   });
 
   describe('findTag test', () => {
@@ -120,8 +123,8 @@ describe('TagRepository test', () => {
       };
       const tags: TagDoc[] = await tagRepository.findTag(paramDto, session);
       tags.should.have.lengthOf(2);
-      tags[0].name.should.equal(commonTestData.tag2.name);
-      tags[1].name.should.equal(commonTestData.tag3.name);
+      tags[0].name.should.equal(commonTestData.tag3.name);
+      tags[1].name.should.equal(commonTestData.tag2.name);
     });
 
     it('findTag - by name and postMeta ID', async () => {
