@@ -3,7 +3,8 @@ path:
 
 logger:
   pino:
-    option:
-      prettyPrint:
+    transport:
+      target: 'pino-pretty'
+      options:
         translateTime: 'SYS:standard'
 

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import marked, { Tokenizer, TokensList } from 'marked';
+import { marked, Tokenizer } from 'marked';
 import hljs from 'highlight.js';
 import katex from 'katex';
 import { Heading } from '@src/post/model/PostVersion';
@@ -21,19 +21,20 @@ export const renderContent = (rawContent: string): { renderedContent: string, to
      * emStrong
      *
      * - Little fix of Copy-and-paste from emStrong tokenizer code of `markedjs` library.
-     *   - v2.1.3
-     *   - https://github.com/markedjs/marked/blob/825a9f82af05448d85618bbac6ade8fbf9df286b/src/Tokenizer.js#L549-L609
-     *   - https://github.com/markedjs/marked/blob/825a9f82af05448d85618bbac6ade8fbf9df286b/src/rules.js#L176-L182
+     *   - v4.0.8
+     *   - https://github.com/markedjs/marked/blob/v4.0.8/src/Tokenizer.js#L567-L631
+     *   - https://github.com/markedjs/marked/blob/v4.0.8/src/rules.js#L168-L174
      * - Check this issue:
      *   - https://github.com/markedjs/marked/issues/2154#issuecomment-890300422
      */
     // @ts-ignore
     emStrong(src, maskedSrc, prevChar = '') {
       /* eslint-disable */
+      // All `punct`s are removed from the rules.
       const rules = {
-        lDelim: /^(?:\*+(?:([_])|[^\s*]))|^_+(?:([*])|([^\s_]))/,
-        rDelimAst: /__[^_*]*?\*[^_*]*?__|[_](\*+)(?=[\s]|$)|[^*_\s](\*+)(?=[_\s]|$)|[_\s](\*+)(?=[^*_\s])|[\s](\*+)(?=[_])|[_](\*+)(?=[_])|[^*_\s](\*+)(?=[^*_\s])/,
-        rDelimUnd: /\*\*[^_*]*?_[^_*]*?\*\*|[*](_+)(?=[\s]|$)|[^*_\s](_+)(?=[*\s]|$)|[*\s](_+)(?=[^*_\s])|[\s](_+)(?=[*])|[*](_+)(?=[*])/,
+          lDelim: /^(?:\*+(?:([_])|[^\s*]))|^_+(?:([*])|([^\s_]))/,
+          rDelimAst: /^[^_*]*?\_\_[^_*]*?\*[^_*]*?(?=\_\_)|[_](\*+)(?=[\s]|$)|[^*_\s](\*+)(?=[_\s]|$)|[_\s](\*+)(?=[^*_\s])|[\s](\*+)(?=[_])|[_](\*+)(?=[_])|[^*_\s](\*+)(?=[^*_\s])/,
+          rDelimUnd: /^[^_*]*?\*\*[^_*]*?\_[^_*]*?(?=\*\*)|[*](\_+)(?=[\s]|$)|[^*_\s](\_+)(?=[*\s]|$)|[*\s](\_+)(?=[^*_\s])|[\s](\_+)(?=[*])|[*](\_+)(?=[*])/,
       };
 
       let match = rules.lDelim.exec(src);
@@ -134,11 +135,11 @@ export const renderContent = (rawContent: string): { renderedContent: string, to
       return `<pre class="hljs"><code class = "language-${language} hljs">${hljs.highlight(code, { language }).value}</code></pre>`;
     },
   });
-  const tokenList: TokensList = marked.lexer(rawContent);
+  const tokenList: marked.TokensList = marked.lexer(rawContent);
   tokenList
     .forEach((token, idx) => {
       if (token.type === 'table') {
-        const tableHtml: string = marked.parser([token] as TokensList)
+        const tableHtml: string = marked.parser([token] as marked.TokensList)
           .replace(/align="left"/ig, 'style="text-align:left;"')
           .replace(/align="right"/ig, 'style="text-align:right;"')
           .replace(/align="center"/ig, 'style="text-align:center;"')

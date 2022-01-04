@@ -598,6 +598,7 @@ describe('PostService test', () => {
 
       verify(postVersionRepository.createPostVersion(anything(), session)).once();
       const [createPostVersionRepoParamDto] = capture<CreatePostVersionRepoParamDto, ClientSession>(postVersionRepository.createPostVersion).last();
+      renderedHtml = createPostVersionRepoParamDto.renderedContent;
       createPostVersionRepoParamDto.toc.should.deep.equal([
         { depth: 2, text: 'ul/li' },
         { depth: 3, text: 'only plain text' },
@@ -638,6 +639,7 @@ describe('PostService test', () => {
 
       verify(postVersionRepository.createPostVersion(anything(), session)).once();
       const [createPostVersionRepoParamDto] = capture<CreatePostVersionRepoParamDto, ClientSession>(postVersionRepository.createPostVersion).last();
+      renderedHtml = createPostVersionRepoParamDto.renderedContent;
       createPostVersionRepoParamDto.toc.should.deep.equal([
         { depth: 2, text: '코드' },
         { depth: 3, text: 'list indentation 없음' },
