@@ -1,10 +1,9 @@
-import { PopulatedDoc } from 'mongoose';
 import Language from '@src/common/constant/Language';
-import { ImageDoc } from '@src/image/Image';
 import { Heading } from '@src/post/model/PostVersion';
 import { TagDto } from '@src/tag/dto/TagResponseDto';
 import { SeriesDto } from '@src/series/dto/SeriesResponseDto';
 import { CategoryDto } from '@src/category/dto/CategoryResponseDto';
+import { ImageDto } from '@src/image/dto/ImageResponseDto';
 
 export interface PostVersionDto {
   title: string;
@@ -13,7 +12,7 @@ export interface PostVersionDto {
   toc: Heading[];
   language: Language;
   thumbnailContent: string;
-  thumbnailImage?: PopulatedDoc<ImageDoc>;
+  thumbnailImage?: ImageDto;
   updatedDate: Date;
   isLatestVersion: boolean;
   lastPostVersion: string;
@@ -35,4 +34,11 @@ export interface PostDto {
 
 export interface FindPostResponseDto {
   postList: PostDto[];
+}
+
+export interface GetPostPreviewResponseDto {
+  title: string;
+  rawContent: string;
+  renderedContent: string;
+  toc: Heading[];
 }

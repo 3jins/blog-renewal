@@ -18,7 +18,7 @@ import {
   CreateNewPostParamDto,
   DeletePostParamDto,
   DeletePostVersionParamDto,
-  FindPostParamDto,
+  FindPostParamDto, GetPostPreviewParamDto,
   UpdatePostMetaDataParamDto,
 } from '@src/post/dto/PostParamDto';
 import { CreatePostVersionRepoParamDto, FindPostVersionRepoParamDto } from '@src/post/dto/PostVersionRepoParamDto';
@@ -28,9 +28,10 @@ import { TagDoc } from '@src/tag/Tag';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
-import { FindPostResponseDto, PostDto, PostVersionDto } from '@src/post/dto/PostResponseDto';
+import { FindPostResponseDto, GetPostPreviewResponseDto, PostDto, PostVersionDto } from '@src/post/dto/PostResponseDto';
 import { PostVersionDoc } from '@src/post/model/PostVersion';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
+import path from 'path';
 
 @Service()
 export default class PostService {
@@ -50,6 +51,18 @@ export default class PostService {
       const postVersionList: PostVersionDoc[] = await this.postVersionRepository.findPostVersion(findPostRepoParamDto, session);
       return this.combineFindPostResponse(postMetaList, postVersionList);
     });
+  }
+
+  public getPostPreview(paramDto: GetPostPreviewParamDto): GetPostPreviewResponseDto {
+    const { post } = paramDto;
+    const rawContent: string = this.readPostContent(post.path);
+    const { renderedContent, toc } = renderContent(rawContent);
+    return {
+      title: path.parse(post.name as string).name,
+      rawContent,
+      renderedContent,
+      toc,
+    };
   }
 
   public async createNewPost(paramDto: CreateNewPostParamDto): Promise<number> {
@@ -163,7 +176,7 @@ export default class PostService {
     const { renderedContent, toc, defaultThumbnailContent } = renderContent(rawContent);
     const createPostRepoParamDto: CreatePostVersionRepoParamDto = {
       postNo,
-      title: post.name as string,
+      title: path.parse(post.name as string).name,
       rawContent,
       renderedContent,
       toc,
@@ -184,7 +197,7 @@ export default class PostService {
     const { renderedContent, toc, defaultThumbnailContent } = renderContent(rawContent);
     const createPostRepoParamDto: CreatePostVersionRepoParamDto = {
       postNo,
-      title: post.name as string,
+      title: path.parse(post.name as string).name,
       rawContent,
       renderedContent,
       toc,
@@ -204,7 +217,7 @@ export default class PostService {
   }
 
   private async makeUpdatePostMetaRepoParamDto(paramDto: UpdatePostMetaDataParamDto, session: ClientSession): Promise<UpdatePostMetaRepoParamDto> {
-    const { postNo, categoryName, seriesName, tagNameList, isPrivate, isDeprecated, isDraft } = paramDto;
+    const { postNo, categoryName, seriesName, tagNameList, isDeleted, isPrivate, isDeprecated, isDraft } = paramDto;
     const [lastVersionPostMeta]: PostMetaDoc[] = await this.postMetaRepository.findPostMeta({ postNo }, session);
     if (_.isNil(lastVersionPostMeta)) {
       throw new BlogError(BlogErrorCode.POST_NOT_FOUND, [postNo.toString(), 'postNo']);
@@ -212,6 +225,7 @@ export default class PostService {
 
     const updatePostMetaRepoParamDto: UpdatePostMetaRepoParamDto = {
       postNo,
+      isDeleted: _.isNil(isDeleted) ? lastVersionPostMeta.isDeleted : isDeleted,
       isPrivate: _.isNil(isPrivate) ? lastVersionPostMeta.isPrivate : isPrivate,
       isDeprecated: _.isNil(isDeprecated) ? lastVersionPostMeta.isDeprecated : isDeprecated,
       isDraft: _.isNil(isDraft) ? lastVersionPostMeta.isDraft : isDraft,

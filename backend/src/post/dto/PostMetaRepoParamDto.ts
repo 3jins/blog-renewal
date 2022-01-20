@@ -5,6 +5,7 @@ export interface FindPostMetaRepoParamDto {
   categoryId?: string;
   seriesId?: string;
   tagIdList?: string[];
+  isDeleted?: boolean;
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
@@ -24,8 +25,8 @@ export interface UpdatePostMetaRepoParamDto {
   categoryId?: Types.ObjectId;
   seriesId?: Types.ObjectId;
   tagIdList?: Types.ObjectId[];
-  isDeleted?: boolean;
   commentCount?: number;
+  isDeleted?: boolean;
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;

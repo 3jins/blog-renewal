@@ -16,7 +16,6 @@ import {
   DeletePostRequestDto,
   DeletePostVersionRequestDto,
   FindPostRequestDto,
-  UpdatePostMetaDataRequestDto,
 } from '@src/post/dto/PostRequestDto';
 import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 import { FindPostParamDto } from '@src/post/dto/PostParamDto';
@@ -45,6 +44,7 @@ describe('Post router test', () => {
         categoryId: commonTestData.objectIdList[0],
         seriesId: commonTestData.objectIdList[1],
         tagIdList: [commonTestData.objectIdList[2], commonTestData.objectIdList[3]],
+        isDeleted: false,
         isPrivate: false,
         isDeprecated: false,
         isDraft: false,
@@ -83,6 +83,7 @@ describe('Post router test', () => {
         categoryId: commonTestData.objectIdList[0],
         seriesId: commonTestData.objectIdList[1],
         tagIdList: [commonTestData.objectIdList[2], commonTestData.objectIdList[3]],
+        isDeleted: false,
         isPrivate: false,
         isDeprecated: false,
         isDraft: false,
@@ -337,10 +338,9 @@ describe('Post router test', () => {
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
-  describe(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST}`, () => {
-    it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST} - normal case`, async () => {
-      const requestDto: UpdatePostMetaDataRequestDto = {
-        postNo: commonTestData.post2V1.postNo,
+  describe(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo`, () => {
+    it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - normal case`, async () => {
+      const requestDto: Object = {
         seriesName: commonTestData.series1.name,
       };
 
@@ -348,15 +348,16 @@ describe('Post router test', () => {
         .thenResolve();
 
       await request
-        .patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`)
+        .patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post2V1.postNo}`)
         .field(requestDto)
         .expect(http2.constants.HTTP_STATUS_OK);
       verify(postService.updatePostMetaData(objectContaining({
+        postNo: commonTestData.post2V1.postNo,
         ...requestDto,
       }))).once();
     });
 
-    it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST} - parameter error(key)`, async () => {
+    it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - parameter error(key)`, async () => {
       const strangeRequestDto = {
         doWeLearnMathTo: 'add the dead\'s sum',
         subtractTheWeakOnes: 'count cash for great ones',
@@ -364,7 +365,7 @@ describe('Post router test', () => {
       };
 
       await request
-        .patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`)
+        .patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post2V1.postNo}`)
         .field(strangeRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {
@@ -373,14 +374,14 @@ describe('Post router test', () => {
         });
     });
 
-    it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST} - parameter error(type of value)`, async () => {
+    it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - parameter error(type of value)`, async () => {
       const typeDistortedRequestDto = {
         postNo: '내가 창조적일 땐 현실도 날 못 타일러',
         seriesName: commonTestData.series1.name,
       };
 
       await request
-        .patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`)
+        .patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post2V1.postNo}`)
         .field(typeDistortedRequestDto)
         .expect(http2.constants.HTTP_STATUS_BAD_REQUEST)
         .expect((res) => {

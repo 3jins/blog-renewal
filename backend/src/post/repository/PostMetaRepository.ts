@@ -21,7 +21,8 @@ export default class PostMetaRepository {
       .populate('category')
       .populate('series')
       .populate('tagList')
-      .session(session);
+      .session(session)
+      .lean();
   }
 
   public async createPostMeta(paramDto: CreatePostMetaRepoParamDto, session: ClientSession): Promise<number> {
@@ -60,10 +61,13 @@ export default class PostMetaRepository {
   }
 
   private makeQueryToFindPostMeta(paramDto: FindPostMetaRepoParamDto): FilterQuery<PostMetaDoc> {
-    const { postNo, categoryId, seriesId, tagIdList, isPrivate, isDeprecated, isDraft } = paramDto;
+    const { postNo, categoryId, seriesId, tagIdList, isDeleted, isPrivate, isDeprecated, isDraft } = paramDto;
     const queryToFindPostMeta: FilterQuery<PostMetaDoc> = {};
     if (!_.isNil(postNo)) {
       Object.assign(queryToFindPostMeta, { postNo });
+    }
+    if (!_.isNil(isDeleted)) {
+      Object.assign(queryToFindPostMeta, { isDeleted });
     }
     if (!_.isNil(isPrivate)) {
       Object.assign(queryToFindPostMeta, { isPrivate });
@@ -112,6 +116,9 @@ export default class PostMetaRepository {
     }
     if (!_.isNil(paramDto.isDraft)) {
       Object.assign(queryToUpdatePostMeta, { isDraft: paramDto.isDraft });
+    }
+    if (!_.isNil(paramDto.isDeleted)) {
+      Object.assign(queryToUpdatePostMeta, { isDeleted: paramDto.isDeleted });
     }
     return queryToUpdatePostMeta;
   }

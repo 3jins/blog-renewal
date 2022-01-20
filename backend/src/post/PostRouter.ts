@@ -41,7 +41,7 @@ postRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo*`, (ctx: Context) 
   const requestDto: FindPostRequestDto = getValidatedRequestDtoOf(FindPostRequestSchema, { ...ctx.query, postNo });
   const paramDto: FindPostParamDto = mapFindPostRequestDtoToFindPostParamDto(requestDto);
 
-  postService.findPost(paramDto)
+  return postService.findPost(paramDto)
     .then((response: FindPostResponseDto) => {
       ctx.body = response;
       ctx.status = http2.constants.HTTP_STATUS_OK;
@@ -56,7 +56,7 @@ postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`, koaBody(koaBodyOptions)
   const requestDto: CreateNewPostRequestDto = getValidatedRequestDtoOf(CreateNewPostRequestSchema, ctx.request.body);
   const post: File = getValidatedRequestDtoOf(fileTypeSchema, ctx.request.files!.post) as File;
 
-  postService.createNewPost({ ...requestDto, post })
+  return postService.createNewPost({ ...requestDto, post })
     .then((postNo: number) => {
       ctx.set(HttpHeaderField.CONTENT_LOCATION, `${URL.PREFIX.API}${URL.ENDPOINT.POST}/${postNo}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;
@@ -71,32 +71,33 @@ postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`, ko
   const requestDto: AddUpdatedVersionPostRequestDto = getValidatedRequestDtoOf(AddUpdatedVersionPostRequestSchema, ctx.request.body);
   const post: File = getValidatedRequestDtoOf(fileTypeSchema, ctx.request.files!.post) as File;
 
-  postService.addUpdatedVersionPost({ ...requestDto, post })
+  return postService.addUpdatedVersionPost({ ...requestDto, post })
     .then((postVersionId: string) => {
       ctx.set(HttpHeaderField.CONTENT_LOCATION, `${URL.PREFIX.API}${URL.ENDPOINT.POST}/${requestDto.postNo}?postVersionId=${postVersionId}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;
     });
 });
 
-postRouter.patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`, koaBody(koaBodyOptions), (ctx: Context) => {
-  const requestDto: UpdatePostMetaDataRequestDto = getValidatedRequestDtoOf(UpdatePostMetaDataRequestSchema, ctx.request.body);
+postRouter.patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo`, koaBody(koaBodyOptions), (ctx: Context) => {
+  const { postNo } = ctx.params;
+  const requestDto: UpdatePostMetaDataRequestDto = getValidatedRequestDtoOf(UpdatePostMetaDataRequestSchema, { postNo, ...ctx.request.body });
 
-  postService.updatePostMetaData({ ...requestDto })
+  return postService.updatePostMetaData({ ...requestDto })
     .then(() => {
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });
 });
 
-postRouter.delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}/:postVersionId`, koaBody(koaBodyOptions), (ctx: Context) => {
+postRouter.delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}/:postVersionId`, (ctx: Context) => {
   const requestDto: DeletePostVersionRequestDto = getValidatedRequestDtoOf(DeletePostVersionRequestSchema, ctx.params);
 
-  postService.deletePostVersion({ ...requestDto })
+  return postService.deletePostVersion({ ...requestDto })
     .then(() => {
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });
 });
 
-postRouter.delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo`, koaBody(koaBodyOptions), (ctx: Context) => {
+postRouter.delete(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo`, (ctx: Context) => {
   const requestDto: DeletePostRequestDto = getValidatedRequestDtoOf(DeletePostRequestSchema, ctx.params);
 
   postService.deletePost({ ...requestDto })
