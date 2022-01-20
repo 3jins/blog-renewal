@@ -1,22 +1,21 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { should } from 'chai';
-import ImageService from '@src/image/ImageService';
-import { File, FileJSON, Files } from 'formidable';
+import path from 'path';
 import fs, { PathLike } from 'fs';
-import ImageRepository from '@src/image/ImageRepository';
+import config from 'config';
+import { File, FileJSON, Files } from 'formidable';
 import { anyOfClass, anything, capture, instance, mock, verify } from 'ts-mockito';
-import { ImageDoc } from '@src/image/Image';
 import { ClientSession, Connection, DocumentDefinition } from 'mongoose';
-import { appPath } from '../data/testData';
-import { createMongoMemoryReplSet, getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
-import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
-import { common as commonTestData } from '@test/data/testData';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
+import ImageService from '@src/image/ImageService';
+import ImageRepository from '@src/image/ImageRepository';
+import { ImageDoc } from '@src/image/Image';
+import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
-import config from 'config';
-import path from 'path';
-import { MongoMemoryReplSet } from 'mongodb-memory-server';
+import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
+import { appPath, common as commonTestData } from '@test/data/testData';
 
 describe('ImageService test', () => {
   let sandbox;

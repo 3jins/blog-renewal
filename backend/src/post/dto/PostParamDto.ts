@@ -6,6 +6,7 @@ export interface FindPostParamDto {
   categoryId?: string;
   seriesId?: string;
   tagIdList?: string[];
+  isDeleted?: boolean;
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
@@ -20,6 +21,10 @@ export interface FindPostParamDto {
   updateDateTo?: Date;
   isLatestVersion?: boolean;
   isOnlyExactSameFieldFound?: boolean;
+}
+
+export interface GetPostPreviewParamDto {
+  post: File,
 }
 
 export interface CreateNewPostParamDto {
@@ -50,6 +55,7 @@ export interface UpdatePostMetaDataParamDto {
   categoryName?: string;
   seriesName?: string;
   tagNameList?: string[];
+  isDeleted?: boolean;
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;

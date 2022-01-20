@@ -6,6 +6,7 @@ const ENDPOINT = {
   CATEGORY: '/category',
   IMAGE: '/image',
   POST: '/post',
+  'POST-PREVIEW': '/postPreview',
   SERIES: '/series',
   TAG: '/tag',
 };

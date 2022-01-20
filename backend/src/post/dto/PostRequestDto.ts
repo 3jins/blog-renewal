@@ -7,6 +7,7 @@ export interface FindPostRequestDto {
   categoryId?: string;
   seriesId?: string;
   tagIdList?: string[];
+  isDeleted?: boolean;
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
@@ -49,6 +50,7 @@ export interface UpdatePostMetaDataRequestDto {
   categoryName?: string;
   tagNameList?: string[];
   seriesName?: string;
+  isDeleted?: boolean;
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
@@ -70,6 +72,7 @@ export const FindPostRequestSchema: JSONSchemaType<FindPostRequestDto> = {
     categoryId: { type: 'string', nullable: true },
     seriesId: { type: 'string', nullable: true },
     tagIdList: { type: 'array', nullable: true, items: { type: 'string' } },
+    isDeleted: { type: 'boolean', nullable: true },
     isPrivate: { type: 'boolean', nullable: true },
     isDeprecated: { type: 'boolean', nullable: true },
     isDraft: { type: 'boolean', nullable: true },
@@ -124,6 +127,7 @@ export const UpdatePostMetaDataRequestSchema: JSONSchemaType<UpdatePostMetaDataR
     categoryName: { type: 'string', nullable: true },
     tagNameList: { type: 'array', nullable: true, items: { type: 'string' } },
     seriesName: { type: 'string', nullable: true },
+    isDeleted: { type: 'boolean', nullable: true },
     isPrivate: { type: 'boolean', nullable: true },
     isDeprecated: { type: 'boolean', nullable: true },
     isDraft: { type: 'boolean', nullable: true },

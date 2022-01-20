@@ -1,7 +1,7 @@
 import { ClientSession, Connection } from 'mongoose';
 import { should } from 'chai';
 import sinon from 'sinon';
-import { createMongoMemoryReplSet, getConnection, setConnection } from '@src/common/mongodb/DbConnectionUtil';
+import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { common as commonTestData } from '@test/data/testData';
 import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import PostMetaRepository from '@src/post/repository/PostMetaRepository';
@@ -134,6 +134,7 @@ describe('PostMetaRepository test', () => {
         categoryId: postMetaList[0].category.id,
         seriesId: postMetaList[0].series.id,
         tagIdList: postMetaList[0].tagList!.map((tag) => tag.id),
+        isDeleted: false,
         isPrivate: postMetaList[0].isPrivate,
         isDeprecated: postMetaList[0].isDeprecated,
         isDraft: postMetaList[0].isDraft,
@@ -141,25 +142,25 @@ describe('PostMetaRepository test', () => {
       const foundPostMetaList: PostMetaDoc[] = await postMetaRepository.findPostMeta(paramDto, session);
       foundPostMetaList.should.have.lengthOf(1);
       foundPostMetaList[0].postNo.should.equal(postMetaList[0].postNo);
-      foundPostMetaList[0].category.id.should.equal(postMetaList[0].category.id);
-      [foundPostMetaList[0].category.id].should.deep.equal(
+      foundPostMetaList[0].category._id.toString().should.equal(postMetaList[0].category.id);
+      [foundPostMetaList[0].category._id.toString()].should.deep.equal(
         categoryList
-          .filter((category) => category.id === postMetaList[0].category.id)
-          .map((category) => category.id),
+          .filter((category) => category._id.toString() === postMetaList[0].category.id)
+          .map((category) => category._id.toString()),
       );
-      foundPostMetaList[0].series.id.should.equal(postMetaList[0].series.id);
-      [foundPostMetaList[0].series.id].should.deep.equal(
+      foundPostMetaList[0].series._id.toString().should.equal(postMetaList[0].series.id);
+      [foundPostMetaList[0].series._id.toString()].should.deep.equal(
         seriesList
-          .filter((series) => series.id === postMetaList[0].series.id)
-          .map((series) => series.id),
+          .filter((series) => series._id.toString() === postMetaList[0].series.id)
+          .map((series) => series._id.toString()),
       );
-      foundPostMetaList[0].tagList!.map((tag) => tag.id).should.deep.equal(
-        postMetaList[0].tagList!.map((tag) => tag.id),
+      foundPostMetaList[0].tagList!.map((tag) => tag._id.toString()).should.deep.equal(
+        postMetaList[0].tagList!.map((tag) => tag._id.toString()),
       );
-      foundPostMetaList[0].tagList!.map((tag) => tag.id).should.deep.equal(
+      foundPostMetaList[0].tagList!.map((tag) => tag._id.toString()).should.deep.equal(
         tagList
-          .filter((foundPostTag) => postMetaList[0].tagList!.map((tag) => tag.id).includes(foundPostTag.id))
-          .map((foundPostTag) => foundPostTag.id),
+          .filter((foundPostTag) => postMetaList[0].tagList!.map((tag) => tag._id.toString()).includes(foundPostTag.id))
+          .map((foundPostTag) => foundPostTag._id.toString()),
       );
       foundPostMetaList[0].createdDate.should.deep.equal(postMetaList[0].createdDate);
       foundPostMetaList[0].isDeleted!.should.equal(postMetaList[0].isDeleted);
@@ -175,24 +176,24 @@ describe('PostMetaRepository test', () => {
       foundPostMetaList[0].postNo.should.equal(postMetaList[2].postNo);
       foundPostMetaList[1].postNo.should.equal(postMetaList[1].postNo);
       foundPostMetaList[2].postNo.should.equal(postMetaList[0].postNo);
-      foundPostMetaList[2].category.id.should.equal(postMetaList[0].category.id);
-      [foundPostMetaList[2].category.id].should.deep.equal(
+      foundPostMetaList[2].category._id.toString().should.equal(postMetaList[0].category.id);
+      [foundPostMetaList[2].category._id.toString()].should.deep.equal(
         categoryList
-          .filter((category) => category.id === postMetaList[0].category.id)
-          .map((category) => category.id),
+          .filter((category) => category._id.toString() === postMetaList[0].category.id)
+          .map((category) => category._id.toString()),
       );
-      foundPostMetaList[2].series.id.should.equal(postMetaList[0].series.id);
-      [foundPostMetaList[2].series.id].should.deep.equal(
+      foundPostMetaList[2].series._id.toString().should.equal(postMetaList[0].series.id);
+      [foundPostMetaList[2].series._id.toString()].should.deep.equal(
         seriesList
-          .filter((series) => series.id === postMetaList[0].series.id)
-          .map((series) => series.id),
+          .filter((series) => series._id.toString() === postMetaList[0].series.id)
+          .map((series) => series._id.toString()),
       );
-      foundPostMetaList[2].tagList!.map((tag) => tag.id).should.deep.equal(
-        postMetaList[0].tagList!.map((tag) => tag.id),
+      foundPostMetaList[2].tagList!.map((tag) => tag._id.toString()).should.deep.equal(
+        postMetaList[0].tagList!.map((tag) => tag._id.toString()),
       );
-      foundPostMetaList[2].tagList!.map((tag) => tag.id).should.deep.equal(
+      foundPostMetaList[2].tagList!.map((tag) => tag._id.toString()).should.deep.equal(
         tagList
-          .filter((foundPostTag) => postMetaList[0].tagList!.map((tag) => tag.id).includes(foundPostTag.id))
+          .filter((foundPostTag) => postMetaList[0].tagList!.map((tag) => tag._id.toString()).includes(foundPostTag.id))
           .map((foundPostTag) => foundPostTag.id),
       );
       foundPostMetaList[2].createdDate.should.deep.equal(postMetaList[0].createdDate);
