@@ -227,6 +227,9 @@ export const common = {
     new Date('2021-12-03T06:02:34.567+0900'),
     new Date('2021-12-03T06:02:45.678+0900'),
   ],
+  ipList: [
+    '1.1.1.1',
+  ],
 };
 
 export const blogErrorCode = {
