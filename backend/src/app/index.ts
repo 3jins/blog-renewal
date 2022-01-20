@@ -8,9 +8,10 @@ import config from 'config';
 import { Connection } from 'mongoose';
 import { Server } from 'http';
 import * as DbConnection from '@src/common/mongodb/DbConnectionUtil';
-import { handleError } from '@src/common/error/BlogErrorHandlingUtil';
 import { leaveLog } from '@src/common/logging/LoggingUtil';
 import LogLevel from '@src/common/logging/LogLevel';
+import { leaveRequestLog } from '@src/common/middleware/RequestLogger';
+import { handleRequestError } from '@src/common/middleware/RequestErrorHandler';
 
 const connectToDb = () => {
   const { uri } = config.get('db');
@@ -38,16 +39,9 @@ const makeApp = (router: Router): Koa => {
   app
     .use(cors({ origin: `${clientUrl}:${clientPort}` }))
     .use(koaBody())
-    .use(async (ctx, next) => {
-      const { ip } = ctx.request;
-      const rt = ctx.response.get('X-Response-Time');
-      leaveLog(`${ctx.method} ${ctx.url} - ${rt} from ${ip}`, LogLevel.INFO);
-      await next();
-    })
-    .use((ctx, next) => next()
-      .catch((err: Error) => handleError(ctx, err)))
+    .use(leaveRequestLog())
+    .use(handleRequestError())
     .use(router.routes());
-
   return app;
 };
 
