@@ -1,0 +1,7 @@
+server:
+  url: http://localhost
+  port: 5913
+
+client:
+  url: http://localhost
+  port: 8080

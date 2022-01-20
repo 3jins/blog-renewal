@@ -5,9 +5,9 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc --skipLibCheck -p tsconfig.json",
-    "test": "./node_modules/mocha/bin/mocha -p .mocharc.js ./test/**/*.ts",
+    "test": "source ../config/script/setEnvironment.sh test; ./node_modules/mocha/bin/mocha -p .mocharc.js ./test/**/*.ts",
     "coverage": "nyc npm run test",
-    "dev": "export NODE_ENV=dev; nodemon --watch 'src/**/*.ts' --exec ts-node -r tsconfig-paths/register src/index.ts",
+    "dev": "source ../config/script/setEnvironment.sh dev; nodemon --watch 'src/**/*.ts' --exec ts-node -r tsconfig-paths/register src/index.ts",
     "start": "pm2 start",
     "startPrimaryDB": "sudo mongod --config config/mongod/primary.conf",
     "startSecondary0DB": "sudo mongod --config config/mongod/secondary0.conf",
