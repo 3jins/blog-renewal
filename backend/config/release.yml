@@ -1,10 +1,3 @@
-server:
-  port: 443
-
-client:
-  url: TBD
-  port: TBD
-
 db:
   uri: TBD
   connectionOptions:
