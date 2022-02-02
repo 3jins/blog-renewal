@@ -4,6 +4,7 @@ import HomeRouter from '@src/home/HomeRouter';
 import ImageRouter from '@src/image/ImageRouter';
 import PostRouter from '@src/post/PostRouter';
 import PostPreviewRouter from '@src/post/PostPreviewRouter';
+import SeriesRouter from '@src/series/SeriesRouter';
 import TagRouter from '@src/tag/TagRouter';
 
 connectToDb();
@@ -13,5 +14,6 @@ startApp([
   ImageRouter,
   PostRouter,
   PostPreviewRouter,
+  SeriesRouter,
   TagRouter,
 ]);

@@ -11,6 +11,7 @@ import { ImageDoc } from '@src/image/Image';
 import { UploadImageParamDto } from '@src/image/dto/ImageParamDto';
 import { useTransaction } from '@src/common/mongodb/TransactionUtil';
 import { BlogErrorCode } from '../common/error/BlogErrorCode';
+import { ImageDto } from '@src/image/dto/ImageRepoParamDto';
 
 @Service()
 export default class ImageService {
@@ -39,10 +40,10 @@ export default class ImageService {
   }
 
   private async saveImage(files: Files, session: ClientSession): Promise<void> {
-    const imageList: DocumentDefinition<ImageDoc>[] = _.keys(files).map((fileName) => {
+    const imageList: ImageDto[] = _.keys(files).map((fileName) => {
       const file: File = files[fileName] as File;
       return ({ title: file.name as string, createdDate: new Date(), size: file.size });
     });
-    await this.imageRepository.createImages(imageList, session);
+    await this.imageRepository.createImages({ imageList }, session);
   }
 }

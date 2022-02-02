@@ -25,7 +25,7 @@ categoryRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:name*`, (ctx: Con
   const { name } = ctx.params;
   const requestDto: FindCategoryRequestDto = getValidatedRequestDtoOf(FindCategoryRequestSchema, { ...ctx.query, name });
 
-  categoryService.findCategory(requestDto)
+  return categoryService.findCategory(requestDto)
     .then((responseDto: FindCategoryResponseDto) => {
       ctx.body = responseDto;
       ctx.status = http2.constants.HTTP_STATUS_OK;
@@ -35,8 +35,9 @@ categoryRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:name*`, (ctx: Con
 categoryRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, (ctx: Context) => {
   const requestDto: CreateCategoryRequestDto = getValidatedRequestDtoOf(CreateCategoryRequestSchema, ctx.request.body);
 
-  categoryService.createCategory(requestDto)
-    .then((name) => {
+  return categoryService.createCategory(requestDto)
+    .then((name: string) => {
+      ctx.body = name;
       ctx.set(HttpHeaderField.CONTENT_LOCATION, `${ctx.url}/${encodeURI(name)}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;
     });
@@ -45,7 +46,7 @@ categoryRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, (ctx: Context) 
 categoryRouter.patch(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, (ctx: Context) => {
   const requestDto: UpdateCategoryRequestDto = getValidatedRequestDtoOf(UpdateCategoryRequestSchema, ctx.request.body);
 
-  categoryService.updateCategory(requestDto)
+  return categoryService.updateCategory(requestDto)
     .then(() => {
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });
@@ -54,7 +55,7 @@ categoryRouter.patch(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}`, (ctx: Context)
 categoryRouter.delete(`${URL.PREFIX.API}${URL.ENDPOINT.CATEGORY}/:name`, (ctx: Context) => {
   const requestDto: DeleteCategoryRequestDto = getValidatedRequestDtoOf(DeleteCategoryRequestSchema, ctx.params);
 
-  categoryService.deleteCategory(requestDto)
+  return categoryService.deleteCategory(requestDto)
     .then(() => {
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });

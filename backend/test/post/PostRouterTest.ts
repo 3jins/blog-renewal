@@ -69,12 +69,13 @@ describe('Post router test', () => {
       };
 
       when(postService.findPost(anything()))
-        .thenResolve({ postList: [] });
+        .thenResolve({ postList: [{ postNo: commonTestData.post1V1.postNo } as PostDto] });
 
       await request
         .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1V1.postNo}`)
         .query(requestDto)
-        .expect(http2.constants.HTTP_STATUS_OK);
+        .expect(http2.constants.HTTP_STATUS_OK)
+        .expect((res) => res.body.should.deep.equal({ postNo: commonTestData.post1V1.postNo }));
       verify(postService.findPost(deepEqual(paramDto)));
     });
 
@@ -108,12 +109,13 @@ describe('Post router test', () => {
       };
 
       when(postService.findPost(anything()))
-        .thenResolve({ postList: [] });
+        .thenResolve({ postList: [{ postNo: commonTestData.post1V1.postNo } as PostDto] });
 
       await request
-        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/${commonTestData.post1V1.postNo}`)
+        .get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`)
         .query(requestDto)
-        .expect(http2.constants.HTTP_STATUS_OK);
+        .expect(http2.constants.HTTP_STATUS_OK)
+        .expect((res) => res.body.should.deep.equal({ postList: [{ postNo: commonTestData.post1V1.postNo }] }));
       verify(postService.findPost(deepEqual(paramDto)));
     });
 
@@ -187,24 +189,27 @@ describe('Post router test', () => {
   describe(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST}`, () => {
     it(`POST ${URL.PREFIX.API}${URL.ENDPOINT.POST} - normal case`, async () => {
       const baseUrl = `${URL.PREFIX.API}${URL.ENDPOINT.POST}`;
-      const requestDto: CreateNewPostRequestDto = {
-        seriesName: commonTestData.series1.name,
-        language: Language.KO,
-      };
 
       when(postService.createNewPost(anything()))
         .thenResolve(commonTestData.post1V1.postNo);
 
       await request
         .post(`${baseUrl}`)
-        .field(requestDto)
+        .field({
+          seriesName: commonTestData.series1.name,
+          language: Language.KO,
+          tagNameList: JSON.stringify([commonTestData.tag1.name, commonTestData.tag2.name]),
+        })
         .attach('post', `${appPath.testData}/${FILE_NAME}`, { contentType: 'application/octet-stream' })
         .expect(http2.constants.HTTP_STATUS_CREATED)
-        .expect((res) => res.get(HttpHeaderField.CONTENT_LOCATION).should.equal(`${baseUrl}/${commonTestData.post1V1.postNo}`));
+        .expect((res) => res.get(HttpHeaderField.CONTENT_LOCATION).should.equal(`${baseUrl}/${commonTestData.post1V1.postNo}`))
+        .expect((res) => res.body.should.equal(commonTestData.post1V1.postNo));
 
       verify(postService.createNewPost(objectContaining({
         post: anything(),
-        ...requestDto,
+        seriesName: commonTestData.series1.name,
+        language: Language.KO,
+        tagNameList: [commonTestData.tag1.name, commonTestData.tag2.name],
       }))).once();
     });
 

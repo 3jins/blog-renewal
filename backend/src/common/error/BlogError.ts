@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { BlogErrorCode, BlogErrorCodeFormat } from '@src/common/error/BlogErrorCode';
+import { BlogErrorCodeFormat } from '@src/common/error/BlogErrorCode';
 
 export default class BlogError extends Error {
   private readonly _blogErrorCode: BlogErrorCodeFormat;

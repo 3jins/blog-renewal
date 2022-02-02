@@ -59,10 +59,14 @@ export default class CategoryService {
   }
 
   private convertToCategoryDto(categoryDoc: CategoryDoc): CategoryDto {
-    const { name, level, parentCategory } = categoryDoc;
-    const categoryDto: CategoryDto = { name, level: level! };
+    const { _id, name, level, parentCategory } = categoryDoc;
+    const categoryDto: CategoryDto = {
+      id: _id,
+      name,
+      level: level!,
+    };
     if (!_.isNil(parentCategory)) {
-      Object.assign(categoryDto, { parentCategory: this.convertToCategoryDto(parentCategory) });
+      Object.assign(categoryDto, { parentCategoryId: parentCategory._id });
     }
     return categoryDto;
   }

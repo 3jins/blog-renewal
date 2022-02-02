@@ -25,7 +25,7 @@ tagRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}/:name*`, (ctx: Context) => {
   const { name } = ctx.params;
   const requestDto: FindTagRequestDto = getValidatedRequestDtoOf(FindTagRequestSchema, { ...ctx.query, name });
 
-  tagService.findTag(requestDto)
+  return tagService.findTag(requestDto)
     .then((responseDto: FindTagResponseDto) => {
       ctx.body = responseDto;
       ctx.status = http2.constants.HTTP_STATUS_OK;
@@ -35,7 +35,7 @@ tagRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}/:name*`, (ctx: Context) => {
 tagRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.TAG}`, (ctx: Context) => {
   const requestDto: CreateTagRequestDto = getValidatedRequestDtoOf(CreateTagRequestSchema, ctx.request.body);
 
-  tagService.createTag(requestDto)
+  return tagService.createTag(requestDto)
     .then((name) => {
       ctx.set(HttpHeaderField.CONTENT_LOCATION, `${ctx.url}/${encodeURI(name)}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;

@@ -43,7 +43,7 @@ postRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo*`, (ctx: Context) 
 
   return postService.findPost(paramDto)
     .then((response: FindPostResponseDto) => {
-      ctx.body = response;
+      ctx.body = _.isNil(postNo) ? response : response.postList[0];
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });
 });
@@ -60,6 +60,7 @@ postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`, koaBody(koaBodyOptions)
     .then((postNo: number) => {
       ctx.set(HttpHeaderField.CONTENT_LOCATION, `${URL.PREFIX.API}${URL.ENDPOINT.POST}/${postNo}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;
+      ctx.body = postNo;
     });
 });
 

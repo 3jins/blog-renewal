@@ -4,11 +4,12 @@ import { common as commonTestData } from '@test/data/testData';
 import { ClientSession, Connection, DocumentDefinition } from 'mongoose';
 import ImageRepository from '@src/image/ImageRepository';
 import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
-import { abortTestTransaction } from '@test/TestUtil';
+import { abortTestTransaction, errorShouldBeThrown } from '@test/TestUtil';
 import sinon from 'sinon';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { MongoMemoryReplSet } from 'mongodb-memory-server';
+import { CreateImageRepoParamDto } from '@src/image/dto/ImageRepoParamDto';
 
 describe('ImageRepository test', () => {
   let sandbox;
@@ -40,30 +41,30 @@ describe('ImageRepository test', () => {
   });
 
   it('createImages', async () => {
-    const imageDocumentDefinitionList: DocumentDefinition<ImageDoc>[] = [commonTestData.gifImage, commonTestData.pngImage];
-    await imageRepository.createImages(imageDocumentDefinitionList, session);
-    const results = await Image.find().session(session).exec();
+    const repoParamDto: CreateImageRepoParamDto = { imageList: [commonTestData.gifImage, commonTestData.pngImage] };
+    await imageRepository.createImages(repoParamDto, session);
+    const results = await Image.find().session(session).lean();
     results.should.have.lengthOf(2);
   });
 
   it('createImages - duplicated image file name', async () => {
-    const imageDocumentDefinitionList: DocumentDefinition<ImageDoc>[] = [commonTestData.gifImage, commonTestData.gifImage];
-    try {
-      await imageRepository.createImages(imageDocumentDefinitionList, session);
-    } catch (err) {
-      (err instanceof BlogError).should.be.true;
-      (err as BlogError).blogErrorCode.should.equal(BlogErrorCode.DUPLICATED_FILE_NAME);
-    }
+    const repoParamDto: CreateImageRepoParamDto = { imageList: [commonTestData.gifImage, commonTestData.gifImage] };
+    await errorShouldBeThrown(
+      new BlogError(BlogErrorCode.DUPLICATED_FILE_NAME, [commonTestData.gifImage.title]),
+      (_repoParamDto, _session) => imageRepository.createImages(_repoParamDto, _session),
+      repoParamDto,
+      session,
+    );
   });
 
   it('createImages - already saved image file name', async () => {
     await Image.insertMany([commonTestData.pngImage], { session });
-    const imageDocumentDefinitionList: DocumentDefinition<ImageDoc>[] = [commonTestData.gifImage, commonTestData.pngImage];
-    try {
-      await imageRepository.createImages(imageDocumentDefinitionList, session);
-    } catch (err) {
-      (err instanceof BlogError).should.be.true;
-      (err as BlogError).blogErrorCode.should.equal(BlogErrorCode.DUPLICATED_FILE_NAME);
-    }
+    const repoParamDto: CreateImageRepoParamDto = { imageList: [commonTestData.gifImage, commonTestData.pngImage] };
+    await errorShouldBeThrown(
+      new BlogError(BlogErrorCode.DUPLICATED_FILE_NAME, [commonTestData.pngImage.title]),
+      (_repoParamDto, _session) => imageRepository.createImages(_repoParamDto, _session),
+      repoParamDto,
+      session,
+    );
   });
 });

@@ -33,7 +33,7 @@ export const replaceUseTransactionForTest = async (sandbox, session: ClientSessi
 
 export const abortTestTransaction = async (sandbox, session: ClientSession): Promise<void> => {
   await session.abortTransaction();
-  session.endSession();
+  await session.endSession();
   sandbox.restore();
 };
 
