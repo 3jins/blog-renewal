@@ -1,4 +1,4 @@
-import Language from '@src/common/constant/Language';
+import Language from '@common/constant/Language';
 import { Heading } from '@src/post/model/PostVersion';
 import { TagDto } from '@src/tag/dto/TagResponseDto';
 import { SeriesDto } from '@src/series/dto/SeriesResponseDto';

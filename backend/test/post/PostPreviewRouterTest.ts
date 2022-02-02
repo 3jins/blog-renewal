@@ -6,7 +6,7 @@ import { anything, instance, mock, objectContaining, verify, when } from 'ts-moc
 import { Container } from 'typedi';
 import PostService from '@src/post/PostService';
 import { endApp } from '@src/app';
-import * as URL from '@src/common/constant/URL';
+import * as URL from '@common/constant/URL';
 import { appPath, common as commonTestData } from '@test/data/testData';
 import { startAppForTest } from '@test/TestUtil';
 import { GetPostPreviewResponseDto } from '@src/post/dto/PostResponseDto';

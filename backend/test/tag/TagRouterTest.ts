@@ -15,8 +15,8 @@ import {
 import { CreateTagParamDto, FindTagParamDto, UpdateTagParamDto } from '@src/tag/dto/TagParamDto';
 import { common as commonTestData } from '@test/data/testData';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
-import * as URL from '@src/common/constant/URL';
-import HttpHeaderField from '@src/common/constant/HttpHeaderField';
+import * as URL from '@common/constant/URL';
+import HttpHeaderField from '@common/constant/HttpHeaderField';
 import { startAppForTest } from '@test/TestUtil';
 
 const tagService: TagService = mock(TagService);

@@ -13,8 +13,8 @@ import {
 } from '@src/tag/dto/TagRequestDto';
 import * as http2 from 'http2';
 import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUtil';
-import * as URL from '@src/common/constant/URL';
-import HttpHeaderField from '@src/common/constant/HttpHeaderField';
+import * as URL from '@common/constant/URL';
+import HttpHeaderField from '@common/constant/HttpHeaderField';
 import TagService from './TagService';
 import { FindTagResponseDto } from '@src/tag/dto/TagResponseDto';
 

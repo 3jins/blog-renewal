@@ -23,7 +23,8 @@
           ".tsx"
         ]
       }
-    }
+    },
+    "import/internal-regex": ["^@common/"]
   },
   "rules": {
     "max-len": [

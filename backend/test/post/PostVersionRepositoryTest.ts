@@ -12,7 +12,7 @@ import {
 } from '@src/post/dto/PostVersionRepoParamDto';
 import PostVersion, { PostVersionDoc } from '@src/post/model/PostVersion';
 import Image from '@src/image/Image';
-import { OBJECT_ID_PATTERN } from '@src/common/constant/RegexPattern';
+import { OBJECT_ID_PATTERN } from '@common/constant/RegexPattern';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
 import { MongoMemoryReplSet } from 'mongodb-memory-server';

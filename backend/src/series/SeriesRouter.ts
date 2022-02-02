@@ -1,6 +1,7 @@
 import Router from '@koa/router';
 import { Context } from 'koa';
 import Container from 'typedi';
+import * as http2 from 'http2';
 import {
   CreateSeriesRequestDto,
   CreateSeriesRequestSchema,
@@ -11,12 +12,11 @@ import {
   UpdateSeriesRequestDto,
   UpdateSeriesRequestSchema,
 } from '@src/series/dto/SeriesRequestDto';
-import * as http2 from 'http2';
 import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUtil';
-import * as URL from '../common/constant/URL';
-import SeriesService from './SeriesService';
-import HttpHeaderField from '@src/common/constant/HttpHeaderField';
+import SeriesService from '@src/series/SeriesService';
 import { FindSeriesResponseDto } from '@src/series/dto/SeriesResponseDto';
+import * as URL from '@common/constant/URL';
+import HttpHeaderField from '@common/constant/HttpHeaderField';
 
 const seriesRouter = new Router();
 const seriesService: SeriesService = Container.get(SeriesService);

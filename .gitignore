@@ -16,6 +16,7 @@
 **/dist
 /backend/build
 /frontend/build/bundle.js
+/frontend/build/config-bundle.json
 
 # misc
 .DS_Store

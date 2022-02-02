@@ -1,4 +1,8 @@
+const fs = require('fs')
 const path = require('path');
+const config = require('config');
+
+fs.writeFileSync(path.resolve(__dirname, 'build/config-bundle.json'), JSON.stringify(config))
 
 module.exports = {
   mode: 'development',
@@ -7,9 +11,11 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'bundle.js',
+    publicPath: '/',
   },
   devServer: {
-    contentBase: path.resolve(__dirname, 'build'),
+    static: path.resolve(__dirname, 'build'),
+    historyApiFallback: true, // It only needs in webpack-dev-server. See https://ui.dev/react-router-cannot-get-url-refresh/#webpack--development
   },
   module: {
     rules: [
@@ -32,7 +38,12 @@ module.exports = {
     ],
   },
   resolve: {
-    modules: ['node_modules'],
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json', '.css'],
+    alias: {
+      configBundle: path.resolve(__dirname, 'build/config-bundle.json'),
+      '@src': path.resolve(__dirname, 'src'),
+      '@test': path.resolve(__dirname, 'test'),
+      '@common': path.resolve(__dirname, '..', 'common')
+    },
   },
 };

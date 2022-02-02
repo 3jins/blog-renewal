@@ -5,7 +5,6 @@ import { Context } from 'koa';
 import Container from 'typedi';
 import * as http2 from 'http2';
 import { File } from 'formidable';
-import * as URL from '@src/common/constant/URL';
 import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUtil';
 import PostService from '@src/post/PostService';
 import BlogError from '@src/common/error/BlogError';
@@ -28,7 +27,8 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import { FindPostResponseDto } from '@src/post/dto/PostResponseDto';
 import { FindPostParamDto } from '@src/post/dto/PostParamDto';
 import { mapFindPostRequestDtoToFindPostParamDto } from '@src/post/dto/PostDtoMapper';
-import HttpHeaderField from '@src/common/constant/HttpHeaderField';
+import * as URL from '@common/constant/URL';
+import HttpHeaderField from '@common/constant/HttpHeaderField';
 
 const postRouter = new Router();
 const koaBodyOptions = {

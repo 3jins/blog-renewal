@@ -40,7 +40,7 @@ import {
 } from '@test/TestUtil';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
-import Language from '@src/common/constant/Language';
+import Language from '@common/constant/Language';
 import { PostMetaDoc } from '@src/post/model/PostMeta';
 import { FindPostResponseDto, GetPostPreviewResponseDto } from '@src/post/dto/PostResponseDto';
 import { PostVersionDoc } from '@src/post/model/PostVersion';

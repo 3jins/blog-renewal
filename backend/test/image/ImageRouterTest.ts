@@ -1,15 +1,15 @@
 import supertest from 'supertest';
 import { should } from 'chai';
 import { Server } from 'http';
+import http2 from 'http2';
+import { Container } from 'typedi';
 import { anything, instance, mock, when } from 'ts-mockito';
 import ImageService from '@src/image/ImageService';
-import { Container } from 'typedi';
-import { endApp } from '../../src/app';
-import { appPath } from '../data/testData';
-import * as URL from '../../src/common/constant/URL';
-import { startAppForTest } from '@test/TestUtil';
-import http2 from 'http2';
+import { endApp } from '@src/app';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
+import * as URL from '@common/constant/URL';
+import { appPath } from '@test/data/testData';
+import { startAppForTest } from '@test/TestUtil';
 
 const imageService: ImageService = mock(ImageService);
 Container.set(ImageService, instance(imageService));

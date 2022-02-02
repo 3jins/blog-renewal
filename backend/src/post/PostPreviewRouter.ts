@@ -1,14 +1,14 @@
+import _ from 'lodash';
 import Router from '@koa/router';
 import koaBody from 'koa-body';
 import { Context } from 'koa';
 import Container from 'typedi';
 import * as http2 from 'http2';
 import { File } from 'formidable';
-import * as URL from '@src/common/constant/URL';
+import * as URL from '@common/constant/URL';
 import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUtil';
 import PostService from '@src/post/PostService';
 import { fileTypeSchema } from '@src/common/validation/ObjectTypeSchema';
-import _ from 'lodash';
 import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 

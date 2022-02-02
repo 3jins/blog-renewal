@@ -13,9 +13,9 @@ import {
   UpdateCategoryRequestSchema,
 } from '@src/category/dto/CategoryRequestDto';
 import { getValidatedRequestDtoOf } from '@src/common/validation/DtoValidationUtil';
-import HttpHeaderField from '@src/common/constant/HttpHeaderField';
-import * as URL from '../common/constant/URL';
-import CategoryService from './CategoryService';
+import HttpHeaderField from '@common/constant/HttpHeaderField';
+import * as URL from '@common/constant/URL';
+import CategoryService from '@src/category/CategoryService';
 import { FindCategoryResponseDto } from '@src/category/dto/CategoryResponseDto';
 
 const categoryRouter = new Router();
