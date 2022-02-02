@@ -5,17 +5,17 @@ import path from 'path';
 import fs, { PathLike } from 'fs';
 import config from 'config';
 import { File, FileJSON, Files } from 'formidable';
-import { anyOfClass, anything, capture, instance, mock, verify } from 'ts-mockito';
-import { ClientSession, Connection, DocumentDefinition } from 'mongoose';
+import { anything, capture, instance, mock, verify } from 'ts-mockito';
+import { ClientSession, Connection } from 'mongoose';
 import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import ImageService from '@src/image/ImageService';
 import ImageRepository from '@src/image/ImageRepository';
-import { ImageDoc } from '@src/image/Image';
 import { createMongoMemoryReplSet, setConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
 import { abortTestTransaction, errorShouldBeThrown, replaceUseTransactionForTest } from '@test/TestUtil';
 import { appPath, common as commonTestData } from '@test/data/testData';
+import { CreateImageRepoParamDto } from '@src/image/dto/ImageRepoParamDto';
 
 describe('ImageService test', () => {
   let sandbox;
@@ -77,9 +77,9 @@ describe('ImageService test', () => {
 
       imageService.uploadImage({ files });
       renameSyncStub.calledTwice.should.be.true;
-      verify(imageRepository.createImages(anyOfClass(Array), anything())).once();
-      const capturedImageList: DocumentDefinition<ImageDoc>[] = capture(imageRepository.createImages).last()[0];
-      capturedImageList.map((capturedImage) => capturedImage.title).should.deep.equal(fileNameList);
+      verify(imageRepository.createImages(anything(), anything())).once();
+      const capturedRepoParamDto: CreateImageRepoParamDto = capture(imageRepository.createImages).last()[0];
+      capturedRepoParamDto.imageList.map((capturedImage) => capturedImage.title).should.deep.equal(fileNameList);
     });
 
     it('uploadImage - failed to move', async () => {

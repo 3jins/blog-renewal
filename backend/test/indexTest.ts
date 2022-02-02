@@ -6,6 +6,7 @@ import HomeRouter from '@src/home/HomeRouter';
 import ImageRouter from '@src/image/ImageRouter';
 import PostRouter from '@src/post/PostRouter';
 import PostPreviewRouter from '@src/post/PostPreviewRouter';
+import SeriesRouter from '@src/series/SeriesRouter';
 import TagRouter from '@src/tag/TagRouter';
 
 describe('index test', () => {
@@ -34,7 +35,7 @@ describe('index test', () => {
 
     connectToDbStub.calledOnce.should.be.true;
     startAppStub.calledOnce.should.be.true;
-    const routerTypeList = [CategoryRouter, HomeRouter, ImageRouter, PostRouter, PostPreviewRouter, TagRouter].map((router) => typeof router);
+    const routerTypeList = [CategoryRouter, HomeRouter, ImageRouter, PostRouter, PostPreviewRouter, SeriesRouter, TagRouter].map((router) => typeof router);
     const argumentRouterTypeList = startAppStub.firstCall.firstArg.map((router) => typeof router);
     argumentRouterTypeList.should.deep.equal(routerTypeList);
   });

@@ -25,7 +25,7 @@ seriesRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/:name*`, (ctx: Context
   const { name } = ctx.params;
   const requestDto: FindSeriesRequestDto = getValidatedRequestDtoOf(FindSeriesRequestSchema, { ...ctx.query, name });
 
-  seriesService.findSeries(requestDto)
+  return seriesService.findSeries(requestDto)
     .then((responseDto: FindSeriesResponseDto) => {
       ctx.body = responseDto;
       ctx.status = http2.constants.HTTP_STATUS_OK;
@@ -35,7 +35,7 @@ seriesRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/:name*`, (ctx: Context
 seriesRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`, (ctx: Context) => {
   const requestDto: CreateSeriesRequestDto = getValidatedRequestDtoOf(CreateSeriesRequestSchema, ctx.request.body);
 
-  seriesService.createSeries(requestDto)
+  return seriesService.createSeries(requestDto)
     .then((name) => {
       ctx.set(HttpHeaderField.CONTENT_LOCATION, `${ctx.url}/${encodeURI(name)}`);
       ctx.status = http2.constants.HTTP_STATUS_CREATED;
@@ -45,7 +45,7 @@ seriesRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`, (ctx: Context) => {
 seriesRouter.patch(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`, (ctx: Context) => {
   const requestDto: UpdateSeriesRequestDto = getValidatedRequestDtoOf(UpdateSeriesRequestSchema, ctx.request.body);
 
-  seriesService.updateSeries(requestDto)
+  return seriesService.updateSeries(requestDto)
     .then(() => {
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });
@@ -54,7 +54,7 @@ seriesRouter.patch(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}`, (ctx: Context) => 
 seriesRouter.delete(`${URL.PREFIX.API}${URL.ENDPOINT.SERIES}/:name`, (ctx: Context) => {
   const requestDto: DeleteSeriesRequestDto = getValidatedRequestDtoOf(DeleteSeriesRequestSchema, ctx.params);
 
-  seriesService.deleteSeries(requestDto)
+  return seriesService.deleteSeries(requestDto)
     .then(() => {
       ctx.status = http2.constants.HTTP_STATUS_OK;
     });

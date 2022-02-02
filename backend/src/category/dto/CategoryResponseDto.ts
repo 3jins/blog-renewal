@@ -1,6 +1,7 @@
 export interface CategoryDto {
+  id: string;
   name: string;
-  parentCategory?: CategoryDto;
+  parentCategoryId?: string;
   level: number;
 }
 
