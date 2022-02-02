@@ -3,7 +3,7 @@ import config from 'config';
 import { getConnection } from '@src/common/mongodb/DbConnectionUtil';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import BlogError from '@src/common/error/BlogError';
-import { leaveLog } from '@src/common/logging/LoggingUtil';
+import { leaveLog, buildMessage } from '@src/common/logging/LoggingUtil';
 import LogLevel from '@src/common/logging/LogLevel';
 
 const tryTransaction = async (session: ClientSession, callback: Function, error: Error | null = null, retryIdx: number = 0): Promise<any> => {
@@ -13,7 +13,7 @@ const tryTransaction = async (session: ClientSession, callback: Function, error:
     await session.abortTransaction();
     await session.endSession();
     if (error instanceof (BlogError)) { // known error
-      leaveLog(`Transaction has failed by the error: ${(error! as BlogError).blogErrorCode.loggingMessage}`, LogLevel.ERROR);
+      leaveLog(`Transaction has failed by the error: ${buildMessage((error! as BlogError))}`, LogLevel.ERROR);
       throw error;
     }
     leaveLog(`Transaction has failed by the error: ${error!.message}`, LogLevel.ERROR);

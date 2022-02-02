@@ -85,7 +85,7 @@ export default class PostMetaRepository {
       Object.assign(queryToFindPostMeta, { series: seriesId });
     }
     if (!_.isEmpty(tagIdList)) {
-      Object.assign(queryToFindPostMeta, { tagList: { $in: tagIdList } });
+      Object.assign(queryToFindPostMeta, { tagList: { $all: tagIdList } });
     }
 
     return queryToFindPostMeta;

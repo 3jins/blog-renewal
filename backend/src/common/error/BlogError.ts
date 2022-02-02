@@ -12,6 +12,16 @@ export default class BlogError extends Error {
     this._params = _.isEmpty(params) ? [] : params as string[];
   }
 
+  public equals(error: any, checkMessage: boolean = true): boolean {
+    if (!(error instanceof BlogError)) {
+      return false;
+    }
+    return this.blogErrorCode === error.blogErrorCode
+      && _.isEqual(this.params, error.params)
+      && (checkMessage ? this.message === error.message : true)
+      && this.name === error.name;
+  }
+
   public get blogErrorCode() {
     return this._blogErrorCode;
   }

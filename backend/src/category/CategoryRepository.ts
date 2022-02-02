@@ -15,9 +15,9 @@ import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 @Service()
 export default class CategoryRepository {
   public async findCategory(paramDto: FindCategoryRepoParamDto, session: ClientSession): Promise<CategoryDoc[]> {
-    const queryToFindCategoryByLevel: FilterQuery<CategoryDoc> = this.makeQueryToFindCategory(paramDto);
+    const queryToFindCategory: FilterQuery<CategoryDoc> = this.makeQueryToFindCategory(paramDto);
     const categoryList = await Category
-      .find(queryToFindCategoryByLevel)
+      .find(queryToFindCategory)
       .populate('parentCategory')
       .session(session)
       .lean();

@@ -106,11 +106,11 @@ describe('CategoryService test', () => {
 
       const response: FindCategoryResponseDto = await categoryService.findCategory(paramDto);
       response.categoryList.should.have.length(2);
-      response.categoryList[0].id.should.equal(categoryId1);
+      response.categoryList[0]._id.should.equal(categoryId1);
       response.categoryList[0].name.should.equal(categoryName1);
       response.categoryList[0].level.should.equal(categoryLevel1);
       (response.categoryList[0].parentCategoryId === undefined).should.be.true;
-      response.categoryList[1].id.should.equal(categoryId2);
+      response.categoryList[1]._id.should.equal(categoryId2);
       response.categoryList[1].name.should.equal(categoryName2);
       response.categoryList[1].level.should.equal(categoryLevel2);
       response.categoryList[1].parentCategoryId!.should.equal(categoryId1);

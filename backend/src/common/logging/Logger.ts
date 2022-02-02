@@ -3,7 +3,7 @@ import config from 'config';
 
 const loggingPath = config.get('path.logging');
 const transportTarget: string = config.get('logger.pino.transport.target');
-const transportOptions: Object = config.get('logger.pino.transport.options');
+const transportOptions: object = config.get('logger.pino.transport.options');
 
 /* istanbul ignore next */
 export default loggingPath === 'stdout'

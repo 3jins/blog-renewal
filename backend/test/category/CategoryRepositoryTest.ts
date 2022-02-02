@@ -47,7 +47,7 @@ describe('CategoryRepository test', () => {
 
   describe('findCategory test', () => {
     let catSwDev, catWeb, catBe, catFe, catMobile, catLife, catEtc; // eslint-disable-line
-    let categoryTestDataList: Object[];
+    let categoryTestDataList: object[];
 
     beforeEach(async () => {
       categoryTestDataList = [

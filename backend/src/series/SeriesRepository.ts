@@ -107,7 +107,7 @@ export default class SeriesRepository {
     return (await this.getSeriesByName(session, name, { postMetaList: true })).postMetaList;
   }
 
-  private async getSeriesByName(session: ClientSession, name: string, projection: Object): Promise<SeriesDoc> {
+  private async getSeriesByName(session: ClientSession, name: string, projection: object): Promise<SeriesDoc> {
     const series: (SeriesDoc | null) = await Series
       .findOne({ name }, projection, { session });
     if (_.isNil(series)) {

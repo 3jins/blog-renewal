@@ -1,3 +1,5 @@
+/* eslint-disable mocha/no-exports */
+import _ from 'lodash';
 import { ClientSession } from 'mongoose';
 import fs from 'fs';
 import { File, FileJSON } from 'formidable';
@@ -37,33 +39,43 @@ export const abortTestTransaction = async (sandbox, session: ClientSession): Pro
   sandbox.restore();
 };
 
-const assertThrownErrorIsExpectedBlogError = (errorThrown: BlogError, errorShouldBe: BlogError) => {
-  errorThrown.blogErrorCode.should.equal(errorShouldBe.blogErrorCode);
-  errorThrown.params.should.deep.equal(errorShouldBe.params);
-  errorThrown.name.should.equal(errorShouldBe.name);
-  errorThrown.message.should.equal(errorShouldBe.message);
-};
-
-const assertThrownErrorIsExpectedError = (errorThrown: Error, errorShouldBe: Error) => {
-  errorThrown.name.should.equal(errorShouldBe.name);
-  errorThrown.message.should.equal(errorShouldBe.message);
-};
-
-// Do not use this function for routers. Instead, use `expect` of supertest.
-export const errorShouldBeThrown = async (errorShouldBe: Error, callback: Function, ...params: any[]) => {
+export const errorShouldBeThrownWithMessageCheck = async (
+  errorShouldBe: Error,
+  callback: Function,
+  assertMessage: ((message: string) => void) | null,
+  ...params: any[]
+) => {
   let isAnyErrorThrown: boolean = false;
   try {
     await callback(...params);
   } catch (error) {
     isAnyErrorThrown = true;
     if (errorShouldBe instanceof BlogError) {
-      (error instanceof BlogError).should.be.true;
-      assertThrownErrorIsExpectedBlogError(error as BlogError, errorShouldBe);
+      if (_.isNil(assertMessage)) {
+        errorShouldBe.equals(error).should.be.true;
+      } else {
+        errorShouldBe.equals(error, false);
+        assertMessage((error as Error).message);
+      }
     } else {
-      assertThrownErrorIsExpectedError(error as Error, errorShouldBe);
+      (error as Error).name.should.equal(errorShouldBe.name);
+      if (_.isNil(assertMessage)) {
+        (error as Error).message.should.equal(errorShouldBe.message);
+      } else {
+        assertMessage((error as Error).message);
+      }
     }
   }
   isAnyErrorThrown.should.be.true;
+};
+
+// Do not use this function for routers. Instead, use `expect` of supertest.
+export const errorShouldBeThrown = async (
+  errorShouldBe: Error,
+  callback: Function,
+  ...params: any[]
+) => {
+  await errorShouldBeThrownWithMessageCheck(errorShouldBe, callback, null, ...params);
 };
 
 export const extractFileInfoFromRawFile = (fileName: string): { file: File, fileContent: string } => {

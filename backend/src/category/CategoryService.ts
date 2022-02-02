@@ -61,7 +61,7 @@ export default class CategoryService {
   private convertToCategoryDto(categoryDoc: CategoryDoc): CategoryDto {
     const { _id, name, level, parentCategory } = categoryDoc;
     const categoryDto: CategoryDto = {
-      id: _id,
+      _id: _id,
       name,
       level: level!,
     };

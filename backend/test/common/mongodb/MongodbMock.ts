@@ -17,7 +17,7 @@ export class ClientSessionForTest implements ClientSession {
   }
 
   // eslint-disable-next-line no-unused-vars
-  public async endSession(options?: Object): Promise<void> {
+  public async endSession(options?: object): Promise<void> {
   }
 
   public startTransaction(): void {

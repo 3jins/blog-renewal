@@ -154,7 +154,7 @@ export default class PostService {
       }
       Object.assign(createPostMetaRepoParamDto, { seriesId: seriesList[0]._id });
     }
-    if (!_.isNil(paramDto.tagNameList)) {
+    if (!_.isNil(paramDto.tagNameList) && !_.isEmpty(paramDto.tagNameList)) {
       const tagList: TagDoc[] = await this.tagRepository.findTag({
         findTagByNameDto: {
           nameList: paramDto.tagNameList,
@@ -163,14 +163,18 @@ export default class PostService {
       }, session);
       if (tagList.length !== paramDto.tagNameList.length) {
         const failedToFindTagNameList = _.difference(paramDto.tagNameList, tagList.map((tag) => tag.name));
-        throw new BlogError(BlogErrorCode.TAG_NOT_FOUND, ['name', failedToFindTagNameList.join(', ')]);
+        throw new BlogError(BlogErrorCode.TAG_NOT_FOUND, [failedToFindTagNameList.join(', '), 'name']);
       }
       Object.assign(createPostMetaRepoParamDto, { tagIdList: tagList.map((tag) => tag._id) });
     }
     return createPostMetaRepoParamDto;
   }
 
-  private makeCreatePostRepoParamDtoForFirstVersionPost(postNo: number, paramDto: CreateNewPostParamDto, currentDate: Date): CreatePostVersionRepoParamDto {
+  private makeCreatePostRepoParamDtoForFirstVersionPost(
+    postNo: number,
+    paramDto: CreateNewPostParamDto,
+    currentDate: Date,
+  ): CreatePostVersionRepoParamDto {
     const { post, language, thumbnailContent } = paramDto;
     const rawContent: string = this.readPostContent(post.path);
     const { renderedContent, toc, defaultThumbnailContent } = renderContent(rawContent);

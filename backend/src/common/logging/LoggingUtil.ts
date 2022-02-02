@@ -3,7 +3,7 @@ import BlogError from '@src/common/error/BlogError';
 import Logger from '@src/common/logging/Logger';
 import LogLevel from './LogLevel';
 
-const buildMessage = (blogError: BlogError): string => {
+export const buildMessage = (blogError: BlogError): string => {
   const {
     blogErrorCode, params, stack, message: rawErrorMessage,
   } = blogError;
@@ -23,29 +23,32 @@ const buildMessage = (blogError: BlogError): string => {
 };
 
 export const leaveLog = (message: any, logLevel: LogLevel): void => {
+  const stringifiedMessage: string = typeof message === 'string'
+    ? message
+    : JSON.stringify(message);
   switch (logLevel) {
     case LogLevel.MUTE:
       break;
     case LogLevel.TRACE:
-      Logger.trace(message);
+      Logger.trace(stringifiedMessage);
       break;
     case LogLevel.DEBUG:
-      Logger.debug(message);
+      Logger.debug(stringifiedMessage);
       break;
     case LogLevel.INFO:
-      Logger.info(message);
+      Logger.info(stringifiedMessage);
       break;
     case LogLevel.WARN:
-      Logger.warn(message);
+      Logger.warn(stringifiedMessage);
       break;
     case LogLevel.ERROR:
-      Logger.error(message);
+      Logger.error(stringifiedMessage);
       break;
     case LogLevel.FATAL:
-      Logger.fatal(message);
+      Logger.fatal(stringifiedMessage);
       break;
     default:
-      Logger.warn(`다음 메시지에 대한 log level이 지정되지 않았습니다:\n${message}`);
+      Logger.warn(`다음 메시지에 대한 log level이 지정되지 않았습니다:\n${stringifiedMessage}`);
   }
 };
 

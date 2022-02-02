@@ -161,7 +161,7 @@ describe('Post router test', () => {
         });
     });
 
-    const typeDistortedRequestDtoList: Object[] = [
+    const typeDistortedRequestDtoList: object[] = [
       { updateDateFrom: 12 },
       { language: 'Java' },
       { isOnlyExactSameFieldFound: 'ambiguous' },
@@ -346,7 +346,7 @@ describe('Post router test', () => {
   // eslint-disable-next-line mocha/no-setup-in-describe
   describe(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo`, () => {
     it(`PATCH ${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo - normal case`, async () => {
-      const requestDto: Object = {
+      const requestDto: object = {
         seriesName: commonTestData.series1.name,
       };
 
