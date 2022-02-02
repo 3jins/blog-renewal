@@ -1,5 +1,5 @@
 import { Document, model, PopulatedDoc, Schema, Types } from 'mongoose';
-import Language from '@src/common/constant/Language';
+import Language from '@common/constant/Language';
 import { ImageDoc } from '@src/image/Image';
 
 export interface Heading {

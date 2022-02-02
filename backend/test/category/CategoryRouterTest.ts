@@ -3,8 +3,8 @@ import { should } from 'chai';
 import { Server } from 'http';
 import { anything, deepEqual, instance, mock, reset, verify, when } from 'ts-mockito';
 import { Container } from 'typedi';
+import * as http2 from 'http2';
 import { endApp } from '@src/app';
-import * as URL from '@src/common/constant/URL';
 import CategoryService from '@src/category/CategoryService';
 import {
   CreateCategoryRequestDto,
@@ -17,11 +17,11 @@ import {
   FindCategoryParamDto,
   UpdateCategoryParamDto,
 } from '@src/category/dto/CategoryParamDto';
-import { common as commonTestData } from '@test/data/testData';
-import * as http2 from 'http2';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
-import HttpHeaderField from '@src/common/constant/HttpHeaderField';
+import * as URL from '@common/constant/URL';
+import HttpHeaderField from '@common/constant/HttpHeaderField';
 import { startAppForTest } from '@test/TestUtil';
+import { common as commonTestData } from '@test/data/testData';
 
 const categoryService: CategoryService = mock(CategoryService);
 Container.set(CategoryService, instance(categoryService));

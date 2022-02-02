@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import Language from '@src/common/constant/Language';
+import Language from '@common/constant/Language';
 import { Heading } from '@src/post/model/PostVersion';
 
 export interface FindPostVersionByUpdatedDateDto {

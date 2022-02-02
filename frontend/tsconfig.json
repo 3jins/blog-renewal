@@ -2,6 +2,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "../common/**/*.ts",
     "test/**/*.ts",
     "test/**/*.tsx"
   ],
@@ -22,6 +23,7 @@
     "baseUrl": "./",
     "paths": {
       "@src/*": ["src/*"],
+      "@common/*": ["../common/*"],
       "@test/*": ["test/*"]
     },
     "esModuleInterop": true,

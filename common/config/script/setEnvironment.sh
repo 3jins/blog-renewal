@@ -14,6 +14,6 @@ fi
 CUR_PATH=`pwd`
 LOCAL_CONFIG_DIR="`pwd`/config"
 cd ..
-COMMON_CONFIG_DIR="`pwd`/config"
+COMMON_CONFIG_DIR="`pwd`/common/config"
 export NODE_CONFIG_DIR="$LOCAL_CONFIG_DIR$DELIMITER$COMMON_CONFIG_DIR"
 cd "$CUR_PATH"

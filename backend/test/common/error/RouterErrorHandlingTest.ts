@@ -4,7 +4,7 @@ import { Server } from 'http';
 import { anything, instance, mock, when } from 'ts-mockito';
 import { Container } from 'typedi';
 import { endApp } from '@src/app';
-import * as URL from '@src/common/constant/URL';
+import * as URL from '@common/constant/URL';
 import BlogError from '@src/common/error/BlogError';
 import TagService from '@src/tag/TagService';
 import { blogErrorCode, common as commonTestData } from '@test/data/testData';

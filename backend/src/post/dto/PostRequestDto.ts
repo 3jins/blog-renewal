@@ -1,6 +1,6 @@
 import { JSONSchemaType } from 'ajv';
-import Language from '@src/common/constant/Language';
-import { OBJECT_ID_PATTERN } from '@src/common/constant/RegexPattern';
+import Language from '@common/constant/Language';
+import { OBJECT_ID_PATTERN } from '@common/constant/RegexPattern';
 
 export interface FindPostRequestDto {
   postNo?: number;

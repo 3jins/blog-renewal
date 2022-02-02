@@ -1,5 +1,5 @@
 import { File } from 'formidable';
-import Language from '@src/common/constant/Language';
+import Language from '@common/constant/Language';
 
 export interface FindPostParamDto {
   postNo?: number;

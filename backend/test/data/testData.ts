@@ -1,8 +1,8 @@
-import Language from '@src/common/constant/Language';
+import Language from '@common/constant/Language';
 import http2 from 'http2';
 import LogLevel from '@src/common/logging/LogLevel';
 import { Heading } from '@src/post/model/PostVersion';
-import RoleLevel from '@src/common/constant/RoleLevel';
+import RoleLevel from '@common/constant/RoleLevel';
 
 const root = process.env.PWD;
 export const appPath = {

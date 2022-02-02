@@ -1,6 +1,6 @@
 import { FindPostRequestDto } from '@src/post/dto/PostRequestDto';
 import { FindPostParamDto } from '@src/post/dto/PostParamDto';
-import Language from '@src/common/constant/Language';
+import Language from '@common/constant/Language';
 
 export const mapFindPostRequestDtoToFindPostParamDto = (source: FindPostRequestDto): FindPostParamDto => {
   const destination: FindPostParamDto = {};

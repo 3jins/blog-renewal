@@ -1,9 +1,8 @@
-import { Document, model, Schema, Types } from 'mongoose';
-import { PopulatedDoc } from 'mongoose';
-import RoleLevel from '../common/constant/RoleLevel';
+import { Document, model, PopulatedDoc, Schema, Types } from 'mongoose';
 import { CategoryDoc } from '@src/category/Category';
 import { TagDoc } from '@src/tag/Tag';
 import { SeriesDoc } from '@src/series/Series';
+import RoleLevel from '@common/constant/RoleLevel';
 
 export interface MemberDoc extends Document {
   memberNo: number;

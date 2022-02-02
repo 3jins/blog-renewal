@@ -3,12 +3,9 @@ import { should } from 'chai';
 import { Server } from 'http';
 import { anything, deepEqual, instance, mock, objectContaining, verify, when } from 'ts-mockito';
 import { Container } from 'typedi';
+import * as http2 from 'http2';
 import PostService from '@src/post/PostService';
 import { endApp } from '@src/app';
-import * as URL from '@src/common/constant/URL';
-import Language from '@src/common/constant/Language';
-import { appPath, common as commonTestData } from '@test/data/testData';
-import * as http2 from 'http2';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 import {
   AddUpdatedVersionPostRequestDto,
@@ -17,9 +14,13 @@ import {
   DeletePostVersionRequestDto,
   FindPostRequestDto,
 } from '@src/post/dto/PostRequestDto';
-import HttpHeaderField from '@src/common/constant/HttpHeaderField';
 import { FindPostParamDto } from '@src/post/dto/PostParamDto';
+import HttpHeaderField from '@common/constant/HttpHeaderField';
+import * as URL from '@common/constant/URL';
+import Language from '@common/constant/Language';
+import { appPath, common as commonTestData } from '@test/data/testData';
 import { startAppForTest } from '@test/TestUtil';
+import { PostDto } from '@src/post/dto/PostResponseDto';
 
 const postService: PostService = mock(PostService);
 Container.set(PostService, instance(postService));
