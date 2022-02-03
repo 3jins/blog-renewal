@@ -1,5 +1,5 @@
-![example event parameter](https://github.com/3jins/blog-renewal/actions/workflows/build.yml/badge.svg)
-[![nycrc config on GitHub](https://img.shields.io/nycrc/3jins/blog-renewal?config=backend%2F.nycrc&label=Backend%20Branch%20Coverage%20Threshold&preferredThreshold=branches)](https://app.travis-ci.com/github/3jins/blog-renewal)
+[![example event parameter](https://github.com/3jins/blog-renewal/actions/workflows/build.yml/badge.svg)](https://github.com/3jins/blog-renewal/actions)
+[![nycrc config on GitHub](https://img.shields.io/nycrc/3jins/blog-renewal?config=backend%2F.nycrc&label=Backend%20Branch%20Coverage%20Threshold&preferredThreshold=branches)](https://github.com/3jins/blog-renewal/blob/develop/backend/.nycrc#L6)
 
 # blog-renewal
 This repository is renewal version of [old blog repository](https://github.com/3jins/blog.sejin).
