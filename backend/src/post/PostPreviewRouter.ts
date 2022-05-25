@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import Router from '@koa/router';
-import koaBody from 'koa-body';
 import { Context } from 'koa';
 import Container from 'typedi';
 import * as http2 from 'http2';
@@ -13,12 +12,9 @@ import BlogError from '@src/common/error/BlogError';
 import { BlogErrorCode } from '@src/common/error/BlogErrorCode';
 
 const postPreviewRouter = new Router();
-const koaBodyOptions = {
-  multipart: true,
-};
 const postService: PostService = Container.get(PostService);
 
-postPreviewRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT['POST-PREVIEW']}`, koaBody(koaBodyOptions), async (ctx: Context) => {
+postPreviewRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT['POST-PREVIEW']}`, async (ctx: Context) => {
   // TODO: Change to use GET when this issue of Axios is solved: https://github.com/axios/axios/issues/787
   if (_.isEmpty(ctx.request.files)) {
     throw new BlogError(BlogErrorCode.FILE_NOT_UPLOADED);

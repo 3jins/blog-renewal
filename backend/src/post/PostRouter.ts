@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import Router from '@koa/router';
-import koaBody from 'koa-body';
 import { Context } from 'koa';
 import Container from 'typedi';
 import * as http2 from 'http2';
@@ -31,9 +30,6 @@ import * as URL from '@common/constant/URL';
 import HttpHeaderField from '@common/constant/HttpHeaderField';
 
 const postRouter = new Router();
-const koaBodyOptions = {
-  multipart: true,
-};
 const postService: PostService = Container.get(PostService);
 
 postRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo*`, (ctx: Context) => {
@@ -48,7 +44,7 @@ postRouter.get(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo*`, (ctx: Context) 
     });
 });
 
-postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`, koaBody(koaBodyOptions), (ctx: Context) => {
+postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`, (ctx: Context) => {
   if (_.isEmpty(ctx.request.files)) {
     throw new BlogError(BlogErrorCode.FILE_NOT_UPLOADED);
   }
@@ -64,7 +60,7 @@ postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}`, koaBody(koaBodyOptions)
     });
 });
 
-postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`, koaBody(koaBodyOptions), (ctx: Context) => {
+postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`, (ctx: Context) => {
   if (_.isEmpty(ctx.request.files)) {
     throw new BlogError(BlogErrorCode.FILE_NOT_UPLOADED);
   }
@@ -79,7 +75,7 @@ postRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.POST}${URL.DETAIL.VERSION}`, ko
     });
 });
 
-postRouter.patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo`, koaBody(koaBodyOptions), (ctx: Context) => {
+postRouter.patch(`${URL.PREFIX.API}${URL.ENDPOINT.POST}/:postNo`, (ctx: Context) => {
   const { postNo } = ctx.params;
   const requestDto: UpdatePostMetaDataRequestDto = getValidatedRequestDtoOf(UpdatePostMetaDataRequestSchema, { postNo, ...ctx.request.body });
 

@@ -1,6 +1,5 @@
 import * as http2 from 'http2';
 import Router from '@koa/router';
-import koaBody from 'koa-body';
 import { Context } from 'koa';
 import Container from 'typedi';
 import _ from 'lodash';
@@ -10,12 +9,9 @@ import BlogError from '@src/common/error/BlogError';
 import * as URL from '@common/constant/URL';
 
 const imageRouter = new Router();
-const koaBodyOptions = {
-  multipart: true,
-};
 const imageService: ImageService = Container.get(ImageService);
 
-imageRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.IMAGE}`, koaBody(koaBodyOptions), (ctx: Context) => {
+imageRouter.post(`${URL.PREFIX.API}${URL.ENDPOINT.IMAGE}`, (ctx: Context) => {
   if (_.isEmpty(ctx.request.files)) {
     throw new BlogError(BlogErrorCode.FILE_NOT_UPLOADED);
   }

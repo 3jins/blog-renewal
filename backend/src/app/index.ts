@@ -37,8 +37,8 @@ const makeApp = (router: Router): Koa => {
   const { url: clientUrl, port: clientPort } = config.get('client');
   const app = new Koa();
   app
+    .use(koaBody({ multipart: true }))
     .use(cors({ origin: `${clientUrl}:${clientPort}` }))
-    .use(koaBody())
     .use(leaveRequestLog())
     .use(handleRequestError())
     .use(router.routes());
