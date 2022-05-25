@@ -62,7 +62,8 @@
       }
     ],
     "no-unused-expressions": "off",
-    "no-plusplus": "off"
+    "no-plusplus": "off",
+    "mocha/no-setup-in-describe": "off" // "If you're using dynamically generated tests, you should disable this rule."
   },
   "overrides": [
     {

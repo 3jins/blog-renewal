@@ -95,3 +95,12 @@ export const extractFileInfoFromRawFile = (fileName: string): { file: File, file
   };
   return { file, fileContent };
 };
+
+export const parameterizedTest = (
+  itTitle: string,
+  parameterList: object[],
+  testFunction: (object) => void,
+) => parameterList.forEach((parameter) => it(
+  `${itTitle}: ${JSON.stringify(parameter)}`,
+  () => testFunction(parameter),
+));
