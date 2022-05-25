@@ -5,6 +5,6 @@ export interface ImageDto {
   uri: string;
 }
 
-export interface FindImageResponseDto {
+export interface ImageResponseDto {
   imageList: ImageDto[];
 }

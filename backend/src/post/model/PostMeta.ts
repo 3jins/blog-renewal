@@ -2,6 +2,7 @@ import { Document, model, PopulatedDoc, Schema, Types } from 'mongoose';
 import { SeriesDoc } from '@src/series/Series';
 import { TagDoc } from '@src/tag/Tag';
 import { CategoryDoc } from '@src/category/Category';
+import PostType from '@common/constant/PostType';
 
 export type PostMetaDoc = {
   postNo: number;
@@ -14,6 +15,7 @@ export type PostMetaDoc = {
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
+  postType?: string;
 } & Document;
 
 export const postMetaSchema = new Schema({
@@ -27,6 +29,7 @@ export const postMetaSchema = new Schema({
   isPrivate: { type: Boolean, required: false, default: false },
   isDeprecated: { type: Boolean, required: false, default: false },
   isDraft: { type: Boolean, required: false, default: false },
+  postType: { type: String, required: false, default: PostType.POST },
 });
 
 export default model<PostMetaDoc>('PostMeta', postMetaSchema, 'PostMeta');

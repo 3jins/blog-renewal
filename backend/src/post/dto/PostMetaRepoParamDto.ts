@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import PostType from '@common/constant/PostType';
 
 export interface FindPostMetaRepoParamDto {
   postNo?: number;
@@ -9,6 +10,7 @@ export interface FindPostMetaRepoParamDto {
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
+  postType?: PostType;
 }
 
 export interface CreatePostMetaRepoParamDto {
@@ -18,6 +20,7 @@ export interface CreatePostMetaRepoParamDto {
   createdDate: Date;
   isPrivate?: boolean;
   isDraft?: boolean;
+  postType?: PostType;
 }
 
 export interface UpdatePostMetaRepoParamDto {
@@ -30,6 +33,7 @@ export interface UpdatePostMetaRepoParamDto {
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
+  postType?: PostType;
 }
 
 export interface DeletePostMetaRepoParamDto {

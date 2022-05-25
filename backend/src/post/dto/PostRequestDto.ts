@@ -1,6 +1,7 @@
 import { JSONSchemaType } from 'ajv';
 import Language from '@common/constant/Language';
 import { OBJECT_ID_PATTERN } from '@common/constant/RegexPattern';
+import PostType from '@common/constant/PostType';
 
 export interface FindPostRequestDto {
   postNo?: number;
@@ -12,6 +13,7 @@ export interface FindPostRequestDto {
   isDeprecated?: boolean;
   isDraft?: boolean;
   postVersionId?: string;
+  postType?: PostType;
   title?: string;
   rawContent?: string;
   renderedContent?: string;
@@ -31,6 +33,7 @@ export interface CreateNewPostRequestDto {
   seriesName?: string;
   isPrivate?: boolean;
   isDraft?: boolean;
+  postType?: PostType;
 
   // post
   language: Language;
@@ -54,6 +57,7 @@ export interface UpdatePostMetaDataRequestDto {
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
+  postType?: PostType;
 }
 
 export interface DeletePostVersionRequestDto {
@@ -76,6 +80,7 @@ export const FindPostRequestSchema: JSONSchemaType<FindPostRequestDto> = {
     isPrivate: { type: 'boolean', nullable: true },
     isDeprecated: { type: 'boolean', nullable: true },
     isDraft: { type: 'boolean', nullable: true },
+    postType: { type: 'string', enum: Object.values(PostType), nullable: true },
     postVersionId: { type: 'string', pattern: OBJECT_ID_PATTERN, nullable: true },
     title: { type: 'string', nullable: true },
     rawContent: { type: 'string', nullable: true },
@@ -99,6 +104,7 @@ export const CreateNewPostRequestSchema: JSONSchemaType<CreateNewPostRequestDto>
     seriesName: { type: 'string', nullable: true },
     isPrivate: { type: 'boolean', nullable: true },
     isDraft: { type: 'boolean', nullable: true },
+    postType: { type: 'string', nullable: true },
 
     language: { type: 'string', nullable: false },
     thumbnailContent: { type: 'string', nullable: true },
@@ -131,6 +137,7 @@ export const UpdatePostMetaDataRequestSchema: JSONSchemaType<UpdatePostMetaDataR
     isPrivate: { type: 'boolean', nullable: true },
     isDeprecated: { type: 'boolean', nullable: true },
     isDraft: { type: 'boolean', nullable: true },
+    postType: { type: 'string', nullable: true },
   },
   required: ['postNo'],
 };

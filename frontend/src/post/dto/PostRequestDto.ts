@@ -1,9 +1,6 @@
-import { File } from 'formidable';
 import Language from '@common/constant/Language';
-import PostType from '@common/constant/PostType';
 
-export interface FindPostParamDto {
-  postNo?: number;
+export interface FindPostRequestDto {
   categoryId?: string;
   seriesId?: string;
   tagIdList?: string[];
@@ -11,64 +8,55 @@ export interface FindPostParamDto {
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
-  postType?: PostType;
   postVersionId?: string;
   title?: string;
   rawContent?: string;
   renderedContent?: string;
-  language?: Language;
+  language?: string;
   thumbnailContent?: string;
   thumbnailImageId?: string;
-  updateDateFrom?: Date;
-  updateDateTo?: Date;
+  updateDateFrom?: string;
+  updateDateTo?: string;
   isLatestVersion?: boolean;
   isOnlyExactSameFieldFound?: boolean;
 }
 
-export interface GetPostPreviewParamDto {
-  post: File,
-}
-
-export interface CreateNewPostParamDto {
+export interface CreateNewPostRequestDto {
   // post meta
   categoryName?: string;
-  seriesName?: string;
   tagNameList?: string[];
+  seriesName?: string;
   isPrivate?: boolean;
   isDraft?: boolean;
-  postType?: PostType;
 
   // post
-  post: File;
   language: Language;
   thumbnailContent?: string;
   thumbnailImageId?: string;
 }
 
-export interface AddUpdatedVersionPostParamDto {
+export interface AddUpdatedVersionPostRequestDto {
   postNo: number;
-  post: File;
   language: Language;
   thumbnailContent?: string;
   thumbnailImageId?: string;
 }
 
-export interface UpdatePostMetaDataParamDto {
+export interface UpdatePostMetaDataRequestDto {
   postNo: number;
   categoryName?: string;
-  seriesName?: string;
   tagNameList?: string[];
+  seriesName?: string;
   isDeleted?: boolean;
   isPrivate?: boolean;
   isDeprecated?: boolean;
   isDraft?: boolean;
-  postType?: PostType;
 }
 
-export interface DeletePostVersionParamDto {
+export interface DeletePostVersionRequestDto {
   postVersionId: string;
 }
 
-export interface DeletePostParamDto {
+export interface DeletePostRequestDto {
   postNo: number;
 }
